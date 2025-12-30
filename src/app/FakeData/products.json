@@ -1,0 +1,1739 @@
+[
+  {
+    "order_info": {
+      "id": "00215",
+      "status": "New Order",
+      "order_date": "2023-10-24",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "AMD Ryzen 3 2200G Desktop PC",
+      "category": "Desktop",
+      "image_url": "/images/pc1.jpg",
+      "price": 1200,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0.1,
+      "net_price": 1160
+    },
+    "customer": {
+      "name": "Mr. Jhon Don",
+      "phone": "01758 69362",
+      "email": "jhon@example.com",
+      "address": "House 12, Road 52, Nikunja 2, Dhaka",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "TechSoi থেকে আমি প্রথমবারের মতো পিসি বিল্ড করলাম। দারুণ সার্ভিস।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00216",
+      "status": "Pending",
+      "order_date": "2023-10-25",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "MSI Prestige 13 AI+ Ukiyoe Edition",
+      "category": "Laptop",
+      "image_url": "/images/msi.jpg",
+      "price": 2300,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 2185
+    },
+    "customer": {
+      "name": "Ariful Islam",
+      "phone": "01822 11223",
+      "email": "arif@mail.com",
+      "address": "Sector 7, Uttara, Dhaka",
+      "customer_message": "Please pack carefully."
+    },
+    "review": {
+      "rating": 4.5,
+      "feedback_bn": "ল্যাপটপটি অনেক হালকা এবং ফাস্ট। ডেলিভারি একটু দেরি হয়েছে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00217",
+      "status": "Delivered",
+      "order_date": "2023-10-22",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Deepcool CK-11509 CPU Cooler",
+      "category": "Accessories",
+      "image_url": "/images/cooler.jpg",
+      "price": 850,
+      "currency": "tk",
+      "quantity": 2,
+      "discount_percent": 0,
+      "net_price": 1700
+    },
+    "customer": {
+      "name": "Sultana Razia",
+      "phone": "01911 55667",
+      "email": "razia@domain.com",
+      "address": "Mirpur 10, Block C, Dhaka",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "অরিজিনাল প্রোডাক্ট পেয়েছি, ধন্যবাদ টেকসই।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00218",
+      "status": "Cancelled",
+      "order_date": "2023-10-26",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Logitech G502 Hero Mouse",
+      "category": "Gadgets",
+      "image_url": "/images/mouse.jpg",
+      "price": 4500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 10.0,
+      "net_price": 4050
+    },
+    "customer": {
+      "name": "Kamrul Hassan",
+      "phone": "01677 88990",
+      "email": "kamrul@web.com",
+      "address": "Agrabad, Chittagong",
+      "customer_message": "Change of mind."
+    },
+    "review": { "rating": 0, "feedback_bn": "অর্ডারটি ক্যানসেল করা হয়েছে।" }
+  },
+  {
+    "order_info": {
+      "id": "00219",
+      "status": "New Order",
+      "order_date": "2023-10-27",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Samsung 980 Pro 1TB NVMe SSD",
+      "category": "Storage",
+      "image_url": "/images/ssd.jpg",
+      "price": 12500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 12250
+    },
+    "customer": {
+      "name": "Tanvir Ahmed",
+      "phone": "01700 12345",
+      "email": "tanvir@mail.com",
+      "address": "Zindabazar, Sylhet",
+      "customer_message": "Deliver after 4 PM please."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "বুট স্পিড এখন অনেক ফাস্ট। খুব ভালো প্রোডাক্ট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00220",
+      "status": "Pending",
+      "order_date": "2023-10-27",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "DeepCool GAMMAXX AG200 Cooler",
+      "category": "Fan",
+      "image_url": "/images/fan.jpg",
+      "price": 1500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 1500
+    },
+    "customer": {
+      "name": "Rashed Khan",
+      "phone": "01555 99887",
+      "email": "rashed@ymail.com",
+      "address": "Motijheel C/A, Dhaka",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 4.0,
+      "feedback_bn": "বাজেট অনুযায়ী ফ্যানটি ভালো ঠান্ডা করে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00221",
+      "status": "Delivered",
+      "order_date": "2023-10-21",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Corsair Vengeance LPX 16GB RAM",
+      "category": "Memory",
+      "image_url": "/images/ram.jpg",
+      "price": 5500,
+      "currency": "tk",
+      "quantity": 2,
+      "discount_percent": 5.0,
+      "net_price": 10450
+    },
+    "customer": {
+      "name": "Mehedi Hasan",
+      "phone": "01844 33221",
+      "email": "mehedi@dev.com",
+      "address": "Banani, Road 11, Dhaka",
+      "customer_message": "Urgent delivery needed."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "প্যাকেজিং দারুণ ছিল। র‍্যামগুলো স্মুথলি কাজ করছে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00222",
+      "status": "New Order",
+      "order_date": "2023-10-28",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Gigabyte B450M Motherboard",
+      "category": "Components",
+      "image_url": "/images/mb.jpg",
+      "price": 9500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 9500
+    },
+    "customer": {
+      "name": "Nasrin Akter",
+      "phone": "01300 44556",
+      "email": "nasrin@edu.com",
+      "address": "Rajshahi University, Rajshahi",
+      "customer_message": "Is it compatible with Ryzen 5000?"
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "সব ঠিকঠাক আছে। ধন্যবাদ সাপোর্ট টিমকে হেল্প করার জন্য।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00223",
+      "status": "Delivered",
+      "order_date": "2023-10-20",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "TP-Link Archer C6 Router",
+      "category": "Networking",
+      "image_url": "/images/router.jpg",
+      "price": 2800,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 3.0,
+      "net_price": 2716
+    },
+    "customer": {
+      "name": "Sajid Rahman",
+      "phone": "01711 00998",
+      "email": "sajid@net.com",
+      "address": "Khulna Sadar, Khulna",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 4.8,
+      "feedback_bn": "রেঞ্জ অনেক ভালো পাওয়া যাচ্ছে। ভালো রাউটার।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00224",
+      "status": "Pending",
+      "order_date": "2023-10-28",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Keychron K2 Mechanical Keyboard",
+      "category": "Gadgets",
+      "image_url": "/images/kb.jpg",
+      "price": 8500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 8075
+    },
+    "customer": {
+      "name": "Ahsan Habib",
+      "phone": "01600 22334",
+      "email": "habib@work.com",
+      "address": "Dhanmondi 27, Dhaka",
+      "customer_message": "Gateron Brown switch please."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "টাইপিং এক্সপেরিয়েন্স জাস্ট অসাধারণ!"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00225",
+      "status": "New Order",
+      "order_date": "2023-11-01",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Apple MacBook Air M2 Chip",
+      "category": "Laptop",
+      "image_url": "/images/macbook.jpg",
+      "price": 115000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 112700
+    },
+    "customer": {
+      "name": "Zayan Ahmed",
+      "phone": "01712 334455",
+      "email": "zayan@tech.com",
+      "address": "Gulshan 2, Road 83, Dhaka",
+      "customer_message": "Handle with extreme care."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "প্রিমিয়াম কোয়ালিটি ল্যাপটপ। টেকসই থেকে সবসময় ভালো সার্ভিস পাই।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00226",
+      "status": "Pending",
+      "order_date": "2023-11-02",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Sony WH-1000XM5 Headphones",
+      "category": "Gadgets",
+      "image_url": "/images/sony.jpg",
+      "price": 38000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 36100
+    },
+    "customer": {
+      "name": "Nabil Chowdhury",
+      "phone": "01819 667788",
+      "email": "nabil@music.com",
+      "address": "Halishahar, Block L, Chittagong",
+      "customer_message": "Is the warranty international?"
+    },
+    "review": {
+      "rating": 4.9,
+      "feedback_bn": "সাউন্ড কোয়ালিটি জাস্ট অসাধারণ। নয়েজ ক্যানসেলেশন খুব ভালো কাজ করে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00227",
+      "status": "Delivered",
+      "order_date": "2023-10-30",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Antec Atom V550 550W PSU",
+      "category": "Power Supply",
+      "image_url": "/images/psu.jpg",
+      "price": 3200,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 3200
+    },
+    "customer": {
+      "name": "Sharif Ullah",
+      "phone": "01911 223344",
+      "email": "sharif@build.com",
+      "address": "Kandirpar, Comilla",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 4.5,
+      "feedback_bn": "বাজেট পিসির জন্য সেরা পাওয়ার সাপ্লাই। ভোল্টেজ স্টেবল থাকে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00228",
+      "status": "Cancelled",
+      "order_date": "2023-11-03",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Razer DeathAdder V3 Pro",
+      "category": "Gadgets",
+      "image_url": "/images/razer.jpg",
+      "price": 14500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 7.0,
+      "net_price": 13485
+    },
+    "customer": {
+      "name": "Imtiaz Ahmed",
+      "phone": "01521 990011",
+      "email": "imtiaz@gamer.com",
+      "address": "Sonadanga, Khulna",
+      "customer_message": "Accidental order."
+    },
+    "review": {
+      "rating": 0,
+      "feedback_bn": "কাস্টমার ভুল করে অর্ডার করেছিলেন।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00229",
+      "status": "New Order",
+      "order_date": "2023-11-04",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "LG 24GN650-B UltraGear Monitor",
+      "category": "Monitor",
+      "image_url": "/images/monitor.jpg",
+      "price": 24500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 3.0,
+      "net_price": 23765
+    },
+    "customer": {
+      "name": "Sumaiya Akter",
+      "phone": "01301 556677",
+      "email": "sumaiya@design.com",
+      "address": "Chasara, Narayanganj",
+      "customer_message": "Check for dead pixels before delivery."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "কালার একুরেসি অনেক ভালো। গেমিং এর জন্য দারুণ।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00230",
+      "status": "Pending",
+      "order_date": "2023-11-05",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Western Digital 2TB Blue HDD",
+      "category": "Storage",
+      "image_url": "/images/hdd.jpg",
+      "price": 6200,
+      "currency": "tk",
+      "quantity": 3,
+      "discount_percent": 10.0,
+      "net_price": 16740
+    },
+    "customer": {
+      "name": "Farhan Ishraq",
+      "phone": "01688 443322",
+      "email": "farhan@office.com",
+      "address": "Baridhara DOHS, Dhaka",
+      "customer_message": "Need invoice for office use."
+    },
+    "review": {
+      "rating": 4.0,
+      "feedback_bn": "ভালো হার্ড ড্রাইভ, অনেক ডেটা ব্যাকআপ রাখা যায়।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00231",
+      "status": "Delivered",
+      "order_date": "2023-10-28",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "HyperX Cloud II Gaming Headset",
+      "category": "Gadgets",
+      "image_url": "/images/hyperx.jpg",
+      "price": 9500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 9500
+    },
+    "customer": {
+      "name": "Asif Talukder",
+      "phone": "01733 112233",
+      "email": "asif@pro.com",
+      "address": "Shahjalal Uposhohor, Sylhet",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "অরিজিনাল কিংস্টন হাইপার-এক্স। সাউন্ড অনেক ক্লিয়ার।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00232",
+      "status": "New Order",
+      "order_date": "2023-11-06",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "ASUS TUF Gaming GT301 Case",
+      "category": "Casing",
+      "image_url": "/images/casing.jpg",
+      "price": 8200,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 7790
+    },
+    "customer": {
+      "name": "Rashedul Haque",
+      "phone": "01811 778899",
+      "email": "rashed@builds.com",
+      "address": "Oxygen Mor, Chittagong",
+      "customer_message": "Include extra cable ties if possible."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "কেসিং এর এয়ারফ্লো খুব ভালো। ফ্যানগুলোও বেশ সুন্দর।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00233",
+      "status": "Delivered",
+      "order_date": "2023-10-25",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Lian Li Galahad 240 AIO Cooler",
+      "category": "Cooling",
+      "image_url": "/images/aio.jpg",
+      "price": 11500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 11270
+    },
+    "customer": {
+      "name": "Fahim Shahriar",
+      "phone": "01755 009988",
+      "email": "fahim@setup.com",
+      "address": "Wari, Dhaka",
+      "customer_message": "Is it the V2 version?"
+    },
+    "review": {
+      "rating": 4.8,
+      "feedback_bn": "লিকুইড কুলারটি দেখতে যেমন সুন্দর, পারফরম্যান্সও তেমনি।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00234",
+      "status": "Pending",
+      "order_date": "2023-11-07",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "SteelSeries Apex Pro TKL",
+      "category": "Gadgets",
+      "image_url": "/images/keyboard2.jpg",
+      "price": 19500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 8.0,
+      "net_price": 17940
+    },
+    "customer": {
+      "name": "Adnan Sami",
+      "phone": "01601 223344",
+      "email": "sami@click.com",
+      "address": "Basundhara R/A, Block C, Dhaka",
+      "customer_message": "Deliver in original seal."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "বিশ্বের অন্যতম ফাস্ট কিবোর্ড। রেসপন্স টাইম অসাধারণ।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00235",
+      "status": "New Order",
+      "order_date": "2023-11-08",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "NVIDIA GeForce RTX 4070 Ti Super",
+      "category": "GPU",
+      "image_url": "/images/rtx4070.jpg",
+      "price": 98000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 3.0,
+      "net_price": 95060
+    },
+    "customer": {
+      "name": "Mahmudul Hasan",
+      "phone": "01722 334455",
+      "email": "mahmud@game.com",
+      "address": "Jatrabari, Dhaka",
+      "customer_message": "Please ensure original warranty card."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "গ্রাফিক্স কার্ডটি অসাধারণ। টেকসই এর সার্ভিস অনেক ফাস্ট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00236",
+      "status": "Pending",
+      "order_date": "2023-11-09",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Razer BlackShark V2 Pro",
+      "category": "Gadgets",
+      "image_url": "/images/razer-hs.jpg",
+      "price": 16500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 15675
+    },
+    "customer": {
+      "name": "Tariqul Islam",
+      "phone": "01811 998877",
+      "email": "tariq@stream.com",
+      "address": "Sadarghat, Chittagong",
+      "customer_message": "White color model please."
+    },
+    "review": {
+      "rating": 4.8,
+      "feedback_bn": "মাইক্রোফোন কোয়ালিটি খুব ভালো, স্ট্রিমিং এর জন্য পারফেক্ট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00237",
+      "status": "Delivered",
+      "order_date": "2023-11-05",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Intel Core i9-14900K Processor",
+      "category": "CPU",
+      "image_url": "/images/i9.jpg",
+      "price": 72000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 70560
+    },
+    "customer": {
+      "name": "Dr. Aminul Islam",
+      "phone": "01911 445566",
+      "email": "aminul@med.com",
+      "address": "Dhanmondi 32, Dhaka",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "হাই-এন্ড কাজের জন্য সেরা প্রসেসর। প্যাকেজিং খুব ভালো ছিল।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00238",
+      "status": "Cancelled",
+      "order_date": "2023-11-10",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Secretlab TITAN Evo 2022",
+      "category": "Furniture",
+      "image_url": "/images/chair.jpg",
+      "price": 55000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 55000
+    },
+    "customer": {
+      "name": "Sabbir Rahman",
+      "phone": "01622 112233",
+      "email": "sabbir@cricket.com",
+      "address": "Uposhohor, Rajshahi",
+      "customer_message": "Delivery time too long."
+    },
+    "review": {
+      "rating": 0,
+      "feedback_bn": "ডেলিভারি দিতে বেশি সময় লাগায় কাস্টমার ক্যানসেল করেছেন।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00239",
+      "status": "New Order",
+      "order_date": "2023-11-11",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Logitech C922 Pro Stream Webcam",
+      "category": "Gadgets",
+      "image_url": "/images/webcam.jpg",
+      "price": 9500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 10.0,
+      "net_price": 8550
+    },
+    "customer": {
+      "name": "Farhana Yeasmin",
+      "phone": "01302 667788",
+      "email": "farhana@edu.com",
+      "address": "Farmgate, Dhaka",
+      "customer_message": "Need tripod included in the box."
+    },
+    "review": {
+      "rating": 4.5,
+      "feedback_bn": "অনলাইন ক্লাসের জন্য খুব ক্লিয়ার ভিডিও পাওয়া যায়।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00240",
+      "status": "Pending",
+      "order_date": "2023-11-12",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "ASUS ROG Swift 360Hz Monitor",
+      "category": "Monitor",
+      "image_url": "/images/rog-mon.jpg",
+      "price": 68000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 4.0,
+      "net_price": 65280
+    },
+    "customer": {
+      "name": "Junaid Ahmed",
+      "phone": "01511 887766",
+      "email": "junaid@pro.com",
+      "address": "Khulshi, Chittagong",
+      "customer_message": "Calibrate the colors before shipping."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "গেম খেলার সময় রিফ্রেশ রেট জাস্ট স্মুথ। জোস একটা মনিটর।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00241",
+      "status": "Delivered",
+      "order_date": "2023-11-02",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Elgato Stream Deck MK.2",
+      "category": "Gadgets",
+      "image_url": "/images/deck.jpg",
+      "price": 18500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 18500
+    },
+    "customer": {
+      "name": "Tanveer Joy",
+      "phone": "01744 556677",
+      "email": "joy@studio.com",
+      "address": "Banasree, Block E, Dhaka",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 4.9,
+      "feedback_bn": "ভিডিও এডিটিং এর শর্টকাটের জন্য দারুণ কাজের জিনিস।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00242",
+      "status": "New Order",
+      "order_date": "2023-11-13",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Crucial P5 Plus 2TB Gen4 SSD",
+      "category": "Storage",
+      "image_url": "/images/crucial.jpg",
+      "price": 18500,
+      "currency": "tk",
+      "quantity": 2,
+      "discount_percent": 6.0,
+      "net_price": 34780
+    },
+    "customer": {
+      "name": "Siam Ahmed",
+      "phone": "01822 443322",
+      "email": "siam@dev.com",
+      "address": "Mohammadpur, Dhaka",
+      "customer_message": "Is it compatible with PS5?"
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "অনেক ফাস্ট এসএসডি। পিএস৫ এ দারুণ কাজ করছে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00243",
+      "status": "Delivered",
+      "order_date": "2023-11-01",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "NZXT Kraken Elite 360 RGB",
+      "category": "Cooling",
+      "image_url": "/images/nzxt.jpg",
+      "price": 28500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 27930
+    },
+    "customer": {
+      "name": "Rakin Absar",
+      "phone": "01799 112233",
+      "email": "rakin@vlog.com",
+      "address": "Uttara Sector 4, Dhaka",
+      "customer_message": "Check LCD screen functionality."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "এলসিডি স্ক্রিনে জিআইএফ সেট করা যায়, দেখতে হেভি কুল।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00244",
+      "status": "Pending",
+      "order_date": "2023-11-14",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Glorious Model O Wireless",
+      "category": "Gadgets",
+      "image_url": "/images/glorious.jpg",
+      "price": 8500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 8500
+    },
+    "customer": {
+      "name": "Abrar Fahad",
+      "phone": "01611 334455",
+      "email": "abrar@mail.com",
+      "address": "Kushtia Sadar, Kushtia",
+      "customer_message": "Matte black version."
+    },
+    "review": {
+      "rating": 4.7,
+      "feedback_bn": "মাউসটি অনেক হালকা এবং রেসপন্স টাইম খুব ফাস্ট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00245",
+      "status": "New Order",
+      "order_date": "2023-11-15",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "ASUS ROG Strix B760-F Gaming WiFi",
+      "category": "Motherboard",
+      "image_url": "/images/asus-mb.jpg",
+      "price": 28500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 27930
+    },
+    "customer": {
+      "name": "Tahmid Rahman",
+      "phone": "01788 223344",
+      "email": "tahmid@rog.com",
+      "address": "Bashundhara R/A, Dhaka",
+      "customer_message": "Please update BIOS if possible."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "মাদারবোর্ডটির বিল্ড কোয়ালিটি অনেক সলিড এবং ওয়াইফাই স্পিড দারুণ।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00246",
+      "status": "Pending",
+      "order_date": "2023-11-16",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Seagate IronWolf 4TB NAS Drive",
+      "category": "Storage",
+      "image_url": "/images/nas-hdd.jpg",
+      "price": 14500,
+      "currency": "tk",
+      "quantity": 4,
+      "discount_percent": 5.0,
+      "net_price": 55100
+    },
+    "customer": {
+      "name": "Omar Faruk",
+      "phone": "01822 556677",
+      "email": "omar@server.com",
+      "address": "Agrabad, Chittagong",
+      "customer_message": "Need same batch drives for RAID."
+    },
+    "review": {
+      "rating": 4.7,
+      "feedback_bn": "ন্যাস ড্রাইভ হিসেবে এগুলো বেশ রিলায়েবল। কোনো নয়েজ নেই।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00247",
+      "status": "Delivered",
+      "order_date": "2023-11-10",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Blue Yeti USB Microphone",
+      "category": "Gadgets",
+      "image_url": "/images/yeti.jpg",
+      "price": 12500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 12500
+    },
+    "customer": {
+      "name": "Nusrat Jahan",
+      "phone": "01933 112233",
+      "email": "nusrat@voice.com",
+      "address": "Subidbazar, Sylhet",
+      "customer_message": "Is it the midnight blue color?"
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "পডকাস্টিং এর জন্য এই মাইকটি সেরা। ভয়েস অনেক ক্লিয়ার শোনা যায়।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00248",
+      "status": "Cancelled",
+      "order_date": "2023-11-17",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Samsung Odyssey G9 OLED",
+      "category": "Monitor",
+      "image_url": "/images/g9.jpg",
+      "price": 145000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 10.0,
+      "net_price": 130500
+    },
+    "customer": {
+      "name": "Sajidul Islam",
+      "phone": "01655 443322",
+      "email": "sajid@ultra.com",
+      "address": "Sector 3, Uttara, Dhaka",
+      "customer_message": "Address changed, will order later."
+    },
+    "review": {
+      "rating": 0,
+      "feedback_bn": "কাস্টমার ঠিকানা পরিবর্তনের কারণে ক্যানসেল করেছেন।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00249",
+      "status": "New Order",
+      "order_date": "2023-11-18",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Corsair iCUE H150i Elite LCD",
+      "category": "Cooling",
+      "image_url": "/images/corsair-aio.jpg",
+      "price": 32000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 32000
+    },
+    "customer": {
+      "name": "Ariful Haque",
+      "phone": "01511 667788",
+      "email": "arif@pcbuild.com",
+      "address": "Kazir Dewri, Chittagong",
+      "customer_message": "Check for any leakages before packing."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "এলসিডি স্ক্রিনটা পিসি সেটআপের লুকে অন্য মাত্রা যোগ করে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00250",
+      "status": "Pending",
+      "order_date": "2023-11-19",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "G.Skill Trident Z5 RGB 32GB DDR5",
+      "category": "RAM",
+      "image_url": "/images/ddr5.jpg",
+      "price": 18500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 3.0,
+      "net_price": 17945
+    },
+    "customer": {
+      "name": "Faisal Ahmed",
+      "phone": "01700 998877",
+      "email": "faisal@code.com",
+      "address": "Mirpur DOHS, Dhaka",
+      "customer_message": "Silver color preferred."
+    },
+    "review": {
+      "rating": 4.9,
+      "feedback_bn": "ডিডিআর৫ র‍্যামের স্পিড সত্যিই প্রশংসনীয়। গেম লোডিং অনেক ফাস্ট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00251",
+      "status": "Delivered",
+      "order_date": "2023-11-12",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Thermal Grizzly Kryonaut 1g",
+      "category": "Accessories",
+      "image_url": "/images/paste.jpg",
+      "price": 950,
+      "currency": "tk",
+      "quantity": 2,
+      "discount_percent": 0,
+      "net_price": 1900
+    },
+    "customer": {
+      "name": "Rashed Khan",
+      "phone": "01833 221100",
+      "email": "rashed@it.com",
+      "address": "Boyra, Khulna",
+      "customer_message": "Check expiry date."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "সেরা থার্মাল পেস্ট। সিপিইউ টেম্পারেচার ৫-১০ ডিগ্রি কমে গেছে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00252",
+      "status": "New Order",
+      "order_date": "2023-11-20",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Logitech G PRO X Superlight 2",
+      "category": "Gadgets",
+      "image_url": "/images/gpro2.jpg",
+      "price": 16500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 16500
+    },
+    "customer": {
+      "name": "Emon Hossain",
+      "phone": "01622 889900",
+      "email": "emon@pro.com",
+      "address": "Malibagh, Dhaka",
+      "customer_message": "Pink version please."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "এত হালকা মাউস আগে কখনো চালাইনি। গেমিং এর জন্য অনবদ্য।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00253",
+      "status": "Delivered",
+      "order_date": "2023-11-08",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Epson EcoTank L3210 Printer",
+      "category": "Office",
+      "image_url": "/images/printer.jpg",
+      "price": 19500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 18525
+    },
+    "customer": {
+      "name": "Kabir Bin Anwar",
+      "phone": "01744 332211",
+      "email": "kabir@office.com",
+      "address": "Laxmipur, Rajshahi",
+      "customer_message": "Need extra black ink bottle."
+    },
+    "review": {
+      "rating": 4.6,
+      "feedback_bn": "প্রিন্টিং কস্ট অনেক কম। অফিসের কাজের জন্য পারফেক্ট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00254",
+      "status": "Pending",
+      "order_date": "2023-11-21",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Lian Li Uni Fan SL120 (3 Pack)",
+      "category": "Fan",
+      "image_url": "/images/lianli-fan.jpg",
+      "price": 11000,
+      "currency": "tk",
+      "quantity": 2,
+      "discount_percent": 8.0,
+      "net_price": 20240
+    },
+    "customer": {
+      "name": "Mehedi Hasan",
+      "phone": "01588 776655",
+      "email": "mehedi@setup.com",
+      "address": "Haluaghat, Mymensingh",
+      "customer_message": "Send the white controller version."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "ক্যাবল ম্যানেজমেন্ট অনেক ইজি করে দেয় এই ফ্যানগুলো।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00255",
+      "status": "New Order",
+      "order_date": "2023-11-22",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Intel Core i7-13700K Processor",
+      "category": "CPU",
+      "image_url": "/images/i7.jpg",
+      "price": 45000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 45000
+    },
+    "customer": {
+      "name": "Tanvir Sakib",
+      "phone": "01711 223344",
+      "email": "tanvir@dev.com",
+      "address": "Banani, Dhaka",
+      "customer_message": "Is it the boxed version?"
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "খুবই পাওয়ারফুল প্রসেসর। গেমিং এবং এডিটিং এর জন্য পারফেক্ট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00256",
+      "status": "Pending",
+      "order_date": "2023-11-23",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "ZOTAC Gaming RTX 4060 Ti 8GB",
+      "category": "GPU",
+      "image_url": "/images/rtx4060.jpg",
+      "price": 52000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 4.0,
+      "net_price": 49920
+    },
+    "customer": {
+      "name": "Rakibul Islam",
+      "phone": "01822 990088",
+      "email": "rakib@gamer.com",
+      "address": "Pahartali, Chittagong",
+      "customer_message": "Need fast shipping."
+    },
+    "review": {
+      "rating": 4.5,
+      "feedback_bn": "১০৮০পি গেমিং এর জন্য সেরা কার্ড। টেম্পারেচার অনেক কন্ট্রোলে থাকে।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00257",
+      "status": "Delivered",
+      "order_date": "2023-11-15",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Lian Li PC-O11 Dynamic Case",
+      "category": "Casing",
+      "image_url": "/images/lianli.jpg",
+      "price": 18500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 18500
+    },
+    "customer": {
+      "name": "Ahsan Habib",
+      "phone": "01677 554433",
+      "email": "ahsan@setup.com",
+      "address": "Mirpur 2, Dhaka",
+      "customer_message": "White color casing please."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "বিল্ড করার জন্য সেরা কেসিং। অনেক স্পেস এবং এয়ারফ্লো দারুণ।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00258",
+      "status": "Cancelled",
+      "order_date": "2023-11-24",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Keychron K6 Wireless Keyboard",
+      "category": "Gadgets",
+      "image_url": "/images/keychron.jpg",
+      "price": 9500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 9025
+    },
+    "customer": {
+      "name": "Naimur Rahman",
+      "phone": "01511 443322",
+      "email": "naim@work.com",
+      "address": "Zindabazar, Sylhet",
+      "customer_message": "Wrong switch selection."
+    },
+    "review": {
+      "rating": 0,
+      "feedback_bn": "সুইচ সিলেকশন ভুল হওয়ায় কাস্টমার অর্ডারটি ক্যান্সেল করেছেন।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00259",
+      "status": "New Order",
+      "order_date": "2023-11-25",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Samsung T7 1TB Portable SSD",
+      "category": "Storage",
+      "image_url": "/images/samsung-t7.jpg",
+      "price": 12500,
+      "currency": "tk",
+      "quantity": 2,
+      "discount_percent": 2.0,
+      "net_price": 24500
+    },
+    "customer": {
+      "name": "Sumon Ahmed",
+      "phone": "01744 887766",
+      "email": "sumon@edit.com",
+      "address": "Chashara, Narayanganj",
+      "customer_message": "Indigo Blue color."
+    },
+    "review": {
+      "rating": 4.8,
+      "feedback_bn": "অনেক ফাস্ট ট্রান্সফার স্পিড। ভিডিও এডিটিং এর জন্য খুব কাজের।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00260",
+      "status": "Pending",
+      "order_date": "2023-11-26",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "DeepCool AK620 CPU Cooler",
+      "category": "Cooling",
+      "image_url": "/images/ak620.jpg",
+      "price": 6500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 6500
+    },
+    "customer": {
+      "name": "Fahad Hossain",
+      "phone": "01911 332211",
+      "email": "fahad@build.com",
+      "address": "Sadar, Barisal",
+      "customer_message": "Check for AM5 bracket."
+    },
+    "review": {
+      "rating": 4.6,
+      "feedback_bn": "বাজেটের মধ্যে সেরা এয়ার কুলার। দেখতেও খুব সুন্দর।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00261",
+      "status": "Delivered",
+      "order_date": "2023-11-18",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Logitech G733 Wireless Headset",
+      "category": "Gadgets",
+      "image_url": "/images/g733.jpg",
+      "price": 14500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 10.0,
+      "net_price": 13050
+    },
+    "customer": {
+      "name": "Mitu Akter",
+      "phone": "01300 998877",
+      "email": "mitu@stream.com",
+      "address": "Uttara Sector 10, Dhaka",
+      "customer_message": "Lilac color version."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "হেডসেটটি অনেক হালকা এবং কালারটা খুব কিউট।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00262",
+      "status": "New Order",
+      "order_date": "2023-11-27",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Corsair RM850e 850W Gold PSU",
+      "category": "Power Supply",
+      "image_url": "/images/corsair-psu.jpg",
+      "price": 13500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 13500
+    },
+    "customer": {
+      "name": "Shaon Khan",
+      "phone": "01855 443322",
+      "email": "shaon@power.com",
+      "address": "Lalkhan Bazar, Chittagong",
+      "customer_message": "Fully modular version?"
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "খুবই সাইলেন্ট এবং পাওয়ারফুল পিএসইউ। কেবলগুলোও প্রিমিয়াম।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00263",
+      "status": "Delivered",
+      "order_date": "2023-11-12",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "BenQ GW2480 24-inch Monitor",
+      "category": "Monitor",
+      "image_url": "/images/benq.jpg",
+      "price": 16500,
+      "currency": "tk",
+      "quantity": 3,
+      "discount_percent": 5.0,
+      "net_price": 47025
+    },
+    "customer": {
+      "name": "Sajid Hasan",
+      "phone": "01722 556677",
+      "email": "sajid@office.com",
+      "address": "Motijheel, Dhaka",
+      "customer_message": "Need for office setup."
+    },
+    "review": {
+      "rating": 4.4,
+      "feedback_bn": "অফিসের কাজের জন্য এবং চোখের আরামের জন্য সেরা মনিটর।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00264",
+      "status": "Pending",
+      "order_date": "2023-11-28",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Razer Leviathan V2 X Soundbar",
+      "category": "Gadgets",
+      "image_url": "/images/razer-soundbar.jpg",
+      "price": 11500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 11500
+    },
+    "customer": {
+      "name": "Imran Ali",
+      "phone": "01600 112233",
+      "email": "imran@desk.com",
+      "address": "Rampura, Dhaka",
+      "customer_message": "RGB control via Synapse?"
+    },
+    "review": {
+      "rating": 4.7,
+      "feedback_bn": "ডেস্ক সেটআপের জন্য কমপ্যাক্ট এবং সাউন্ড অনেক জোস।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00265",
+      "status": "New Order",
+      "order_date": "2023-11-29",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "MSI MAG B650 Tomahawk WiFi",
+      "category": "Motherboard",
+      "image_url": "/images/msi-b650.jpg",
+      "price": 26500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 25970
+    },
+    "customer": {
+      "name": "Asif Abdullah",
+      "phone": "01733 445566",
+      "email": "asif@msi.com",
+      "address": "Banasree, Dhaka",
+      "customer_message": "Include sticker if possible."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "অ্যাম৫ বিল্ডের জন্য সেরা মাদারবোর্ড। অনেক ফিচার সমৃদ্ধ।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00266",
+      "status": "Pending",
+      "order_date": "2023-11-30",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Gigabyte M27Q 27-inch 170Hz",
+      "category": "Monitor",
+      "image_url": "/images/gigabyte-mon.jpg",
+      "price": 34500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 3.0,
+      "net_price": 33465
+    },
+    "customer": {
+      "name": "Faisal Mahmood",
+      "phone": "01811 009988",
+      "email": "faisal@gaming.com",
+      "address": "Oxygen, Chittagong",
+      "customer_message": "KVM switch feature working?"
+    },
+    "review": {
+      "rating": 4.9,
+      "feedback_bn": "২কে গেমিং এর জন্য এই বাজেটে এর চেয়ে ভালো মনিটর হয় না।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00267",
+      "status": "Delivered",
+      "order_date": "2023-11-20",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Western Digital Black 2TB NVMe",
+      "category": "Storage",
+      "image_url": "/images/wd-black.jpg",
+      "price": 19500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 19500
+    },
+    "customer": {
+      "name": "Meherun Nesa",
+      "phone": "01944 778899",
+      "email": "meher@mail.com",
+      "address": "Uposhohor, Sylhet",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "অনেক ফাস্ট এসএসডি। বুট হতে মাত্র কয়েক সেকেন্ড সময় নেয়।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00268",
+      "status": "Cancelled",
+      "order_date": "2023-12-01",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "SteelSeries Arctis Nova 7",
+      "category": "Gadgets",
+      "image_url": "/images/arctis.jpg",
+      "price": 22000,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 22000
+    },
+    "customer": {
+      "name": "Zubair Ahmed",
+      "phone": "01622 334455",
+      "email": "zubair@sound.com",
+      "address": "Kazir Dewri, Chittagong",
+      "customer_message": "Found it cheaper elsewhere."
+    },
+    "review": {
+      "rating": 0,
+      "feedback_bn": "অন্য জায়গায় কম দামে পাওয়ায় কাস্টমার অর্ডারটি ক্যান্সেল করেছেন।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00269",
+      "status": "New Order",
+      "order_date": "2023-12-02",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "ASUS TUF Gaming Gold 750W",
+      "category": "Power Supply",
+      "image_url": "/images/asus-psu.jpg",
+      "price": 11500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 5.0,
+      "net_price": 10925
+    },
+    "customer": {
+      "name": "Shakil Khan",
+      "phone": "01511 223344",
+      "email": "shakil@builds.com",
+      "address": "Dhanmondi, Dhaka",
+      "customer_message": "Check all cables."
+    },
+    "review": {
+      "rating": 4.7,
+      "feedback_bn": "পিএসইউ-টি অনেক হেভি এবং বিল্ড কোয়ালিটি টাস-এর মতো।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00270",
+      "status": "Pending",
+      "order_date": "2023-12-03",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Logitech MX Master 3S",
+      "category": "Gadgets",
+      "image_url": "/images/mx-master.jpg",
+      "price": 12500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 12500
+    },
+    "customer": {
+      "name": "Nabil Farhan",
+      "phone": "01300 556677",
+      "email": "nabil@work.com",
+      "address": "Gulshan 1, Dhaka",
+      "customer_message": "Graphite color version."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "অফিসিয়াল কাজের জন্য এবং প্রোডাক্টিভিটি বাড়াতে সেরা মাউস।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00271",
+      "status": "Delivered",
+      "order_date": "2023-11-25",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "TP-Link Deco M4 (3-Pack)",
+      "category": "Networking",
+      "image_url": "/images/deco.jpg",
+      "price": 13500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 2.0,
+      "net_price": 13230
+    },
+    "customer": {
+      "name": "Sajia Afrin",
+      "phone": "01788 112233",
+      "email": "sajia@home.com",
+      "address": "Niketon, Dhaka",
+      "customer_message": "No Message..."
+    },
+    "review": {
+      "rating": 4.8,
+      "feedback_bn": "পুরো বাসায় এখন ফুল ওয়াইফাই কাভারেজ পাচ্ছি। থ্যাংক ইউ টেকসই।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00272",
+      "status": "New Order",
+      "order_date": "2023-12-04",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Glorious Model D Minus Wireless",
+      "category": "Gadgets",
+      "image_url": "/images/model-d.jpg",
+      "price": 8200,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 8200
+    },
+    "customer": {
+      "name": "Arif Ahmed",
+      "phone": "01844 990011",
+      "email": "arif@gamer.com",
+      "address": "Boyra, Khulna",
+      "customer_message": "Check for double clicking."
+    },
+    "review": {
+      "rating": 4.5,
+      "feedback_bn": "মাউসটি অনেক লাইটওয়েট এবং হাতে খুব ভালো গ্রিপ পাওয়া যায়।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00273",
+      "status": "Delivered",
+      "order_date": "2023-11-28",
+      "delivery_type": "Cash on Delivery"
+    },
+    "product": {
+      "name": "Arctic MX-6 Thermal Paste 4g",
+      "category": "Accessories",
+      "image_url": "/images/mx6.jpg",
+      "price": 1250,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 0,
+      "net_price": 1250
+    },
+    "customer": {
+      "name": "Kamrul Islam",
+      "phone": "01955 667788",
+      "email": "kamrul@pc.com",
+      "address": "Siddhirganj, Narayanganj",
+      "customer_message": "Original Arctic seal."
+    },
+    "review": {
+      "rating": 5.0,
+      "feedback_bn": "টেম্পারেচার অনেক ড্রপ করেছে। আর্টিকের পেস্ট সবসময়ই সেরা।"
+    }
+  },
+  {
+    "order_info": {
+      "id": "00274",
+      "status": "Pending",
+      "order_date": "2023-12-05",
+      "delivery_type": "Online Payment"
+    },
+    "product": {
+      "name": "Elgato Wave:3 USB Microphone",
+      "category": "Gadgets",
+      "image_url": "/images/wave3.jpg",
+      "price": 16500,
+      "currency": "tk",
+      "quantity": 1,
+      "discount_percent": 4.0,
+      "net_price": 15840
+    },
+    "customer": {
+      "name": "Tahsin Jaman",
+      "phone": "01611 223344",
+      "email": "tahsin@voice.com",
+      "address": "Kandirpar, Comilla",
+      "customer_message": "Need boom arm adapter."
+    },
+    "review": {
+      "rating": 4.9,
+      "feedback_bn": "স্ট্রিমিং এর জন্য এই মাইকের ওয়েভ লিঙ্ক সফটওয়্যার জাস্ট জোস।"
+    }
+  }
+]
