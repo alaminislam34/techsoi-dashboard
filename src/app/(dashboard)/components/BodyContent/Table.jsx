@@ -62,7 +62,7 @@ const Table = () => {
             {currentItems.map((item, index) => (
               <tr
                 key={item.order_info.id}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-gray-100 ring ring-gray-200 transition-colors"
               >
                 <td className="p-4 text-sm font-medium">
                   {item.order_info.id}
@@ -98,7 +98,7 @@ const Table = () => {
                     onClick={() =>
                       setOpenDropdownId(openDropdownId === index ? null : index)
                     }
-                    className={`flex items-center justify-between w-32 px-3 py-1.5 border rounded-md text-xs font-medium transition-all ${getStatusStyles(
+                    className={`flex items-center justify-between w-32 px-3 py-2 border rounded-md text-xs font-medium transition-all ${getStatusStyles(
                       item.order_info.status
                     )}`}
                   >
@@ -140,7 +140,7 @@ const Table = () => {
                 <td className="p-4">
                   <Link
                     href={`/dashboard/${item.order_info.id}`}
-                    className="text-primary border border-primary/20 bg-secondary px-4 py-1.5 rounded-md text-xs font-medium hover:bg-primary hover:text-white transition-all"
+                    className="text-primary w-full flex items-center justify-center border border-primary/20 bg-secondary px-4 py-2 rounded-md text-xs font-medium hover:bg-primary hover:text-white transition-all"
                   >
                     View Details
                   </Link>

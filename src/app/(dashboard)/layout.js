@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       {/* Main Content Area */}
-      <section className="flex-1 bg-gray-50 min-h-screen p-4 lg:p-6 relative z-10">
+      <section className="flex-1 min-h-screen p-4 lg:p-6 relative z-10">
         <DashboardNavbar />
         {children}
       </section>

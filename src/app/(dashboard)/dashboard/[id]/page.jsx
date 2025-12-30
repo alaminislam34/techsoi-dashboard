@@ -35,7 +35,7 @@ const ProductsDetails = () => {
     <div className="text-dark mt-6">
       <div className="space-y-6">
         <section>
-          <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
+          <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-xl border-b border-white">
             Order Details
           </div>
           <div className="bg-white/70 backdrop-blur-sm p-8 rounded-b-xl flex flex-col md:flex-row gap-8 relative">
@@ -121,7 +121,7 @@ const ProductsDetails = () => {
         </section>
 
         <section>
-          <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
+          <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-xl border-b border-white">
             Customer Details
           </div>
           <div className="bg-white/70 backdrop-blur-sm p-8 rounded-b-xl flex flex-col md:flex-row gap-8">
@@ -154,7 +154,7 @@ const ProductsDetails = () => {
         </section>
 
         <section>
-          <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
+          <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-xl border-b border-white">
             Customer Review
           </div>
           <div className="bg-white/70 backdrop-blur-sm p-8 rounded-b-xl">
