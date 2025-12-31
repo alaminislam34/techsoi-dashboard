@@ -6,3 +6,6 @@
     --color-dark: #2B3645;
     --color-primary_red: #DA1A21
 }
+button {
+    cursor: pointer;
+}

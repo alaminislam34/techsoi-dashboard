@@ -1,42 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import Link from "next/link";
-// JSON data import
-import productsData from "@/app/FakeData/products.json";
+import { useState } from "react";
 
-const Table = () => {
+const Table = ({ data = [], columns = [], itemsPerPage }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   // --- Pagination Logic ---
-  const itemsPerPage = 7;
-  const totalPages = Math.ceil(productsData.length / itemsPerPage);
-
+  const totalPages = Math.ceil(data.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = productsData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
-  const getStatusStyles = (status) => {
-    switch (status) {
-      case "Cancelled":
-        return "text-primary_red border-primary_red bg-red-50";
-      case "Pending":
-        return "text-orange-500 border-orange-500 bg-orange-50";
-      case "Delivered":
-        return "text-green-600 border-green-600 bg-green-50";
-      default:
-        return "text-primary border-primary bg-secondary";
+  const MAX_VISIBLE_PAGES = 5;
+  const getVisiblePages = () => {
+    let start = Math.max(currentPage - Math.floor(MAX_VISIBLE_PAGES / 2), 1);
+    let end = start + MAX_VISIBLE_PAGES - 1;
+    if (end > totalPages) {
+      end = totalPages;
+      start = Math.max(end - MAX_VISIBLE_PAGES + 1, 1);
     }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
-
-  const handleStatusChange = (orderId, newStatus) => {
-    console.log(`Updating Order ${orderId} to ${newStatus}`);
-    setOpenDropdownId(null);
-  };
-
-  const statusOptions = ["New Order", "Pending", "Delivered", "Cancelled"];
 
   return (
     <div className="w-full text-dark">
@@ -44,114 +29,41 @@ const Table = () => {
         <table className="text-left border-collapse min-w-250 w-full">
           <thead>
             <tr className="text-gray-500 text-sm border-b border-gray-100 bg-gray-50/50 *:p-4 *:font-medium truncate">
-              <th className="">Order ID</th>
-              <th className="">Product</th>
-              <th className="">Category</th>
-              <th className="">Qty</th>
-              <th className="">Discount</th>
-              <th className="">Price</th>
-              <th className="">Customer</th>
-              <th className="">Action</th>
-              <th className=" text-center">Details</th>
+              {columns.map((col, idx) => (
+                <th key={idx} className={col.className || ""}>
+                  {col.header}
+                </th>
+              ))}
             </tr>
           </thead>
+
           <tbody className="divide-y divide-gray-50 bg-white">
-            {currentItems.map((item, index) => (
+            {currentItems.map((item, rowIndex) => (
               <tr
-                key={item.order_info.id}
+                key={item.id || rowIndex}
                 className="hover:bg-gray-50 transition-colors"
               >
-                <td className="p-4 text-sm font-medium">
-                  #{item.order_info.id}
-                </td>
-                <td className="p-4 text-sm">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={item.product.image_url}
-                      alt=""
-                      className="w-10 h-10 bg-gray-100 rounded-md shrink-0 object-cover"
-                      onError={(e) =>
-                        (e.target.src = "https://via.placeholder.com/40")
-                      }
-                    />
-                    <span className="truncate max-w-37.5 lg:max-w-62.5 block">
-                      {item.product.name}
-                    </span>
-                  </div>
-                </td>
-                <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
-                  {item.product.category}
-                </td>
-                <td className="p-4 text-sm text-gray-600">
-                  {item.product.quantity}
-                </td>
-                <td className="p-4 text-sm text-gray-600">
-                  {item.order_info.discount || "0%"}
-                </td>
-                <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
-                  {item.product.net_price} {item.product.currency}
-                </td>
-                <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
-                  {item.customer.name}
-                </td>
-                <td className="p-4 relative">
-                  <button
-                    onClick={() =>
-                      setOpenDropdownId(openDropdownId === index ? null : index)
-                    }
-                    className={`flex items-center justify-between w-32 px-3 py-2 border rounded-md text-xs font-medium transition-all ${getStatusStyles(
-                      item.order_info.status
-                    )}`}
+                {columns.map((col, colIndex) => (
+                  <td
+                    key={colIndex}
+                    className={`p-4 text-sm ${col.cellClassName || ""}`}
                   >
-                    {item.order_info.status}
-                    <ChevronDown
-                      size={14}
-                      className={`transition-transform ${
-                        openDropdownId === index ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {openDropdownId === index && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setOpenDropdownId(null)}
-                      />
-                      <div
-                        className={`absolute left-4 w-32 bg-white border border-gray-200 rounded-md shadow-xl z-50 py-1 
-                        ${index < 4 ? "top-full mt-1" : "bottom-full mb-1"}`}
-                      >
-                        {statusOptions.map((option) => (
-                          <button
-                            key={option}
-                            onClick={() =>
-                              handleStatusChange(item.order_info.id, option)
-                            }
-                            className="w-full text-left px-3 py-2 text-xs hover:bg-secondary hover:text-primary transition-colors text-dark"
-                          >
-                            {option}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </td>
-                <td className="p-4">
-                  <Link
-                    href={`/dashboard/${item.order_info.id}`}
-                    className="text-primary w-full flex items-center justify-center border border-primary/20 bg-secondary px-4 py-2 rounded-md text-xs font-medium hover:bg-primary hover:text-white transition-all whitespace-nowrap"
-                  >
-                    View Details
-                  </Link>
-                </td>
+                    {/* If a custom render function is provided, use it, otherwise show raw data */}
+                    {col.render
+                      ? col.render(item, rowIndex, {
+                          openDropdownId,
+                          setOpenDropdownId,
+                        })
+                      : item[col.key]}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
+      {/* Pagination (Your Exact Design) */}
       <div className="flex flex-wrap justify-center md:justify-end mt-6 gap-2 pb-4">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -166,7 +78,12 @@ const Table = () => {
         </button>
 
         <div className="flex gap-1">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {getVisiblePages()[0] > 1 && (
+            <button className="w-9 h-9 md:w-10 md:h-10 rounded-md border bg-white text-gray-500 hover:bg-gray-50">
+              ...
+            </button>
+          )}
+          {getVisiblePages().map((page) => (
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
@@ -179,6 +96,11 @@ const Table = () => {
               {page}
             </button>
           ))}
+          {getVisiblePages().slice(-1)[0] < totalPages && (
+            <button className="w-9 h-9 md:w-10 md:h-10 rounded-md border bg-white text-gray-500 hover:bg-gray-50">
+              ...
+            </button>
+          )}
         </div>
 
         <button
