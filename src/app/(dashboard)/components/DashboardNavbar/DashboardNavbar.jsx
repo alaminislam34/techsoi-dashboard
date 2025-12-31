@@ -4,7 +4,7 @@ import { Bell, Mail, Menu, Search } from "lucide-react";
 
 const DashboardNavbar = () => {
   return (
-    <div className="p-2 md:p-3 lg:p-4 rounded-xl bg-secondary flex items-center justify-between border border-[#D4DAE6] gap-3">
+    <div className="p-2 md:p-3 lg:p-4 rounded-xl bg-secondary flex items-center justify-between border border-[#D4DAE6] gap-3 left-0">
       {/* Mobile Menu Button */}
       <div className="lg:hidden shrink-0">
         <button className="p-2 border border-primary/50 rounded-xl text-primary hover:bg-primary hover:text-white duration-300 cursor-pointer">
@@ -12,9 +12,6 @@ const DashboardNavbar = () => {
         </button>
       </div>
 
-      {/* Search Bar Container 
-          - hidden on very small screens, or we can keep it flexible 
-      */}
       <div className="flex-1 max-w-2xl">
         <div className="relative group">
           <input
@@ -31,7 +28,7 @@ const DashboardNavbar = () => {
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2 xl:gap-4 shrink-0">
-        <button className="p-2 hover:bg-primary hover:text-white duration-300 rounded-xl text-primary bg-white cursor-pointer border border-primary/80 hidden sm:flex">
+        <button className="p-2 hover:bg-primary hover:text-white duration-300 rounded-xl text-primary bg-white cursor-pointer border border-primary/80">
           <Mail size={20} />
         </button>
 

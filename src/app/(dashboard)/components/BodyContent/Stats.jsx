@@ -31,7 +31,7 @@ const Stats = () => {
        grid-cols-2 for tablets 
        lg:grid-cols-4 for desktops 
     */
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-3 py-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 lg:gap-3 pb-6">
       {stats.map((stat) => (
         <div
           key={stat.stat}
