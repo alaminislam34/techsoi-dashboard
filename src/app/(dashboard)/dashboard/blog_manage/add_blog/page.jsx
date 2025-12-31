@@ -31,7 +31,7 @@ const PublishNewBlog = () => {
 
   return (
     <div className="w-full space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 lg:mt-0">
         {/* Blog Title */}
         <div className="md:col-span-2 flex flex-col gap-2">
           <label className="text-sm font-medium text-gray-600">

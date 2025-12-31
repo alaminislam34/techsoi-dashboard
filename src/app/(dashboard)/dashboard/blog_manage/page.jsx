@@ -111,7 +111,7 @@ const BlogManage = () => {
 
   return (
     <div className="w-full space-y-6 p-2">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-6 lg:mt-0">
         <Link
           href={"/dashboard/blog_manage/add_blog"}
           className="bg-primary text-white px-6 py-2.5 rounded-lg font-medium shadow-sm hover:opacity-90 transition-all w-fit"
@@ -136,7 +136,7 @@ const BlogManage = () => {
 
           {/* --- Updated Sort Dropdown --- */}
           <div className="relative group">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 capitalize">
+            <button className="flex items-center truncate gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 capitalize">
               {sortConfig ? `Sort by: ${sortConfig}` : "Sort By"}{" "}
               <ChevronDown size={16} />
             </button>
