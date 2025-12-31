@@ -31,7 +31,7 @@ const PublishNewBlog = () => {
 
   return (
     <div className="w-full space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Blog Title */}
         <div className="md:col-span-2 flex flex-col gap-2">
           <label className="text-sm font-medium text-gray-600">
@@ -127,7 +127,7 @@ const PublishNewBlog = () => {
       </div>
 
       {/* Action Button */}
-      <div className="pt-4 flex items-center justify-end">
+      <div className=" flex items-center justify-end">
         <button className="bg-primary hover:opacity-90 text-white px-10 py-3 rounded-lg font-medium shadow-md transition-all">
           Publish Product
         </button>
