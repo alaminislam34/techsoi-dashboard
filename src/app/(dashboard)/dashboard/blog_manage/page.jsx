@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Eye, Trash2, Search, ChevronDown } from "lucide-react";
 import productsData from "@/app/FakeData/products.json";
 import Table from "../../components/BodyContent/Table";
+import Link from "next/link";
 
 const BlogManage = () => {
   const [data, setData] = useState([]);
@@ -30,7 +31,10 @@ const BlogManage = () => {
     } else if (type === "rating") {
       sortedData.sort((a, b) => b.review.rating - a.review.rating); // High to Low
     } else if (type === "newest") {
-      sortedData.sort((a, b) => new Date(b.order_info.order_date) - new Date(a.order_info.order_date));
+      sortedData.sort(
+        (a, b) =>
+          new Date(b.order_info.order_date) - new Date(a.order_info.order_date)
+      );
     }
 
     setData(sortedData);
@@ -64,7 +68,9 @@ const BlogManage = () => {
     {
       header: "Customer",
       render: (item) => (
-        <span className="text-sm text-dark font-medium">{item.customer.name}</span>
+        <span className="text-sm text-dark font-medium">
+          {item.customer.name}
+        </span>
       ),
     },
     {
@@ -106,13 +112,19 @@ const BlogManage = () => {
   return (
     <div className="w-full space-y-6 p-2">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <button className="bg-primary text-white px-6 py-2.5 rounded-lg font-medium shadow-sm hover:opacity-90 transition-all w-fit">
+        <Link
+          href={"/dashboard/blog_manage/add_blog"}
+          className="bg-primary text-white px-6 py-2.5 rounded-lg font-medium shadow-sm hover:opacity-90 transition-all w-fit"
+        >
           Publish New Blog
-        </button>
+        </Link>
 
         <div className="flex items-center gap-4 flex-1 md:max-w-2xl justify-end">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+            />
             <input
               type="text"
               placeholder="Search Blogs"
@@ -125,14 +137,30 @@ const BlogManage = () => {
           {/* --- Updated Sort Dropdown --- */}
           <div className="relative group">
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 capitalize">
-              {sortConfig ? `Sort by: ${sortConfig}` : "Sort By"} <ChevronDown size={16} />
+              {sortConfig ? `Sort by: ${sortConfig}` : "Sort By"}{" "}
+              <ChevronDown size={16} />
             </button>
-            
+
             {/* Simple CSS Dropdown on Hover/Click */}
             <div className="absolute right-0 w-40 bg-white border border-gray-100 rounded-lg shadow-xl hidden group-hover:block z-50">
-              <button onClick={() => handleSort("name")} className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20 transition-colors">Name</button>
-              <button onClick={() => handleSort("rating")} className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20 transition-colors">Rating</button>
-              <button onClick={() => handleSort("newest")} className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20 transition-colors">Newest</button>
+              <button
+                onClick={() => handleSort("name")}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20 transition-colors"
+              >
+                Name
+              </button>
+              <button
+                onClick={() => handleSort("rating")}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20 transition-colors"
+              >
+                Rating
+              </button>
+              <button
+                onClick={() => handleSort("newest")}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20 transition-colors"
+              >
+                Newest
+              </button>
             </div>
           </div>
         </div>
