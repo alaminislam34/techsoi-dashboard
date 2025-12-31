@@ -43,7 +43,7 @@ const sidelinks = [
 const Sidebar = () => {
   const pathName = usePathname();
   return (
-    <div className="lg:w-72 border-r border-gray-300 h-screen bg-secondary flex justify-between flex-col fixed left-0 top-0 p-6">
+    <div className="lg:w-65 xl:w-72 border-r border-gray-300 h-screen bg-secondary flex justify-between flex-col fixed left-0 top-0 p-6">
       <div>
         <div className="flex items-center justify-center mt-6 mb-12">
           <Link href={"/dashboard"}>
@@ -62,7 +62,7 @@ const Sidebar = () => {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`py-2 px-4 rounded-xl lg:text-lg hover:bg-primary inline-block w-full duration-300 hover:text-white ${
+                  className={`py-2 px-4 rounded-xl xl:text-lg hover:bg-primary inline-block w-full duration-300 hover:text-white ${
                     pathName === link.href
                       ? "bg-primary text-white"
                       : "text-dark"

@@ -5,14 +5,14 @@ import Sidebar from "./components/Sidebar/Sidebar";
 
 export default function DashboardLayout({ children }) {
   return (
-    <main className="flex min-h-screen">
+    <main className="flex min-h-screen overflow-hidden">
       {/* Sidebar - Desktop Only */}
-      <aside className="hidden lg:block lg:w-72 shrink-0">
+      <aside className="hidden lg:block lg:w-65 xl:w-72 shrink-0 border">
         <Sidebar />
       </aside>
 
       {/* Main Content Area */}
-      <section className="flex-1 min-h-screen p-4 lg:p-6 relative z-10">
+      <section className="flex-1 overflow-hidden min-h-screen p-4 xl:p-6 relative z-10">
         <DashboardNavbar />
         {children}
       </section>

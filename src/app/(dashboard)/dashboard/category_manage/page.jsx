@@ -1,9 +1,11 @@
-'use client';
+"use client";
+
+import UpdateCategoryFrom from "./components/UpdateCategoryFrom";
 
 const CategoryManage = () => {
   return (
     <div>
-      <h1>CategoryManage</h1>
+      <UpdateCategoryFrom />
     </div>
   );
 };

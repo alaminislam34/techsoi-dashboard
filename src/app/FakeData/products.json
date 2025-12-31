@@ -9,7 +9,7 @@
     "product": {
       "name": "AMD Ryzen 3 2200G Desktop PC",
       "category": "Desktop",
-      "image_url": "/images/pc1.jpg",
+      "image_url": "/images/hp.png",
       "price": 1200,
       "currency": "tk",
       "quantity": 1,
@@ -38,7 +38,7 @@
     "product": {
       "name": "MSI Prestige 13 AI+ Ukiyoe Edition",
       "category": "Laptop",
-      "image_url": "/images/msi.jpg",
+      "image_url": "/images/hp.png",
       "price": 2300,
       "currency": "tk",
       "quantity": 1,
@@ -67,7 +67,7 @@
     "product": {
       "name": "Deepcool CK-11509 CPU Cooler",
       "category": "Accessories",
-      "image_url": "/images/cooler.jpg",
+      "image_url": "/images/hp.png",
       "price": 850,
       "currency": "tk",
       "quantity": 2,
@@ -96,7 +96,7 @@
     "product": {
       "name": "Logitech G502 Hero Mouse",
       "category": "Gadgets",
-      "image_url": "/images/mouse.jpg",
+      "image_url": "/images/hp.png",
       "price": 4500,
       "currency": "tk",
       "quantity": 1,
@@ -122,7 +122,7 @@
     "product": {
       "name": "Samsung 980 Pro 1TB NVMe SSD",
       "category": "Storage",
-      "image_url": "/images/ssd.jpg",
+      "image_url": "/images/hp.png",
       "price": 12500,
       "currency": "tk",
       "quantity": 1,
@@ -151,7 +151,7 @@
     "product": {
       "name": "DeepCool GAMMAXX AG200 Cooler",
       "category": "Fan",
-      "image_url": "/images/fan.jpg",
+      "image_url": "/images/hp.png",
       "price": 1500,
       "currency": "tk",
       "quantity": 1,
@@ -180,7 +180,7 @@
     "product": {
       "name": "Corsair Vengeance LPX 16GB RAM",
       "category": "Memory",
-      "image_url": "/images/ram.jpg",
+      "image_url": "/images/hp.png",
       "price": 5500,
       "currency": "tk",
       "quantity": 2,
@@ -209,7 +209,7 @@
     "product": {
       "name": "Gigabyte B450M Motherboard",
       "category": "Components",
-      "image_url": "/images/mb.jpg",
+      "image_url": "/images/hp.png",
       "price": 9500,
       "currency": "tk",
       "quantity": 1,
@@ -238,7 +238,7 @@
     "product": {
       "name": "TP-Link Archer C6 Router",
       "category": "Networking",
-      "image_url": "/images/router.jpg",
+      "image_url": "/images/hp.png",
       "price": 2800,
       "currency": "tk",
       "quantity": 1,
@@ -267,7 +267,7 @@
     "product": {
       "name": "Keychron K2 Mechanical Keyboard",
       "category": "Gadgets",
-      "image_url": "/images/kb.jpg",
+      "image_url": "/images/hp.png",
       "price": 8500,
       "currency": "tk",
       "quantity": 1,
@@ -296,7 +296,7 @@
     "product": {
       "name": "Apple MacBook Air M2 Chip",
       "category": "Laptop",
-      "image_url": "/images/macbook.jpg",
+      "image_url": "/images/hp.png",
       "price": 115000,
       "currency": "tk",
       "quantity": 1,
@@ -325,7 +325,7 @@
     "product": {
       "name": "Sony WH-1000XM5 Headphones",
       "category": "Gadgets",
-      "image_url": "/images/sony.jpg",
+      "image_url": "/images/hp.png",
       "price": 38000,
       "currency": "tk",
       "quantity": 1,
@@ -354,7 +354,7 @@
     "product": {
       "name": "Antec Atom V550 550W PSU",
       "category": "Power Supply",
-      "image_url": "/images/psu.jpg",
+      "image_url": "/images/hp.png",
       "price": 3200,
       "currency": "tk",
       "quantity": 1,
@@ -383,7 +383,7 @@
     "product": {
       "name": "Razer DeathAdder V3 Pro",
       "category": "Gadgets",
-      "image_url": "/images/razer.jpg",
+      "image_url": "/images/hp.png",
       "price": 14500,
       "currency": "tk",
       "quantity": 1,
@@ -412,7 +412,7 @@
     "product": {
       "name": "LG 24GN650-B UltraGear Monitor",
       "category": "Monitor",
-      "image_url": "/images/monitor.jpg",
+      "image_url": "/images/hp.png",
       "price": 24500,
       "currency": "tk",
       "quantity": 1,
@@ -441,7 +441,7 @@
     "product": {
       "name": "Western Digital 2TB Blue HDD",
       "category": "Storage",
-      "image_url": "/images/hdd.jpg",
+      "image_url": "/images/hp.png",
       "price": 6200,
       "currency": "tk",
       "quantity": 3,
@@ -470,7 +470,7 @@
     "product": {
       "name": "HyperX Cloud II Gaming Headset",
       "category": "Gadgets",
-      "image_url": "/images/hyperx.jpg",
+      "image_url": "/images/hp.png",
       "price": 9500,
       "currency": "tk",
       "quantity": 1,
@@ -499,7 +499,7 @@
     "product": {
       "name": "ASUS TUF Gaming GT301 Case",
       "category": "Casing",
-      "image_url": "/images/casing.jpg",
+      "image_url": "/images/hp.png",
       "price": 8200,
       "currency": "tk",
       "quantity": 1,
@@ -528,7 +528,7 @@
     "product": {
       "name": "Lian Li Galahad 240 AIO Cooler",
       "category": "Cooling",
-      "image_url": "/images/aio.jpg",
+      "image_url": "/images/hp.png",
       "price": 11500,
       "currency": "tk",
       "quantity": 1,
@@ -557,7 +557,7 @@
     "product": {
       "name": "SteelSeries Apex Pro TKL",
       "category": "Gadgets",
-      "image_url": "/images/keyboard2.jpg",
+      "image_url": "/images/hp.png",
       "price": 19500,
       "currency": "tk",
       "quantity": 1,
@@ -586,7 +586,7 @@
     "product": {
       "name": "NVIDIA GeForce RTX 4070 Ti Super",
       "category": "GPU",
-      "image_url": "/images/rtx4070.jpg",
+      "image_url": "/images/hp.png",
       "price": 98000,
       "currency": "tk",
       "quantity": 1,
@@ -615,7 +615,7 @@
     "product": {
       "name": "Razer BlackShark V2 Pro",
       "category": "Gadgets",
-      "image_url": "/images/razer-hs.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 16500,
       "currency": "tk",
       "quantity": 1,
@@ -644,7 +644,7 @@
     "product": {
       "name": "Intel Core i9-14900K Processor",
       "category": "CPU",
-      "image_url": "/images/i9.jpg",
+      "image_url": "/images/hp.png",
       "price": 72000,
       "currency": "tk",
       "quantity": 1,
@@ -673,7 +673,7 @@
     "product": {
       "name": "Secretlab TITAN Evo 2022",
       "category": "Furniture",
-      "image_url": "/images/chair.jpg",
+      "image_url": "/images/hp.png",
       "price": 55000,
       "currency": "tk",
       "quantity": 1,
@@ -702,7 +702,7 @@
     "product": {
       "name": "Logitech C922 Pro Stream Webcam",
       "category": "Gadgets",
-      "image_url": "/images/webcam.jpg",
+      "image_url": "/images/hp.png",
       "price": 9500,
       "currency": "tk",
       "quantity": 1,
@@ -731,7 +731,7 @@
     "product": {
       "name": "ASUS ROG Swift 360Hz Monitor",
       "category": "Monitor",
-      "image_url": "/images/rog-mon.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 68000,
       "currency": "tk",
       "quantity": 1,
@@ -760,7 +760,7 @@
     "product": {
       "name": "Elgato Stream Deck MK.2",
       "category": "Gadgets",
-      "image_url": "/images/deck.jpg",
+      "image_url": "/images/hp.png",
       "price": 18500,
       "currency": "tk",
       "quantity": 1,
@@ -789,7 +789,7 @@
     "product": {
       "name": "Crucial P5 Plus 2TB Gen4 SSD",
       "category": "Storage",
-      "image_url": "/images/crucial.jpg",
+      "image_url": "/images/hp.png",
       "price": 18500,
       "currency": "tk",
       "quantity": 2,
@@ -818,7 +818,7 @@
     "product": {
       "name": "NZXT Kraken Elite 360 RGB",
       "category": "Cooling",
-      "image_url": "/images/nzxt.jpg",
+      "image_url": "/images/hp.png",
       "price": 28500,
       "currency": "tk",
       "quantity": 1,
@@ -847,7 +847,7 @@
     "product": {
       "name": "Glorious Model O Wireless",
       "category": "Gadgets",
-      "image_url": "/images/glorious.jpg",
+      "image_url": "/images/hp.png",
       "price": 8500,
       "currency": "tk",
       "quantity": 1,
@@ -876,7 +876,7 @@
     "product": {
       "name": "ASUS ROG Strix B760-F Gaming WiFi",
       "category": "Motherboard",
-      "image_url": "/images/asus-mb.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 28500,
       "currency": "tk",
       "quantity": 1,
@@ -905,7 +905,7 @@
     "product": {
       "name": "Seagate IronWolf 4TB NAS Drive",
       "category": "Storage",
-      "image_url": "/images/nas-hdd.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 14500,
       "currency": "tk",
       "quantity": 4,
@@ -934,7 +934,7 @@
     "product": {
       "name": "Blue Yeti USB Microphone",
       "category": "Gadgets",
-      "image_url": "/images/yeti.jpg",
+      "image_url": "/images/hp.png",
       "price": 12500,
       "currency": "tk",
       "quantity": 1,
@@ -963,7 +963,7 @@
     "product": {
       "name": "Samsung Odyssey G9 OLED",
       "category": "Monitor",
-      "image_url": "/images/g9.jpg",
+      "image_url": "/images/hp.png",
       "price": 145000,
       "currency": "tk",
       "quantity": 1,
@@ -992,7 +992,7 @@
     "product": {
       "name": "Corsair iCUE H150i Elite LCD",
       "category": "Cooling",
-      "image_url": "/images/corsair-aio.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 32000,
       "currency": "tk",
       "quantity": 1,
@@ -1021,7 +1021,7 @@
     "product": {
       "name": "G.Skill Trident Z5 RGB 32GB DDR5",
       "category": "RAM",
-      "image_url": "/images/ddr5.jpg",
+      "image_url": "/images/hp.png",
       "price": 18500,
       "currency": "tk",
       "quantity": 1,
@@ -1050,7 +1050,7 @@
     "product": {
       "name": "Thermal Grizzly Kryonaut 1g",
       "category": "Accessories",
-      "image_url": "/images/paste.jpg",
+      "image_url": "/images/hp.png",
       "price": 950,
       "currency": "tk",
       "quantity": 2,
@@ -1079,7 +1079,7 @@
     "product": {
       "name": "Logitech G PRO X Superlight 2",
       "category": "Gadgets",
-      "image_url": "/images/gpro2.jpg",
+      "image_url": "/images/hp.png",
       "price": 16500,
       "currency": "tk",
       "quantity": 1,
@@ -1108,7 +1108,7 @@
     "product": {
       "name": "Epson EcoTank L3210 Printer",
       "category": "Office",
-      "image_url": "/images/printer.jpg",
+      "image_url": "/images/hp.png",
       "price": 19500,
       "currency": "tk",
       "quantity": 1,
@@ -1137,7 +1137,7 @@
     "product": {
       "name": "Lian Li Uni Fan SL120 (3 Pack)",
       "category": "Fan",
-      "image_url": "/images/lianli-fan.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 11000,
       "currency": "tk",
       "quantity": 2,
@@ -1166,7 +1166,7 @@
     "product": {
       "name": "Intel Core i7-13700K Processor",
       "category": "CPU",
-      "image_url": "/images/i7.jpg",
+      "image_url": "/images/hp.png",
       "price": 45000,
       "currency": "tk",
       "quantity": 1,
@@ -1195,7 +1195,7 @@
     "product": {
       "name": "ZOTAC Gaming RTX 4060 Ti 8GB",
       "category": "GPU",
-      "image_url": "/images/rtx4060.jpg",
+      "image_url": "/images/hp.png",
       "price": 52000,
       "currency": "tk",
       "quantity": 1,
@@ -1224,7 +1224,7 @@
     "product": {
       "name": "Lian Li PC-O11 Dynamic Case",
       "category": "Casing",
-      "image_url": "/images/lianli.jpg",
+      "image_url": "/images/hp.png",
       "price": 18500,
       "currency": "tk",
       "quantity": 1,
@@ -1253,7 +1253,7 @@
     "product": {
       "name": "Keychron K6 Wireless Keyboard",
       "category": "Gadgets",
-      "image_url": "/images/keychron.jpg",
+      "image_url": "/images/hp.png",
       "price": 9500,
       "currency": "tk",
       "quantity": 1,
@@ -1282,7 +1282,7 @@
     "product": {
       "name": "Samsung T7 1TB Portable SSD",
       "category": "Storage",
-      "image_url": "/images/samsung-t7.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 12500,
       "currency": "tk",
       "quantity": 2,
@@ -1311,7 +1311,7 @@
     "product": {
       "name": "DeepCool AK620 CPU Cooler",
       "category": "Cooling",
-      "image_url": "/images/ak620.jpg",
+      "image_url": "/images/hp.png",
       "price": 6500,
       "currency": "tk",
       "quantity": 1,
@@ -1340,7 +1340,7 @@
     "product": {
       "name": "Logitech G733 Wireless Headset",
       "category": "Gadgets",
-      "image_url": "/images/g733.jpg",
+      "image_url": "/images/hp.png",
       "price": 14500,
       "currency": "tk",
       "quantity": 1,
@@ -1369,7 +1369,7 @@
     "product": {
       "name": "Corsair RM850e 850W Gold PSU",
       "category": "Power Supply",
-      "image_url": "/images/corsair-psu.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 13500,
       "currency": "tk",
       "quantity": 1,
@@ -1398,7 +1398,7 @@
     "product": {
       "name": "BenQ GW2480 24-inch Monitor",
       "category": "Monitor",
-      "image_url": "/images/benq.jpg",
+      "image_url": "/images/hp.png",
       "price": 16500,
       "currency": "tk",
       "quantity": 3,
@@ -1427,7 +1427,7 @@
     "product": {
       "name": "Razer Leviathan V2 X Soundbar",
       "category": "Gadgets",
-      "image_url": "/images/razer-soundbar.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 11500,
       "currency": "tk",
       "quantity": 1,
@@ -1456,7 +1456,7 @@
     "product": {
       "name": "MSI MAG B650 Tomahawk WiFi",
       "category": "Motherboard",
-      "image_url": "/images/msi-b650.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 26500,
       "currency": "tk",
       "quantity": 1,
@@ -1485,7 +1485,7 @@
     "product": {
       "name": "Gigabyte M27Q 27-inch 170Hz",
       "category": "Monitor",
-      "image_url": "/images/gigabyte-mon.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 34500,
       "currency": "tk",
       "quantity": 1,
@@ -1514,7 +1514,7 @@
     "product": {
       "name": "Western Digital Black 2TB NVMe",
       "category": "Storage",
-      "image_url": "/images/wd-black.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 19500,
       "currency": "tk",
       "quantity": 1,
@@ -1543,7 +1543,7 @@
     "product": {
       "name": "SteelSeries Arctis Nova 7",
       "category": "Gadgets",
-      "image_url": "/images/arctis.jpg",
+      "image_url": "/images/hp.png",
       "price": 22000,
       "currency": "tk",
       "quantity": 1,
@@ -1572,7 +1572,7 @@
     "product": {
       "name": "ASUS TUF Gaming Gold 750W",
       "category": "Power Supply",
-      "image_url": "/images/asus-psu.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 11500,
       "currency": "tk",
       "quantity": 1,
@@ -1601,7 +1601,7 @@
     "product": {
       "name": "Logitech MX Master 3S",
       "category": "Gadgets",
-      "image_url": "/images/mx-master.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 12500,
       "currency": "tk",
       "quantity": 1,
@@ -1630,7 +1630,7 @@
     "product": {
       "name": "TP-Link Deco M4 (3-Pack)",
       "category": "Networking",
-      "image_url": "/images/deco.jpg",
+      "image_url": "/images/hp.png",
       "price": 13500,
       "currency": "tk",
       "quantity": 1,
@@ -1659,7 +1659,7 @@
     "product": {
       "name": "Glorious Model D Minus Wireless",
       "category": "Gadgets",
-      "image_url": "/images/model-d.jpg",
+      "image_url": "/images/hp.png.jpg",
       "price": 8200,
       "currency": "tk",
       "quantity": 1,
@@ -1688,7 +1688,7 @@
     "product": {
       "name": "Arctic MX-6 Thermal Paste 4g",
       "category": "Accessories",
-      "image_url": "/images/mx6.jpg",
+      "image_url": "/images/hp.png",
       "price": 1250,
       "currency": "tk",
       "quantity": 1,
@@ -1717,7 +1717,7 @@
     "product": {
       "name": "Elgato Wave:3 USB Microphone",
       "category": "Gadgets",
-      "image_url": "/images/wave3.jpg",
+      "image_url": "/images/hp.png",
       "price": 16500,
       "currency": "tk",
       "quantity": 1,
