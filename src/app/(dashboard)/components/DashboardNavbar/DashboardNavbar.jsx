@@ -84,10 +84,6 @@ const DashboardNavbar = () => {
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2 xl:gap-4 shrink-0">
-        <button className="p-2 hover:bg-primary hover:text-white duration-300 rounded-xl text-primary bg-white cursor-pointer border border-primary/80 transition-all">
-          <Mail size={20} />
-        </button>
-
         <button className="p-2 hover:bg-primary hover:text-white duration-300 rounded-xl text-primary bg-white cursor-pointer border border-primary/80 relative transition-all">
           <Bell size={20} />
           <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary_red rounded-full border border-white"></span>
