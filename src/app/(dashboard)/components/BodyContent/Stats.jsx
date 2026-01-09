@@ -1,56 +1,97 @@
 "use client";
 
-import React from "react";
-
-const stats = [
-  {
-    stat: "New Order",
-    count: 12046,
-    color: "#2CACE2",
-  },
-  {
-    stat: "Pending Products",
-    count: 12046,
-    color: "#E2872C",
-  },
-  {
-    stat: "Delivered Products",
-    count: 12046,
-    color: "#0D9800",
-  },
-  {
-    stat: "Cancel Order",
-    count: 12046,
-    color: "#E22C2C",
-  },
-];
+import { ORDER_API } from "@/api/apiEndPoint";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 
 const Stats = () => {
-  return (
-    /* grid-cols-1 for small phones 
-       grid-cols-2 for tablets 
-       lg:grid-cols-4 for desktops 
-    */
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 lg:gap-3 pb-6 mt-6 lg:mt-0">
-      {stats.map((stat) => (
-        <div
-          key={stat.stat}
-          className="flex flex-col gap-1 md:gap-2 items-start rounded-2xl p-5 md:p-6 transition-transform hover:scale-[1.02] duration-300"
-          style={{
-            backgroundColor: `${stat.color}10`, // 10 = approx 6% opacity in hex
-          }}
-        >
-          {/* Label: Adjusted font sizes for mobile/desktop */}
-          <p
-            style={{ color: stat.color }}
-            className="text-sm xl:text-lg font-medium whitespace-nowrap"
-          >
-            {stat.stat}
-          </p>
+  const [loading, setLoading] = useState(true);
+  const [statsData, setStatsData] = useState({
+    total: 0,
+    pending: 0,
+    delivered: 0,
+    canceled: 0,
+  });
 
-          {/* Count: Responsive sizing to prevent overflow */}
-          <h1 className="text-2xl sm:text-3xl xl:text-4xl font-semibold text-dark">
-            {stat.count.toLocaleString()}
+  const fetchStats = async () => {
+    try {
+      const token = Cookies.get("admin_token");
+      const res = await axios.get(ORDER_API, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // আপনার API স্ট্রাকচার অনুযায়ী res.data.data হচ্ছে মূল অ্যারে
+      if (res.data.status === true) {
+        const allOrders = res.data.data;
+
+        setStatsData({
+          total: allOrders.length,
+          // আপনার API-তে স্ট্যাটাসের নাম যা আছে (যেমন: 'Pending', 'Delivered') সেই অনুযায়ী ফিল্টার করুন
+          pending: allOrders.filter((order) => order.status === "Pending")
+            .length,
+          delivered: allOrders.filter((order) => order.status === "Delivered")
+            .length,
+          canceled: allOrders.filter((order) => order.status === "Cancelled")
+            .length,
+        });
+      }
+    } catch (error) {
+      console.error("Fetch Error:", error);
+      toast.error("Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const statsConfig = [
+    {
+      label: "New Order",
+      count: statsData.total,
+      color: "#2CACE2",
+    },
+    {
+      label: "Pending Products",
+      count: statsData.pending,
+      color: "#E2872C",
+    },
+    {
+      label: "Delivered Products",
+      count: statsData.delivered,
+      color: "#0D9800",
+    },
+    {
+      label: "Cancel Order",
+      count: statsData.canceled,
+      color: "#E22C2C",
+    },
+  ];
+
+  if (loading) return <p className="p-5">Loading Dashboard Stats...</p>;
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-6 mt-6">
+      {statsConfig.map((item) => (
+        <div
+          key={item.label}
+          className="flex flex-col gap-2 items-start rounded-2xl p-6 transition-transform hover:scale-[1.02] duration-300"
+          style={{ backgroundColor: `${item.color}10` }}
+        >
+          <p
+            style={{ color: item.color }}
+            className="text-sm xl:text-lg font-medium"
+          >
+            {item.label}
+          </p>
+          <h1 className="text-2xl sm:text-4xl font-semibold text-gray-800">
+            {item.count.toLocaleString()}
           </h1>
         </div>
       ))}

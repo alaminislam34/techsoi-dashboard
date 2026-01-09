@@ -1,8 +1,10 @@
 "use client";
 
+import Cookies from "js-cookie";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { HiOutlineLogout } from "react-icons/hi";
 const sidelinks = [
   {
@@ -50,6 +52,21 @@ const sidelinks = [
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const handleLogout = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = user.token;
+    if (!token) {
+      return toast.error("Invalid token!");
+    } else {
+      toast.success("Logout successful");
+      localStorage.clear("user");
+      Cookies.remove("admin_token");
+      setTimeout(() => {
+        router.push("/login");
+      }, 1000);
+    }
+  };
 
   return (
     <div className="lg:w-65 xl:w-72 border-r border-gray-300 h-screen bg-secondary flex justify-between flex-col fixed left-0 top-0 p-6">
@@ -58,8 +75,9 @@ const Sidebar = () => {
           <Link href="/dashboard">
             <Image
               src="/logos/logo.png"
-              height={400}
+              height={135}
               width={600}
+              loading="eager"
               alt="Website logo"
               className="w-55 h-auto object-cover"
             />
@@ -90,7 +108,10 @@ const Sidebar = () => {
         </ul>
       </div>
 
-      <button className="text-primary_red hover:bg-primary_red hover:text-white duration-300 w-full flex items-center gap-2 rounded-xl py-2 px-4">
+      <button
+        onClick={handleLogout}
+        className="text-primary_red hover:bg-primary_red hover:text-white duration-300 w-full flex items-center gap-2 rounded-xl py-2 px-4"
+      >
         <HiOutlineLogout className="rotate-180" />
         Logout
       </button>
