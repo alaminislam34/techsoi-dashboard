@@ -5,7 +5,7 @@ import { Upload } from "lucide-react";
 
 const UpdateCategoryFrom = () => {
   return (
-    <div className="bg-white space-y-10">
+    <div className="bg-white space-y-6">
       <section>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-7">
@@ -15,7 +15,7 @@ const UpdateCategoryFrom = () => {
             <input
               type="text"
               placeholder="Enter your name"
-              className="w-full px-4 py-3 rounded-md border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
+              className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
             />
           </div>
           <div className="md:col-span-3">
@@ -26,7 +26,7 @@ const UpdateCategoryFrom = () => {
               <input type="file" id="file-upload" className="hidden" />
               <label
                 htmlFor="file-upload"
-                className="flex items-center gap-2 w-full px-4 py-3 rounded-md border border-primary cursor-pointer text-gray-400"
+                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400"
               >
                 <Upload size={20} className="text-primary" />
                 <span className="truncate">Choose a file</span>
@@ -34,7 +34,7 @@ const UpdateCategoryFrom = () => {
             </div>
           </div>
           <div className="md:col-span-2">
-            <button className="w-full bg-primary hover:bg-[#2591be] text-white py-3 rounded-md font-medium transition-colors">
+            <button className="w-full cursor-pointer bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors">
               Create
             </button>
           </div>
@@ -49,7 +49,7 @@ const UpdateCategoryFrom = () => {
               Select Main Category
             </label>
             <div className="relative">
-              <select className="w-full appearance-none px-4 py-3 rounded-md border border-primary focus:outline-none text-gray-400 bg-white">
+              <select className="w-full appearance-none px-4 py-3 rounded-xl border border-primary focus:outline-none text-gray-400 bg-white">
                 <option>Enter your name</option>
               </select>
               <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
@@ -76,11 +76,11 @@ const UpdateCategoryFrom = () => {
             <input
               type="text"
               placeholder="Enter your name"
-              className="w-full px-4 py-3 rounded-md border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
+              className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
             />
           </div>
           <div className="md:col-span-2">
-            <button className="w-full bg-primary hover:bg-[#2591be] text-white py-3 rounded-md font-medium transition-colors">
+            <button className="w-full cursor-pointer bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors">
               Create
             </button>
           </div>
@@ -97,11 +97,11 @@ const UpdateCategoryFrom = () => {
             <input
               type="text"
               placeholder="Enter your name"
-              className="w-full px-4 py-3 rounded-md border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
+              className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
             />
           </div>
           <div className="md:col-span-2">
-            <button className="w-full bg-primary hover:bg-[#2591be] text-white py-3 rounded-md font-medium transition-colors">
+            <button className="w-full cursor-pointer bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors">
               Create
             </button>
           </div>
