@@ -1,5 +1,7 @@
 "use client";
 
+import { LOGOUT_API } from "@/api/apiEndPoint";
+import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import Link from "next/link";
@@ -56,6 +58,13 @@ const Sidebar = () => {
   const handleLogout = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = user.token;
+    console.log("Token:", token);
+    const res = await axios.get(LOGOUT_API, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(res);
     if (!token) {
       return toast.error("Invalid token!");
     } else {

@@ -1,0 +1,559 @@
+@URL = https://api.techsoibd.com/api
+@USERTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50ZWNoc29pYmQuY29tL2FwaS9sb2dpbiIsImlhdCI6MTc2ODE3MTkzNSwiZXhwIjoxNzY4MTc1NTM1LCJuYmYiOjE3NjgxNzE5MzUsImp0aSI6IlZyeW9YSW44ak5hQmZKOFIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.1rpFDuuknpEEBRUywTyDfzdyj3idPZUxK-In44EgmNU
+@ADMINTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzY1MDM4Mzg5LCJleHAiOjE3NjUwNDE5ODksIm5iZiI6MTc2NTAzODM4OSwianRpIjoiSjM5cUU4bjhXeWptWGFzZiIsInN1YiI6IjEiLCJwcnYiOiJkZjg4M2RiOTdiZDA1ZWY4ZmY4NTA4MmQ2ODZjNDVlODMyZTU5M2E5In0._y0BTUhhH9Lbi8PGM2Mv7HnnbA8GNxj7D1ZcZFwEpAE
+
+### user login           ---------------> user requests
+
+POST {{URL}}/login
+accept: application/json
+content-type: application/json
+
+{
+    "name": "user one",
+    "email": "user1@techsoibd.com",
+    "image": "gmail-account-image-url"
+}
+
+### user token refresh
+
+GET {{URL}}/refresh
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### user info refresh
+
+GET {{URL}}/profile
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### user info
+
+GET {{URL}}/logout
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### get user favorite product list ----------->favorite product requests
+
+GET {{URL}}/fav-list
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### get user favorite product list
+
+POST {{URL}}/fav-list
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+{
+    "product_id": "1"
+}
+
+### delete favorite product
+
+DELETE {{URL}}/fav-list/1
+accept: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### get user cart product list ----------->cart product requests
+
+GET {{URL}}/cart-product
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### get user cart product list
+
+POST {{URL}}/cart-product
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+{
+    "product_id": "1"
+}
+
+### delete cart product
+
+DELETE {{URL}}/cart-product/1
+accept: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### pay and order             ---------------> pay and order requests
+
+POST {{URL}}/pay/sslcommerz
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+{
+    "name": "Akash Frontend",
+    "phone": "01754576435",
+    "email": "akash@techsoibd.com",
+    "address": "Nikunjo",
+    "city": "Dhaka",
+    "postcode": "1200",
+    "products": [{"product_id":1,"quantity":3,"amount":5000},{"product_id":3,"quantity":3,"amount":8500},{"product_id":7,"quantity":4,"amount":1400}]
+}
+
+### user review             ---------------> user review requests
+
+GET {{URL}}/user-review
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+### admin login             ---------------> admin info requests
+
+POST {{URL}}/admin/login
+accept: application/json
+content-type: application/json
+
+{
+    "email": "admin@techsoibd.com",
+    "password": "123"
+}
+
+### admin info
+
+GET {{URL}}/admin/profile
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+### admin logout
+
+GET {{URL}}/admin/logout
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+### get order info for admin  ---------------> order requests
+
+GET {{URL}}/order
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+### get single order details
+
+GET {{URL}}/order/1
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+### update order
+
+PUT {{URL}}/order/1
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+{
+    "pay_status": "1",
+    "status": "1",
+}
+
+# pay_status 0 = due, 1 = paid
+# status 1 = new order, 2 = panding, 3 = processing, 4 = in delivery, 5 = complete, 0 = cancel
+
+### delete a order
+
+DELETE {{URL}}/order/1
+accept: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+{
+    "cancel_message": "Out of Stock",
+}
+
+### get order product info  ---------------> order details requests
+
+PUT {{URL}}/order-details/1
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+{
+    "pay_status": "1",
+    "status": "1",
+}
+
+# pay_status 0 = due, 1 = paid
+# status 1 = new order, 2 = panding, 3 = processing, 4 = in delivery, 5 = complete, 0 = cancel
+
+### delete a order product
+
+DELETE {{URL}}/order-details/1
+accept: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+{
+    "cancel_message": "Out of Stock",
+}
+
+### get website basic info  ---------------> full website info requests
+
+GET {{URL}}/website-info
+accept: application/json
+
+### update website basic info
+
+PUT {{URL}}/website-info
+accept: application/json
+content-type: application/json
+
+{
+    "email": "test@gamil.com",
+    "phone": "01754545454",
+    "address": "Chapai",
+    "facebook_link": "#",
+    "instagram_link": "#"
+}
+
+### get all products       ---------------> product requests
+
+GET {{URL}}/product
+accept: application/json
+
+### get limited product
+
+GET {{URL}}/product-limit/4
+accept: application/json
+
+### get paginated product
+
+GET {{URL}}/product-paginate/4
+accept: application/json
+
+### get searching product
+
+GET {{URL}}/product-search/Gaming Mouse
+accept: application/json
+
+### get filtered product
+
+GET {{URL}}/product-filter?filter[name]=Gaming Mouse&filter[category_id]=1&sort=-id
+accept: application/json
+
+### get details of product
+
+GET {{URL}}/product-details/monarch-city-ranger-x7-argb-mid-tower-atx-desktop-case
+accept: application/json
+
+### get single product
+
+GET {{URL}}/product/1
+accept: application/json
+
+### store new product
+
+POST {{URL}}/product
+accept: application/json
+content-type: application/json
+
+{
+    "name": "test product 1",
+    "sku": "apple-02022025",
+    "regular_price": "2000",
+    "sale_price": "1500",
+    "main_image": "FORM-URL",
+    "category_id": "1",
+    "sub_category_id": "1",
+    "brand_id": "1",
+    "short_description": "short-description",
+}
+
+### update product
+
+PUT {{URL}}/product/1
+accept: application/json
+content-type: application/json
+
+{
+    "name": "test product update",
+    "sku": "apple-02022025",
+    "regular_price": "2000",
+    "sale_price": "1500",
+    "main_image": "FORM-URL",
+    "category_id": "1",
+    "sub_category_id": "1",
+    "brand_id": "1",
+    "short_description": "short-description",
+}
+
+### delete a product
+
+DELETE {{URL}}/product/1
+accept: application/json
+
+### get single product details       ---------------> product details requests
+
+GET {{URL}}/product-details/1
+accept: application/json
+
+### update product details
+
+PUT {{URL}}/product-details/1
+accept: application/json
+content-type: application/json
+
+{
+    "product_id": "1",
+    "full_description": "full-description",
+    "specifications": [{"name":"Height","value":"38.6mm",},{"name":"color","value":"red",}],
+    "extra_images": [{ "FORM-URL-1" },{ "FORM-URL-2" },]
+}
+
+### get all products review       ---------------> product review requests
+
+GET {{URL}}/review-product
+accept: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+### get single products review
+
+GET {{URL}}/review-product/1
+accept: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+### store new products review
+
+POST {{URL}}/review-product
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+{
+    "product_id": "1",
+    "star":"5",
+    "message":"customer message"
+}
+
+### delete a products review
+
+DELETE {{URL}}/review-product/1
+accept: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+### get all faq             ---------------> faq requests
+
+GET {{URL}}/faq
+accept: application/json
+
+### get limited faq
+
+GET {{URL}}/faq-limit/4
+accept: application/json
+
+### get single faq
+
+GET {{URL}}/faq/1
+accept: application/json
+
+### store new faq
+
+POST {{URL}}/faq
+accept: application/json
+content-type: application/json
+
+{
+    "question": "test-question-1",
+    "answer": "test-answer-1"
+}
+
+### update a faq
+
+PUT {{URL}}/faq/1
+accept: application/json
+content-type: application/json
+
+{
+    "question": "test-question-up",
+    "answer": "test-answer-1"
+}
+
+### delete a faq
+
+DELETE {{URL}}/faq/1
+accept: application/json
+
+### get all category             ---------------> category requests
+
+GET {{URL}}/category
+accept: application/json
+
+### get single category
+
+GET {{URL}}/category/1
+accept: application/json
+
+### get limited category
+
+GET {{URL}}/category-limit/4
+accept: application/json
+
+### store new category
+
+POST {{URL}}/category
+accept: application/json
+content-type: application/json
+
+{
+    "name": "test-category-1",
+    "image": "FORM-URL"
+}
+
+### update a category
+
+PUT {{URL}}/category/1
+accept: application/json
+content-type: application/json
+
+{
+    "name": "test-category-1",
+    "image": "FORM-URL"
+}
+
+### delete a category
+
+DELETE {{URL}}/category/1
+accept: application/json
+
+### get all sub-category             ---------------> sub-category requests
+
+GET {{URL}}/sub-category
+accept: application/json
+
+### get single sub-category
+
+GET {{URL}}/sub-category/1
+accept: application/json
+
+### store new sub-category
+
+POST {{URL}}/sub-category
+accept: application/json
+content-type: application/json
+
+{
+    "category_id": "1",
+    "name": "test-sub-category-1",
+    "image": "FORM-URL"
+}
+
+### update a sub-category
+
+PUT {{URL}}/sub-category/1
+accept: application/json
+content-type: application/json
+
+{
+    "category_id": "1",
+    "name": "test-sub-category-1",
+    "image": "FORM-URL"
+}
+
+### delete a sub-category
+
+DELETE {{URL}}/sub-category/1
+accept: application/json
+
+### get all brand             ---------------> brand requests
+
+GET {{URL}}/brand
+accept: application/json
+
+### get limited brand
+
+GET {{URL}}/brand-limit/4
+accept: application/json
+
+### get single brand
+
+GET {{URL}}/brand/1
+accept: application/json
+
+### get special brand
+
+GET {{URL}}/brand-special
+accept: application/json
+
+### store new brand
+
+POST {{URL}}/brand
+accept: application/json
+content-type: application/json
+
+{
+    "name": "test-brand-1",
+    "image": "FORM-URL",
+    "special": 1
+}
+
+### update a brand
+
+PUT {{URL}}/brand/1
+accept: application/json
+content-type: application/json
+
+{
+    "name": "test-brand-1",
+    "image": "FORM-URL",
+    "special": 0
+}
+
+### delete a brand
+
+DELETE {{URL}}/brand/1
+accept: application/json
+
+### get all blog             ---------------> blog requests
+
+GET {{URL}}/blog
+accept: application/json
+
+### get limited blog
+
+GET {{URL}}/blog-limit/4
+accept: application/json
+
+### get single blog
+
+GET {{URL}}/blog/1
+accept: application/json
+
+### store new blog
+
+POST {{URL}}/blog
+accept: application/json
+content-type: application/json
+
+{
+    "title": "test-blog-1",
+    "image": "FORM-URL",
+    "short_description": "test-short-description",
+    "full_description": "test-full-description",
+}
+
+### update a blog
+
+PUT {{URL}}/blog/1
+accept: application/json
+content-type: application/json
+
+{
+    "title": "test-blog-update",
+    "image": "FORM-URL",
+    "short_description": "test-short-description",
+    "full_description": "test-full-description",
+}
+
+### delete a blog
+
+DELETE {{URL}}/blog/1
+accept: application/json

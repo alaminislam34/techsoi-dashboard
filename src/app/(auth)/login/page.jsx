@@ -30,8 +30,8 @@ const LoginPage = () => {
         Cookies.set("admin_token", res.data.token, {
           expires: 7,
           path: "/",
-          secure: true,
-          sameSite: "strict",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
         });
         localStorage.setItem(
           "user",
