@@ -1,11 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
-import { Pencil, Plus, Trash2, Upload, ChevronDown, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Pencil, Upload, ChevronDown, X, Loader2 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import {
+  GET_CATEGORY_API,
+  GET_SUB_CATEGORY_API,
+  GET_BRAND_API,
+  CREATE_PRODUCT_API,
+} from "@/api/apiEndPoint";
 
 const AddProduct = () => {
+  // --- Data States for Dropdowns ---
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+
   // --- Form State ---
   const [formData, setFormData] = useState({
     name: "",
@@ -13,17 +24,44 @@ const AddProduct = () => {
     sub_category_id: "",
     brand_id: "",
     stock: "",
+    regular_price: "", // Added to match sample API
     sale_price: "",
     discount: "0",
     description: "",
-    short_details: "",
+    short_description: "", // Renamed to match sample API
     emi: "",
     display_amount: "",
+    sku: `prod-${Date.now()}`, // Auto-generated SKU
   });
 
-  const [images, setImages] = useState([]); // To store actual File objects
-  const [previews, setPreviews] = useState([]); // To store URL previews
+  const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // --- Fetch Dynamic Data ---
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [catRes, subRes, brandRes] = await Promise.all([
+          axios.get(GET_CATEGORY_API),
+          axios.get(GET_SUB_CATEGORY_API),
+          axios.get(GET_BRAND_API),
+        ]);
+        setCategories(catRes.data?.data || catRes.data || []);
+        setSubCategories(subRes.data?.data || subRes.data || []);
+        setBrands(brandRes.data?.data || brandRes.data || []);
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Failed to load categories/brands");
+      }
+    };
+    fetchInitialData();
+  }, []);
+
+  // Filter sub-categories based on selected category
+  const filteredSubCategories = subCategories.filter(
+    (sub) => Number(sub.category_id) === Number(formData.category_id)
+  );
 
   // --- Handle Input Change ---
   const handleChange = (e) => {
@@ -35,73 +73,64 @@ const AddProduct = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (images.length + files.length > 4) {
-      return toast.error("You can only upload up to 4 images");
+      return toast.error("Max 4 images allowed");
     }
-
-    const newImages = [...images, ...files];
-    setImages(newImages);
-
+    setImages((prev) => [...prev, ...files]);
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviews((prev) => [...prev, ...newPreviews]);
   };
 
   const removeImage = (index) => {
-    const updatedImages = images.filter((_, i) => i !== index);
-    const updatedPreviews = previews.filter((_, i) => i !== index);
-    setImages(updatedImages);
-    setPreviews(updatedPreviews);
+    setImages(images.filter((_, i) => i !== index));
+    setPreviews(previews.filter((_, i) => i !== index));
   };
 
   // --- Handle Submit ---
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (images.length === 0)
+      return toast.error("Please upload at least one image");
     setLoading(true);
 
     try {
-      // Use FormData to handle both text and files
       const data = new FormData();
 
-      // Append text fields
+      // Append all form fields
       Object.keys(formData).forEach((key) => {
         data.append(key, formData[key]);
       });
 
-      // Append images
-      images.forEach((image) => {
-        data.append("images[]", image); // Using 'images[]' as a standard array key for APIs
+      // Append images (Matches standard "main_image" or array upload)
+      // Usually the first image is the main_image
+      data.append("main_image", images[0]);
+      images.forEach((image, index) => {
+        data.append(`images[${index}]`, image);
       });
 
-      const res = await axios.post(
-        "https://api.techsoibd.com/api/product/store",
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const res = await axios.post(CREATE_PRODUCT_API, data, {
+        headers: { "Content-Type": "application/json" },
+      });
 
-      if (res.data?.status) {
-        toast.success("Product added successfully!");
-        // Reset state after success
-        setFormData({
-          name: "",
-          category_id: "",
-          sub_category_id: "",
-          brand_id: "",
-          stock: "",
-          sale_price: "",
-          discount: "0",
-          description: "",
-          short_details: "",
-          emi: "",
-          display_amount: "",
-        });
-        setImages([]);
-        setPreviews([]);
-      }
+      toast.success("Product added successfully!");
+      // Reset logic
+      setFormData({
+        name: "",
+        category_id: "",
+        sub_category_id: "",
+        brand_id: "",
+        stock: "",
+        regular_price: "",
+        sale_price: "",
+        discount: "0",
+        description: "",
+        short_description: "",
+        emi: "",
+        display_amount: "",
+        sku: `prod-${Date.now()}`,
+      });
+      setImages([]);
+      setPreviews([]);
     } catch (error) {
-      console.error("Add product error:", error);
       toast.error(error.response?.data?.message || "Failed to add product.");
     } finally {
       setLoading(false);
@@ -126,8 +155,11 @@ const AddProduct = () => {
                 className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-dark focus:outline-none focus:ring-1 focus:ring-primary/30"
               >
                 <option value="">Select Category</option>
-                <option value="1">Electronics</option>
-                <option value="2">Gadgets</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
               <ChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -145,11 +177,14 @@ const AddProduct = () => {
                 name="sub_category_id"
                 value={formData.sub_category_id}
                 onChange={handleChange}
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-dark focus:outline-none focus:ring-1 focus:ring-primary/30"
               >
                 <option value="">Select Sub Category</option>
-                <option value="1">HeadPhone</option>
-                <option value="2">Watch</option>
+                {filteredSubCategories.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.name}
+                  </option>
+                ))}
               </select>
               <ChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -170,11 +205,14 @@ const AddProduct = () => {
                 name="brand_id"
                 value={formData.brand_id}
                 onChange={handleChange}
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-dark focus:outline-none focus:ring-1 focus:ring-primary/30"
               >
                 <option value="">Select brands</option>
-                <option value="1">Apple</option>
-                <option value="2">Oraimo</option>
+                {brands.map((brand) => (
+                  <option key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </option>
+                ))}
               </select>
               <ChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -227,8 +265,8 @@ const AddProduct = () => {
             <div className="relative">
               <input
                 type="text"
-                name="short_details"
-                value={formData.short_details}
+                name="short_description"
+                value={formData.short_description}
                 placeholder="Brief highlight (e.g. 2024 Edition)"
                 onChange={handleChange}
                 className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
@@ -265,7 +303,20 @@ const AddProduct = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-500 truncate">
-              Price (BDT)
+              Regular Price (BDT)
+            </label>
+            <input
+              type="number"
+              name="regular_price"
+              value={formData.regular_price}
+              placeholder="0.00"
+              onChange={handleChange}
+              className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-500 truncate">
+              Sale Price (BDT)
             </label>
             <input
               type="number"
@@ -304,20 +355,6 @@ const AddProduct = () => {
               className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
             />
           </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500 truncate">
-              Display Amount
-            </label>
-            <input
-              type="text"
-              name="display_amount"
-              value={formData.display_amount}
-              placeholder="Showroom display"
-              onChange={handleChange}
-              className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
-            />
-          </div>
         </div>
 
         {/* --- Image Upload Section --- */}
@@ -325,8 +362,6 @@ const AddProduct = () => {
           <label className="text-sm font-medium text-gray-500">
             Upload images (upto 4)
           </label>
-
-          {/* Image Previews */}
           <div className="flex flex-wrap gap-4">
             {previews.map((src, index) => (
               <div
@@ -341,7 +376,7 @@ const AddProduct = () => {
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
-                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors"
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
                 >
                   <X size={14} />
                 </button>
@@ -369,9 +404,15 @@ const AddProduct = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full md:w-auto bg-[#38bdf8] hover:bg-primary text-white px-12 py-3.5 rounded-lg font-semibold transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#38bdf8] hover:bg-primary text-white px-12 py-3.5 rounded-lg font-semibold transition-all shadow-md active:scale-95 disabled:opacity-50"
           >
-            {loading ? "Adding Product..." : "Add Product"}
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" size={20} /> Adding Product...
+              </>
+            ) : (
+              "Add Product"
+            )}
           </button>
         </div>
       </form>

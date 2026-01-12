@@ -1,4 +1,5 @@
 // app/dashboard/layout.js
+import { Toaster } from "react-hot-toast";
 import "../globals.css";
 import { StateProvider } from "../providers/StateProvider";
 import DashboardNavbar from "./components/DashboardNavbar/DashboardNavbar";
@@ -25,6 +26,7 @@ export default function DashboardLayout({ children }) {
             {children}
           </div>
         </section>
+        <Toaster position="top-center" />
       </StateProvider>
     </main>
   );

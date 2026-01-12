@@ -1,31 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-const Table = ({ data = [], columns = [], itemsPerPage }) => {
+const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
+  // ✅ Always normalize data to array
+  const safeData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+
   // --- Pagination Logic ---
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(safeData.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = safeData.slice(indexOfFirstItem, indexOfLastItem);
 
   const MAX_VISIBLE_PAGES = 5;
+
   const getVisiblePages = () => {
     let start = Math.max(currentPage - Math.floor(MAX_VISIBLE_PAGES / 2), 1);
     let end = start + MAX_VISIBLE_PAGES - 1;
+
     if (end > totalPages) {
       end = totalPages;
       start = Math.max(end - MAX_VISIBLE_PAGES + 1, 1);
     }
+
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
   return (
     <div className="w-full text-dark">
-      <div className="relative overflow-x-auto min-h-137.5">
+      <div className="relative overflow-x-auto min-h-100">
         <table className="text-left border-collapse min-w-250 w-full">
           <thead>
             <tr className="text-gray-500 text-sm border-b border-gray-100 bg-gray-50/50 *:p-4 *:font-medium truncate">
@@ -38,35 +44,47 @@ const Table = ({ data = [], columns = [], itemsPerPage }) => {
           </thead>
 
           <tbody className="divide-y divide-gray-50 bg-white">
-            {currentItems.map((item, rowIndex) => (
-              <tr
-                key={item.id || rowIndex}
-                className="hover:bg-gray-50 transition-colors"
-              >
-                {columns.map((col, colIndex) => (
-                  <td
-                    key={colIndex}
-                    className={`p-4 text-sm ${col.cellClassName || ""}`}
-                  >
-                    {/* If a custom render function is provided, use it, otherwise show raw data */}
-                    {col.render
-                      ? col.render(item, rowIndex, {
-                          openDropdownId,
-                          setOpenDropdownId,
-                        })
-                      : item[col.key]}
-                  </td>
-                ))}
+            {currentItems.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="p-6 text-center text-gray-400 text-sm"
+                >
+                  No data found
+                </td>
               </tr>
-            ))}
+            ) : (
+              currentItems.map((item, rowIndex) => (
+                <tr
+                  key={item?.id ?? rowIndex}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  {columns.map((col, colIndex) => (
+                    <td
+                      key={colIndex}
+                      className={`p-4 text-sm ${col.cellClassName || ""}`}
+                    >
+                      {col.render
+                        ? // ✅ SAFE render
+                          col.render(item ?? {}, rowIndex, {
+                            openDropdownId,
+                            setOpenDropdownId,
+                          })
+                        : // ✅ SAFE key access
+                          item?.[col.key] ?? "-"}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination (Your Exact Design) */}
+      {/* Pagination (unchanged design) */}
       <div className="flex flex-wrap justify-center md:justify-end mt-6 gap-2 pb-4">
         <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
           disabled={currentPage === 1}
           className={`px-3 py-2 rounded-md transition-all ${
             currentPage === 1
@@ -78,11 +96,6 @@ const Table = ({ data = [], columns = [], itemsPerPage }) => {
         </button>
 
         <div className="flex gap-1">
-          {getVisiblePages()[0] > 1 && (
-            <button className="w-9 h-9 md:w-10 md:h-10 rounded-md border bg-white text-gray-500 hover:bg-gray-50">
-              ...
-            </button>
-          )}
           {getVisiblePages().map((page) => (
             <button
               key={page}
@@ -96,17 +109,10 @@ const Table = ({ data = [], columns = [], itemsPerPage }) => {
               {page}
             </button>
           ))}
-          {getVisiblePages().slice(-1)[0] < totalPages && (
-            <button className="w-9 h-9 md:w-10 md:h-10 rounded-md border bg-white text-gray-500 hover:bg-gray-50">
-              ...
-            </button>
-          )}
         </div>
 
         <button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
           disabled={currentPage === totalPages}
           className={`px-3 py-2 rounded-md transition-all ${
             currentPage === totalPages
