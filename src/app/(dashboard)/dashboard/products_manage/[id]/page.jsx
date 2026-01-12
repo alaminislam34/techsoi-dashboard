@@ -1,26 +1,74 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import productsData from "@/app/FakeData/products.json";
 import { Pencil, Plus, Trash2, Upload, ChevronDown, X } from "lucide-react";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const ManageProduct = () => {
   const params = useParams();
   const productId = params.id;
 
-  // Find the specific product based on the ID in the URL
-  const item = productsData.find(
-    (p) => p.order_info.id.toString() === productId
-  );
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  if (!item) {
+  // --- Fetch single product ---
+  const fetchProduct = async () => {
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const res = await axios.get(
+        `https://api.techsoibd.com/api/product/${productId}`
+      );
+
+      if (!res.data?.status || !res.data?.data) {
+        setErrorMsg("Product not found.");
+        toast("Product not found.", { icon: "⚠️" });
+        return;
+      }
+
+      const product = res.data.data;
+
+      // Map API response to your existing design structure
+      setItem({
+        product: {
+          id: product.id,
+          name: product.name,
+          image_url: product.main_image,
+          category: product.category_id,
+          quantity: product.stock,
+          net_price: product.sale_price,
+        },
+        order_info: {
+          id: product.id,
+          discount: "10%", // fallback, you can replace if API has discount
+        },
+      });
+    } catch (error) {
+      console.error("Fetch product error:", error);
+      setErrorMsg("Failed to load product. Please try again.");
+      toast("Failed to load product. Please try again.", { icon: "⚠️" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (productId) fetchProduct();
+  }, [productId]);
+
+  if (loading)
     return (
-      <div className="p-10 text-center text-dark font-medium">
-        Product not found...
-      </div>
+      <p className="text-center py-10 text-gray-500">Loading product...</p>
     );
-  }
+
+  if (errorMsg)
+    return <p className="text-center py-10 text-red-500">{errorMsg}</p>;
+
+  if (!item) return null;
 
   return (
     <div className="w-full min-h-screen">
@@ -46,6 +94,7 @@ const ManageProduct = () => {
               />
             </div>
           </div>
+
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-500">
               Select Sub Category
@@ -90,7 +139,7 @@ const ManageProduct = () => {
           </div>
         </div>
 
-        {/* --- Text Inputs --- */}
+        {/* --- Product Name & Short Description --- */}
         <div className="space-y-4">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-500">
@@ -162,6 +211,7 @@ const ManageProduct = () => {
               />
             </div>
           </div>
+
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-500 truncate">
               Discount (%)
@@ -178,6 +228,7 @@ const ManageProduct = () => {
               />
             </div>
           </div>
+
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-500 truncate">
               EMI
@@ -188,6 +239,7 @@ const ManageProduct = () => {
               className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
             />
           </div>
+
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-500 truncate">
               Display Amount (BDT)
@@ -197,74 +249,6 @@ const ManageProduct = () => {
               defaultValue="250"
               className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
             />
-          </div>
-        </div>
-
-        {/* --- Technical Specs (Dynamic Design) --- */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-500">
-                Technical Name
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  defaultValue="Height"
-                  className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none text-dark"
-                />
-                <Pencil
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={16}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  defaultValue="5.5 ft"
-                  className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none text-dark"
-                />
-                <Pencil
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={16}
-                />
-              </div>
-              <button className="p-3 bg-red-500 text-white rounded-lg hover:opacity-90 shrink-0">
-                <X size={20} />
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Type here"
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none text-dark"
-              />
-              <Pencil
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  placeholder="Type here"
-                  className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none text-dark"
-                />
-                <Pencil
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={16}
-                />
-              </div>
-              <button className="p-3 bg-primary text-white rounded-lg hover:opacity-90 shrink-0">
-                <Plus size={20} />
-              </button>
-            </div>
           </div>
         </div>
 

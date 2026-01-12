@@ -1,18 +1,86 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Table from "@/app/(dashboard)/components/BodyContent/Table";
-import productsData from "@/app/FakeData/products.json";
 import { Eye, Edit3, Trash2, EyeOff } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2";
 import Link from "next/link";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const ProductsManage = () => {
-  const [data, setData] = useState(productsData);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // --- Fetch products from API ---
+  const fetchProducts = async () => {
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const res = await axios.get("https://api.techsoibd.com/api/product");
+
+      if (res.data?.status !== true || !Array.isArray(res.data.data)) {
+        setErrorMsg("Invalid server response");
+        toast("Invalid server response", { icon: "⚠️" });
+        return;
+      }
+
+      const formattedData = res.data.data.map((product) => ({
+        product: {
+          id: product.id,
+          name: product.name,
+          image_url: product.main_image,
+          category: product.category_id,
+          quantity: product.stock,
+          net_price: product.sale_price,
+        },
+        order_info: {
+          id: product.id,
+          discount: "10%",
+        },
+      }));
+
+      if (formattedData.length === 0) {
+        toast("No products found", { icon: "ℹ️" });
+      }
+
+      setData(formattedData);
+    } catch (error) {
+      console.error("Fetch products error:", error);
+
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 401) {
+          setErrorMsg("Unauthorized. Please login again.");
+          toast("Unauthorized. Please login again.", { icon: "⚠️" });
+        } else if (status === 403) {
+          setErrorMsg("You do not have permission to view products.");
+          toast("You do not have permission to view products.", { icon: "⚠️" });
+        } else {
+          setErrorMsg(
+            error.response?.data?.message || "Failed to load products."
+          );
+          toast(error.response?.data?.message || "Failed to load products.", {
+            icon: "⚠️",
+          });
+        }
+      } else {
+        setErrorMsg("Something went wrong. Please try again.");
+        toast("Something went wrong. Please try again.", { icon: "⚠️" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   // --- Action Handlers ---
-
   const handleToggleVisibility = (id) => {
     toast.success(`Product visibility updated`, {
       icon: "👁️",
@@ -20,21 +88,14 @@ const ProductsManage = () => {
     });
   };
 
-  const handleEdit = (productName) => {
-    toast(`Opening editor for: ${productName}`, {
-      icon: "📝",
-    });
-  };
-
   const handleDelete = (id) => {
-    // Implement SweetAlert2 for Delete Confirmation
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#ef4444", // Matching your red-500
-      cancelButtonColor: "#64748b", // Matching slate-500
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#64748b",
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "No, cancel",
       background: "#ffffff",
@@ -45,11 +106,8 @@ const ProductsManage = () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        // Filter the data
         const filteredData = data.filter((item) => item.order_info.id !== id);
         setData(filteredData);
-
-        // Professional Feedback using Toast
         toast.error("Product has been deleted.", {
           duration: 3000,
           position: "top-center",
@@ -58,6 +116,13 @@ const ProductsManage = () => {
     });
   };
 
+  const handleEdit = (productName) => {
+    toast(`Opening editor for: ${productName}`, {
+      icon: "📝",
+    });
+  };
+
+  // --- Table Columns ---
   const productColumns = [
     {
       header: "All Products",
@@ -138,6 +203,10 @@ const ProductsManage = () => {
       ),
     },
   ];
+
+  if (loading) return <p className="text-center py-10">Loading products...</p>;
+  if (errorMsg)
+    return <p className="text-center py-10 text-red-500">{errorMsg}</p>;
 
   return (
     <div className="w-full">
