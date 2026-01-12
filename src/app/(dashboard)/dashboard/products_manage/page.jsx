@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Table from "@/app/(dashboard)/components/BodyContent/Table";
-import { Eye, Edit3, Trash2, EyeOff } from "lucide-react";
+import { Eye, Edit3, Trash2, EyeOff, Search, ChevronDown } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import Swal from "sweetalert2";
 import Link from "next/link";
@@ -210,8 +210,44 @@ const ProductsManage = () => {
 
   return (
     <div className="w-full">
-      <Toaster />
+      <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 py-4">
+        {/* --- Add New Product Button --- */}
+        <Link
+          href={"/dashboard/products_manage/add_product"}
+          className="w-full md:w-auto bg-[#32afe2] hover:bg-[#2a9ac9] text-white px-10 py-3.5 rounded-2xl font-medium text-lg transition-colors shadow-sm active:scale-95"
+        >
+          Add New Product
+        </Link>
+
+        {/* --- Search Bar --- */}
+        <div className="flex-1 w-full max-w-2xl relative">
+          <input
+            type="text"
+            placeholder="Search products"
+            className="w-full pl-6 pr-12 py-3.5 bg-white border border-[#32afe2]/40 rounded-2xl text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#32afe2] placeholder:text-gray-400"
+          />
+          <Search
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#32afe2]"
+            size={24}
+          />
+        </div>
+
+        {/* --- Sort By Dropdown --- */}
+        <div className="w-full md:w-auto relative min-w-40">
+          <select className="w-full appearance-none bg-white border border-[#32afe2]/40 rounded-2xl px-6 py-3.5 pr-12 text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#32afe2] cursor-pointer">
+            <option>Sort By</option>
+            <option>Newest</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+          </select>
+          <ChevronDown
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+            size={20}
+          />
+        </div>
+      </div>
       <Table data={data} columns={productColumns} itemsPerPage={10} />
+      <Toaster />
     </div>
   );
 };
