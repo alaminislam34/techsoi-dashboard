@@ -4,20 +4,42 @@ import React, { useState, useEffect } from "react";
 import { Eye, Trash2, Star } from "lucide-react";
 import productsData from "@/app/FakeData/products.json";
 import Table from "../../components/BodyContent/Table";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { GET_REVIEW_API } from "@/api/apiEndPoint";
 
 const ReviewManage = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    setData(productsData);
+    const token = Cookies.get("admin_token");
+    if (!token) {
+      return console.log("Token expired");
+    }
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get(GET_REVIEW_API, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(res.data);
+        if (res.status === 200) {
+          setData(res.data.data);
+        } else {
+          setData([]);
+        }
+      } catch (error) {
+        console.log(error.message || "Something went wrong");
+      }
+    };
+    fetchReviews();
   }, []);
 
   const handleDelete = (id) => {
     const filteredData = data.filter((item) => item.order_info.id !== id);
     setData(filteredData);
   };
-
-  // --- Table Column Configuration ---
   const columns = [
     {
       header: "Product",

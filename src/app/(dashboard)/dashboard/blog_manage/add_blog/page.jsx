@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Upload, Trash2, Pencil } from "lucide-react";
-import Link from "next/link";
+import { Upload, Trash2 } from "lucide-react";
 
 const PublishNewBlog = () => {
   const [images, setImages] = useState([]);
