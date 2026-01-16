@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Pencil, Upload, ChevronDown, X, Loader2 } from "lucide-react";
+import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {
@@ -12,412 +12,459 @@ import {
 } from "@/api/apiEndPoint";
 
 const AddProduct = () => {
-  // --- Data States for Dropdowns ---
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // --- Form State ---
   const [formData, setFormData] = useState({
-    name: "",
     category_id: "",
     sub_category_id: "",
     brand_id: "",
     stock: "",
-    regular_price: "", // Added to match sample API
-    sale_price: "",
-    discount: "0",
+    name: "",
+    short_description: "",
     description: "",
-    short_description: "", // Renamed to match sample API
-    emi: "",
-    display_amount: "",
-    sku: `prod-${Date.now()}`, // Auto-generated SKU
+    regular_price: "",
+    discount: "10%",
+    emi: "1200",
+    display_amount: "250",
   });
 
-  const [images, setImages] = useState([]);
-  const [previews, setPreviews] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [specs, setSpecs] = useState([
+    { key: "Height", value: "5.5 ft" },
+    { key: "", value: "" },
+  ]);
 
-  // --- Fetch Dynamic Data ---
+  const [images, setImages] = useState([]);
+
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchData = async () => {
       try {
-        const [catRes, subRes, brandRes] = await Promise.all([
+        const [cat, sub, br] = await Promise.all([
           axios.get(GET_CATEGORY_API),
           axios.get(GET_SUB_CATEGORY_API),
           axios.get(GET_BRAND_API),
         ]);
-        setCategories(catRes.data?.data || catRes.data || []);
-        setSubCategories(subRes.data?.data || subRes.data || []);
-        setBrands(brandRes.data?.data || brandRes.data || []);
-      } catch (error) {
-        console.error("Fetch error:", error);
-        toast.error("Failed to load categories/brands");
+        setCategories(cat.data?.data || []);
+        setSubCategories(sub.data?.data || []);
+        setBrands(br.data?.data || []);
+      } catch (e) {
+        console.error("Data fetch failed");
       }
     };
-    fetchInitialData();
+    fetchData();
   }, []);
 
-  // Filter sub-categories based on selected category
-  const filteredSubCategories = subCategories.filter(
-    (sub) => Number(sub.category_id) === Number(formData.category_id)
-  );
-
-  // --- Handle Input Change ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // --- Handle Image Change ---
-  const handleImageChange = (e) => {
+  const handleSpecChange = (index, field, value) => {
+    const newSpecs = [...specs];
+    newSpecs[index][field] = value;
+    setSpecs(newSpecs);
+  };
+
+  const addSpec = () => setSpecs([...specs, { key: "", value: "" }]);
+  const removeSpec = (index) => setSpecs(specs.filter((_, i) => i !== index));
+
+  const handleFile = (e) => {
     const files = Array.from(e.target.files);
-    if (images.length + files.length > 4) {
-      return toast.error("Max 4 images allowed");
-    }
-    setImages((prev) => [...prev, ...files]);
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
-    setPreviews((prev) => [...prev, ...newPreviews]);
+    if (images.length + files.length > 4) return toast.error("Max 4 images");
+    setImages([...images, ...files]);
   };
 
-  const removeImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
-    setPreviews(previews.filter((_, i) => i !== index));
-  };
-
-  // --- Handle Submit ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (images.length === 0)
-      return toast.error("Please upload at least one image");
     setLoading(true);
 
     try {
       const data = new FormData();
 
-      // Append all form fields
-      Object.keys(formData).forEach((key) => {
-        data.append(key, formData[key]);
+      // 1. Append standard text fields
+      Object.keys(formData).forEach((k) => {
+        data.append(k, formData[k]);
       });
 
-      // Append images (Matches standard "main_image" or array upload)
-      // Usually the first image is the main_image
-      data.append("main_image", images[0]);
-      images.forEach((image, index) => {
-        data.append(`images[${index}]`, image);
+      // 2. Append Technical Specs as a JSON string
+      // Note: Check if your backend expects the key 'specs' or 'technical_specs'
+      data.append("specs", JSON.stringify(specs));
+
+      // 3. Append Images
+      // We use 'images[]' so the backend receives an array of files
+      images.forEach((img) => {
+        data.append("images[]", img);
       });
 
-      const res = await axios.post(CREATE_PRODUCT_API, data, {
-        headers: { "Content-Type": "application/json" },
+      // 4. Send the request
+      // We REMOVE "Content-Type" so axios/browser can set it automatically
+      await axios.post(CREATE_PRODUCT_API, data, {
+        headers: {
+          Accept: "application/json",
+        },
       });
 
-      toast.success("Product added successfully!");
-      // Reset logic
-      setFormData({
-        name: "",
-        category_id: "",
-        sub_category_id: "",
-        brand_id: "",
-        stock: "",
-        regular_price: "",
-        sale_price: "",
-        discount: "0",
-        description: "",
-        short_description: "",
-        emi: "",
-        display_amount: "",
-        sku: `prod-${Date.now()}`,
-      });
+      toast.success("Product Created!");
+
+      // Optional: Reset images and form here
       setImages([]);
-      setPreviews([]);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to add product.");
+    } catch (err) {
+      // Improved error logging to see exactly why the server said 422
+      if (err.response && err.response.status === 422) {
+        console.error("Validation Errors:", err.response.data.errors);
+        toast.error("Validation failed. Check the console for details.");
+      } else {
+        toast.error("Failed to publish product");
+      }
     } finally {
       setLoading(false);
     }
   };
-
   return (
-    <div className="w-full min-h-screen">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* --- Category & Brand Row --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500">
-              Select Main Category
-            </label>
-            <div className="relative">
-              <select
-                name="category_id"
-                value={formData.category_id}
-                onChange={handleChange}
-                required
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-dark focus:outline-none focus:ring-1 focus:ring-primary/30"
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
+    <div className="w-full text-[#475569]">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Row 1: Categories */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputWrapper label="Select Main Category">
+            <select
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              className="custom-select"
+            >
+              <option value="">Select Main Category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="absolute right-4 top-3.5 text-slate-400 pointer-events-none"
+              size={20}
+            />
+          </InputWrapper>
+          <InputWrapper label="Select Sub Category">
+            <select
+              name="sub_category_id"
+              value={formData.sub_category_id}
+              onChange={handleChange}
+              className="custom-select"
+            >
+              <option value="">Select Sub Category</option>
+              {subCategories
+                .filter(
+                  (s) => String(s.category_id) === String(formData.category_id)
+                )
+                .map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
                   </option>
                 ))}
-              </select>
-              <ChevronDown
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                size={18}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500">
-              Select Sub Category
-            </label>
-            <div className="relative">
-              <select
-                name="sub_category_id"
-                value={formData.sub_category_id}
-                onChange={handleChange}
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-dark focus:outline-none focus:ring-1 focus:ring-primary/30"
-              >
-                <option value="">Select Sub Category</option>
-                {filteredSubCategories.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                size={18}
-              />
-            </div>
-          </div>
+            </select>
+            <ChevronDown
+              className="absolute right-4 top-3.5 text-slate-400 pointer-events-none"
+              size={20}
+            />
+          </InputWrapper>
         </div>
 
-        {/* --- Brands & Quantity --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500">
-              Select Brands
-            </label>
-            <div className="relative">
-              <select
-                name="brand_id"
-                value={formData.brand_id}
-                onChange={handleChange}
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg appearance-none text-dark focus:outline-none focus:ring-1 focus:ring-primary/30"
-              >
-                <option value="">Select brands</option>
-                {brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>
-                    {brand.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                size={18}
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500">
-              Quantity
-            </label>
+        {/* Row 2: Brand & Stock */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputWrapper label="Select Brands">
+            <select
+              name="brand_id"
+              value={formData.brand_id}
+              onChange={handleChange}
+              className="custom-select"
+            >
+              <option value="">Select brands</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="absolute right-4 top-3.5 text-slate-400 pointer-events-none"
+              size={20}
+            />
+          </InputWrapper>
+          <InputWrapper label="Quantity">
             <input
-              type="number"
+              type="text"
               name="stock"
               value={formData.stock}
-              placeholder="0"
+              placeholder="Type quantity"
               onChange={handleChange}
-              className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
+              className="custom-input"
             />
-          </div>
+          </InputWrapper>
         </div>
 
-        {/* --- Product Name & Short Description --- */}
-        <div className="space-y-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500">
-              Product Name
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                required
-                placeholder="Enter product name"
-                onChange={handleChange}
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
-              />
-              <Pencil
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-            </div>
-          </div>
+        {/* Product Name */}
+        <InputWrapper label="Products Name">
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            placeholder="Type here"
+            onChange={handleChange}
+            className="custom-input pr-12"
+          />
+          <Pencil
+            className="absolute right-4 top-3.5 text-slate-300"
+            size={18}
+          />
+        </InputWrapper>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500">
-              Short Details
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="short_description"
-                value={formData.short_description}
-                placeholder="Brief highlight (e.g. 2024 Edition)"
-                onChange={handleChange}
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
-              />
-              <Pencil
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-            </div>
-          </div>
+        {/* Short Details */}
+        <InputWrapper label="Short Details">
+          <input
+            type="text"
+            name="short_description"
+            value={formData.short_description}
+            placeholder="Type here"
+            onChange={handleChange}
+            className="custom-input pr-12"
+          />
+          <Pencil
+            className="absolute right-4 top-3.5 text-slate-300"
+            size={18}
+          />
+        </InputWrapper>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500">
-              Product Description
-            </label>
-            <div className="relative">
-              <textarea
-                name="description"
-                value={formData.description}
-                rows={4}
-                placeholder="Type your detailed product description here..."
-                onChange={handleChange}
-                className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark resize-none"
-              />
-              <Pencil
-                className="absolute right-3 top-4 text-gray-400"
-                size={16}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Description */}
+        <InputWrapper label="Products Description">
+          <textarea
+            name="description"
+            value={formData.description}
+            placeholder="Type here"
+            rows={5}
+            onChange={handleChange}
+            className="custom-input pr-12 resize-none"
+          />
+          <Pencil className="absolute right-4 top-4 text-slate-300" size={18} />
+        </InputWrapper>
 
-        {/* --- Pricing Grid --- */}
+        {/* Pricing Grid - Error Fixes Here */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500 truncate">
-              Regular Price (BDT)
-            </label>
+          <InputWrapper label="Price (BDT)">
             <input
-              type="number"
+              type="text"
               name="regular_price"
               value={formData.regular_price}
-              placeholder="0.00"
+              placeholder="Type amount"
               onChange={handleChange}
-              className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
+              className="custom-input"
             />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500 truncate">
-              Sale Price (BDT)
-            </label>
-            <input
-              type="number"
-              name="sale_price"
-              value={formData.sale_price}
-              placeholder="0.00"
-              onChange={handleChange}
-              className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
+            <Pencil
+              className="absolute right-4 top-3.5 text-slate-300"
+              size={18}
             />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500 truncate">
-              Discount (%)
-            </label>
+          </InputWrapper>
+          <InputWrapper label="Discount (Percentage)">
             <input
               type="text"
               name="discount"
               value={formData.discount}
-              placeholder="0%"
               onChange={handleChange}
-              className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
+              className="custom-input"
             />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-500 truncate">
-              EMI
-            </label>
+            <Pencil
+              className="absolute right-4 top-3.5 text-slate-300"
+              size={18}
+            />
+          </InputWrapper>
+          <InputWrapper label="EMI">
             <input
               type="text"
               name="emi"
               value={formData.emi}
-              placeholder="Monthly EMI"
               onChange={handleChange}
-              className="w-full p-3 bg-white border border-primary/50 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 text-dark"
+              className="custom-input"
             />
-          </div>
+          </InputWrapper>
+          <InputWrapper label="Display Amount (BDT)">
+            <input
+              type="text"
+              name="display_amount"
+              value={formData.display_amount}
+              onChange={handleChange}
+              className="custom-input"
+            />
+          </InputWrapper>
         </div>
 
-        {/* --- Image Upload Section --- */}
+        {/* Technical Specs */}
         <div className="space-y-4">
-          <label className="text-sm font-medium text-gray-500">
-            Upload images (upto 4)
-          </label>
-          <div className="flex flex-wrap gap-4">
-            {previews.map((src, index) => (
-              <div
-                key={index}
-                className="relative w-24 h-24 border border-primary/30 rounded-lg overflow-hidden"
-              >
-                <img
-                  src={src}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
+          {specs.map((spec, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col md:flex-row gap-4 items-end"
+            >
+              <div className="flex-1 w-full">
+                <InputWrapper label={idx === 0 ? "Technical Name" : ""}>
+                  <input
+                    type="text"
+                    value={spec.key}
+                    onChange={(e) =>
+                      handleSpecChange(idx, "key", e.target.value)
+                    }
+                    placeholder="Type here"
+                    className="custom-input"
+                  />
+                  <Pencil
+                    className="absolute right-4 top-3.5 text-slate-300"
+                    size={18}
+                  />
+                </InputWrapper>
+              </div>
+              <div className="flex-1 w-full">
+                <InputWrapper label={idx === 0 ? "Technical Specs" : ""}>
+                  <input
+                    type="text"
+                    value={spec.value}
+                    onChange={(e) =>
+                      handleSpecChange(idx, "value", e.target.value)
+                    }
+                    placeholder="Type here"
+                    className="custom-input"
+                  />
+                  <Pencil
+                    className="absolute right-4 top-3.5 text-slate-300"
+                    size={18}
+                  />
+                </InputWrapper>
+              </div>
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                  onClick={() => removeSpec(idx)}
+                  className="h-13 w-13 flex items-center justify-center bg-[#ff0000] text-white rounded-lg shadow-sm"
                 >
-                  <X size={14} />
+                  <X size={24} strokeWidth={3} />
+                </button>
+                {idx === specs.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={addSpec}
+                    className="h-13 w-13 flex items-center justify-center bg-[#38bdf8] text-white rounded-lg shadow-sm"
+                  >
+                    <Plus size={24} strokeWidth={3} />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Upload Images Section */}
+        <div className="space-y-4 pt-2">
+          <label className="text-[15px] font-medium text-[#64748b]">
+            Upload Images (upto 4)
+          </label>
+          <div className="border-[1.5px] border-[#38bdf8]/30 border-dashed rounded-md p-4 flex items-center gap-3 cursor-pointer hover:bg-sky-50 transition-colors relative">
+            <Upload className="text-[#38bdf8]" size={20} />
+            <span className="text-[#94a3b8] text-sm">Choose a file</span>
+            <input
+              type="file"
+              multiple
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              onChange={handleFile}
+            />
+          </div>
+          <div className="space-y-3">
+            {images.map((file, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="text-[#38bdf8]">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <rect
+                      x="3"
+                      y="3"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+                <span className="text-sm text-[#94a3b8] flex-1">
+                  {file.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImages(images.filter((_, idx) => idx !== i))
+                  }
+                >
+                  <X className="text-[#ff4d4f]" size={18} />
                 </button>
               </div>
             ))}
-
-            {previews.length < 4 && (
-              <label className="w-24 h-24 p-3 bg-white border border-primary/50 border-dashed rounded-lg flex flex-col items-center justify-center text-primary cursor-pointer hover:bg-gray-50 transition-colors">
-                <Upload size={18} />
-                <span className="text-[10px] mt-1 font-medium">Add Image</span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </label>
-            )}
           </div>
         </div>
 
-        {/* --- Submit Button --- */}
-        <div className="pt-6">
+        {/* Submit Button */}
+        <div className="pt-4">
           <button
             type="submit"
             disabled={loading}
-            className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#38bdf8] hover:bg-primary text-white px-12 py-3.5 rounded-lg font-semibold transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="w-full md:w-auto px-10 py-4 bg-[#38bdf8] text-white rounded-xl font-semibold text-[16px] shadow-lg shadow-sky-100 hover:bg-sky-500 transition-all flex items-center justify-center gap-3"
           >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} /> Adding Product...
-              </>
-            ) : (
-              "Add Product"
-            )}
+            {loading ? <Loader2 className="animate-spin" /> : "Publish Product"}
           </button>
         </div>
       </form>
+
+      <style jsx>{`
+        .custom-input,
+        .custom-select {
+          width: 100%;
+          height: 52px;
+          padding: 0 1rem;
+          background: #fff;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 15px;
+          color: #1e293b;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        .custom-input::placeholder {
+          color: #cbd5e1;
+        }
+        .custom-input:focus,
+        .custom-select:focus {
+          border-color: #38bdf8;
+        }
+        .custom-select {
+          appearance: none;
+          cursor: pointer;
+        }
+      `}</style>
     </div>
   );
 };
+
+const InputWrapper = ({ label, children }) => (
+  <div className="flex flex-col gap-2 w-full">
+    {label && (
+      <label className="text-[15px] font-medium text-[#64748b]">{label}</label>
+    )}
+    <div className="relative w-full">{children}</div>
+  </div>
+);
 
 export default AddProduct;

@@ -55,15 +55,9 @@ const sidelinks = [
 const DashboardNavbar = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useGlobalState();
   const pathname = usePathname();
-  const hidden =
-    pathname.startsWith("/dashboard/products_manage") ||
-    pathname.startsWith("/dashboard/banner_manage");
-
   return (
     <div
-      className={`${
-        hidden ? "hidden" : "flex"
-      } p-2 md:p-3 lg:p-4 rounded-xl bg-secondary items-center justify-between gap-3 relative z-30`}
+      className={`flex p-2 md:p-3 lg:p-4 rounded-xl bg-secondary items-center justify-between gap-3 relative z-30`}
     >
       {/* Mobile Menu Button */}
       <div className="lg:hidden shrink-0">
