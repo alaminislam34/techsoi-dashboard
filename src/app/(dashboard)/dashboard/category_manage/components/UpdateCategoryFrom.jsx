@@ -1,20 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Upload, Loader2, ChevronDown } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {
-  CREATE_BRAND_API,
-  CREATE_CATEGORY_API,
-  CREATE_SUB_CATEGORY_API,
-  GET_CATEGORY_API,
+  PRODUCT_API,
+  CATEGORY_API,
+  SUB_CATEGORY_API,
+  BRAND_API,
 } from "@/api/apiEndPoint";
 
 const UpdateCategoryForm = () => {
   const [categories, setCategories] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [loadingType, setLoadingType] = useState(null);
+
+  // Independent loading states
+  const [loadingCategory, setLoadingCategory] = useState(false);
+  const [loadingSubCategory, setLoadingSubCategory] = useState(false);
+  const [loadingBrand, setLoadingBrand] = useState(false);
 
   // Category state
   const [categoryName, setCategoryName] = useState("");
@@ -23,15 +27,17 @@ const UpdateCategoryForm = () => {
   // Subcategory state
   const [selectedParentId, setSelectedParentId] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
+  const [subCategoryFile, setSubCategoryFile] = useState(null);
 
   // Brand state
   const [brandName, setBrandName] = useState("");
+  const [brandFile, setBrandFile] = useState(null);
 
   // Fetch categories for dropdown
   const fetchCategories = async () => {
     setLoadingData(true);
     try {
-      const res = await axios.get(GET_CATEGORY_API);
+      const res = await axios.get(CATEGORY_API);
       setCategories(res.data.data || []);
     } catch (error) {
       console.error(error);
@@ -46,80 +52,96 @@ const UpdateCategoryForm = () => {
   }, []);
 
   // --- Handlers ---
-  const handleCreateCategory = async () => {
-    if (!categoryName.trim() || !categoryFile)
-      return toast.error("Missing fields");
-    setLoadingType("category");
 
+  const handleCreateCategory = async () => {
+    if (!categoryName.trim() || !categoryFile) {
+      return toast.error("Missing fields for Category");
+    }
+
+    setLoadingCategory(true);
     try {
       const formData = new FormData();
       formData.append("name", categoryName);
       formData.append("image", categoryFile);
 
-      await axios.post(CREATE_CATEGORY_API, formData, {
+      await axios.post(CATEGORY_API, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
       toast.success("Category created!");
       setCategoryName("");
       setCategoryFile(null);
       fetchCategories();
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.message || "Failed to create category");
     } finally {
-      setLoadingType(null);
+      setLoadingCategory(false);
     }
   };
 
   const handleCreateSubCategory = async () => {
-    if (!selectedParentId || !subCategoryName.trim())
-      return toast.error("Missing fields");
-    setLoadingType("subcategory");
+    if (!selectedParentId || !subCategoryName.trim() || !subCategoryFile) {
+      return toast.error("Missing fields for Subcategory");
+    }
 
+    setLoadingSubCategory(true);
     try {
-      await axios.post(CREATE_SUB_CATEGORY_API, {
-        category_id: selectedParentId,
-        name: subCategoryName,
+      const formData = new FormData();
+      formData.append("category_id", selectedParentId);
+      formData.append("name", subCategoryName);
+      formData.append("image", subCategoryFile);
+
+      await axios.post(SUB_CATEGORY_API, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
+
       toast.success("Subcategory created!");
       setSubCategoryName("");
+      setSubCategoryFile(null);
     } catch (error) {
-      console.error(error);
       toast.error(
-        error.response?.data?.message || "Failed to create subcategory"
+        error.response?.data?.message || "Failed to create subcategory",
       );
     } finally {
-      setLoadingType(null);
+      setLoadingSubCategory(false);
     }
   };
 
   const handleCreateBrand = async () => {
-    if (!brandName.trim()) return toast.error("Missing fields");
-    setLoadingType("brand");
+    if (!brandName.trim() || !brandFile) {
+      return toast.error("Missing fields for Brand");
+    }
 
+    setLoadingBrand(true);
     try {
-      await axios.post(CREATE_BRAND_API, {
-        name: brandName,
-        special: 1,
+      const formData = new FormData();
+      formData.append("name", brandName);
+      formData.append("image", brandFile);
+      formData.append("special", "1");
+
+      await axios.post(BRAND_API, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
+
       toast.success("Brand created!");
       setBrandName("");
+      setBrandFile(null);
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.message || "Failed to create brand");
     } finally {
-      setLoadingType(null);
+      setLoadingBrand(false);
     }
   };
 
   return (
-    <div className="bg-white space-y-8 p-2">
-      {/* Category */}
+    <div className="bg-white space-y-10 p-2 md:p-4">
+      {/* Main Category Section */}
       <section>
+        <h2 className="text-lg font-semibold text-dark mb-4">Main Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="md:col-span-7">
-            <label className="block text-base md:text-lg text-dark mb-2">
-              Create Main Category
+          <div className="md:col-span-6">
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Category Name
             </label>
             <input
               type="text"
@@ -129,8 +151,8 @@ const UpdateCategoryForm = () => {
               className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
             />
           </div>
-          <div className="md:col-span-3">
-            <label className="block text-base md:text-lg text-dark mb-2">
+          <div className="md:col-span-4">
+            <label className="block text-sm md:text-base text-dark mb-2">
               Upload Icon
             </label>
             <div className="relative">
@@ -145,22 +167,23 @@ const UpdateCategoryForm = () => {
               />
               <label
                 htmlFor="category-upload"
-                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400"
+                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400 bg-white"
               >
-                <Upload size={20} className="text-primary" />
-                <span className="truncate">
-                  {categoryFile ? categoryFile.name : "Choose a file"}
+                <Upload size={18} className="text-primary shrink-0" />
+                <span className="truncate text-sm">
+                  {categoryFile ? categoryFile.name : "Choose icon"}
                 </span>
               </label>
             </div>
           </div>
           <div className="md:col-span-2">
             <button
+              type="button"
               onClick={handleCreateCategory}
-              disabled={loadingType !== null}
+              disabled={loadingCategory}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {loadingType === "category" ? (
+              {loadingCategory ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 "Create"
@@ -170,17 +193,20 @@ const UpdateCategoryForm = () => {
         </div>
       </section>
 
-      {/* Subcategory */}
+      <hr className="border-gray-100" />
+
+      {/* Subcategory Section */}
       <section>
+        <h2 className="text-lg font-semibold text-dark mb-4">Sub Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="md:col-span-5">
-            <label className="block text-base md:text-lg text-dark mb-2">
-              Select Main Category
+          <div className="md:col-span-3">
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Select Parent
             </label>
             <select
               value={selectedParentId}
               onChange={(e) => setSelectedParentId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none text-gray-600 bg-white appearance-none"
+              className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none text-gray-600 bg-white appearance-none text-sm"
             >
               <option value="">
                 {loadingData ? "Loading..." : "Select Category"}
@@ -192,25 +218,51 @@ const UpdateCategoryForm = () => {
               ))}
             </select>
           </div>
-          <div className="md:col-span-5">
-            <label className="block text-base md:text-lg text-dark mb-2">
-              Create Sub Category
+          <div className="md:col-span-4">
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Sub Category Name
             </label>
             <input
               type="text"
               value={subCategoryName}
               onChange={(e) => setSubCategoryName(e.target.value)}
-              placeholder="Enter subcategory name"
+              placeholder="Enter sub name"
               className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
             />
           </div>
+          <div className="md:col-span-3">
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Sub Icon
+            </label>
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="subcategory-upload"
+                onChange={(e) =>
+                  e.target.files.length && setSubCategoryFile(e.target.files[0])
+                }
+              />
+              <label
+                htmlFor="subcategory-upload"
+                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400 bg-white"
+              >
+                <Upload size={18} className="text-primary shrink-0" />
+                <span className="truncate text-sm">
+                  {subCategoryFile ? subCategoryFile.name : "Choose icon"}
+                </span>
+              </label>
+            </div>
+          </div>
           <div className="md:col-span-2">
             <button
+              type="button"
               onClick={handleCreateSubCategory}
-              disabled={loadingType !== null}
+              disabled={loadingSubCategory}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {loadingType === "subcategory" ? (
+              {loadingSubCategory ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 "Create"
@@ -220,13 +272,16 @@ const UpdateCategoryForm = () => {
         </div>
       </section>
 
-      {/* Brand */}
+      <hr className="border-gray-100" />
+
+      {/* Brand Section */}
       <section>
-        <label className="block text-base md:text-lg text-dark mb-2">
-          Add Brands
-        </label>
+        <h2 className="text-lg font-semibold text-dark mb-4">Brands</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="md:col-span-10">
+          <div className="md:col-span-6">
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Brand Name
+            </label>
             <input
               type="text"
               value={brandName}
@@ -235,13 +290,39 @@ const UpdateCategoryForm = () => {
               className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
             />
           </div>
+          <div className="md:col-span-4">
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Brand Image
+            </label>
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="brand-upload"
+                onChange={(e) =>
+                  e.target.files.length && setBrandFile(e.target.files[0])
+                }
+              />
+              <label
+                htmlFor="brand-upload"
+                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400 bg-white"
+              >
+                <Upload size={18} className="text-primary shrink-0" />
+                <span className="truncate text-sm">
+                  {brandFile ? brandFile.name : "Choose image"}
+                </span>
+              </label>
+            </div>
+          </div>
           <div className="md:col-span-2">
             <button
+              type="button"
               onClick={handleCreateBrand}
-              disabled={loadingType !== null}
+              disabled={loadingBrand}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {loadingType === "brand" ? (
+              {loadingBrand ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 "Create"

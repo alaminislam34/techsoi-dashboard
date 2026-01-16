@@ -4,9 +4,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { AlertCircle, RefreshCw, Layers, Tag, Package } from "lucide-react";
 import {
-  GET_BRAND_API,
-  GET_CATEGORY_API,
-  GET_SUB_CATEGORY_API,
+  BRAND_API,
+  CATEGORY_API,
+  SUB_CATEGORY_API,
 } from "@/api/apiEndPoint";
 import Image from "next/image";
 
@@ -24,9 +24,9 @@ const Category = () => {
       setLoading(true);
       setError(null);
       const [catRes, subRes, brandRes] = await Promise.all([
-        axios.get(GET_CATEGORY_API),
-        axios.get(GET_SUB_CATEGORY_API),
-        axios.get(GET_BRAND_API),
+        axios.get(CATEGORY_API),
+        axios.get(SUB_CATEGORY_API),
+        axios.get(BRAND_API),
       ]);
 
       setCategories(catRes.data?.data || catRes.data || []);

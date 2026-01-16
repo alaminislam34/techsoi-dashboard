@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { Eye, Trash2, Star } from "lucide-react";
-import productsData from "@/app/FakeData/products.json";
 import Table from "../../components/BodyContent/Table";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { GET_REVIEW_API } from "@/api/apiEndPoint";
+import { REVIEW_API } from "@/api/apiEndPoint";
 
 const ReviewManage = () => {
   const [data, setData] = useState([]);
@@ -18,7 +17,7 @@ const ReviewManage = () => {
     }
     const fetchReviews = async () => {
       try {
-        const res = await axios.get(GET_REVIEW_API, {
+        const res = await axios.get(REVIEW_API, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

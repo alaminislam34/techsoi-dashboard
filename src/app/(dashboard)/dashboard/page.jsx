@@ -3,12 +3,11 @@
 import axios from "axios";
 import Stats from "../components/BodyContent/Stats";
 import Table from "../components/BodyContent/Table";
-import productsData from "@/app/FakeData/products.json";
 import Cookies from "js-cookie";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { GET_ORDERS_API } from "@/api/apiEndPoint";
+import { ORDER_API } from "@/api/apiEndPoint";
 
 const DashboardPage = () => {
   const [orders, setOrders] = useState([]);
@@ -17,7 +16,7 @@ const DashboardPage = () => {
     const token = Cookies.get("admin_token");
     const getOrders = async () => {
       try {
-        const res = await axios.get(GET_ORDERS_API, {
+        const res = await axios.get(ORDER_API, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -108,7 +107,7 @@ const DashboardPage = () => {
                 setOpenDropdownId(openDropdownId === index ? null : index)
               }
               className={`flex items-center justify-between w-32 px-3 py-2 border rounded-md text-xs font-medium transition-all ${getStatusStyles(
-                status
+                status,
               )}`}
             >
               {status}

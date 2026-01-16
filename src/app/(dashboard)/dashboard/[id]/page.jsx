@@ -5,9 +5,9 @@ import { ChevronDown, ArrowLeft, Package } from "lucide-react";
 import axios from "axios";
 import {
   GET_SINGLE_ORDER_API,
-  GET_CATEGORY_API,
-  GET_SUB_CATEGORY_API,
-  GET_BRAND_API,
+  CATEGORY_API,
+  SUB_CATEGORY_API,
+  BRAND_API,
 } from "@/api/apiEndPoint";
 import Cookies from "js-cookie";
 
@@ -34,9 +34,9 @@ const ProductsDetails = () => {
 
         const [orderRes, catRes, subRes, brandRes] = await Promise.all([
           axios.get(`${GET_SINGLE_ORDER_API}/${orderId}`, { headers }),
-          axios.get(GET_CATEGORY_API, { headers }),
-          axios.get(GET_SUB_CATEGORY_API, { headers }),
-          axios.get(GET_BRAND_API, { headers }),
+          axios.get(CATEGORY_API, { headers }),
+          axios.get(SUB_CATEGORY_API, { headers }),
+          axios.get(BRAND_API, { headers }),
         ]);
 
         if (orderRes.status === 200) {

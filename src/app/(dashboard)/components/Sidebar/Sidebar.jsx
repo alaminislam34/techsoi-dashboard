@@ -1,6 +1,6 @@
 "use client";
 
-import { LOGOUT_API } from "@/api/apiEndPoint";
+import { ADMIN_LOGOUT_API } from "@/api/apiEndPoint";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
@@ -59,7 +59,7 @@ const Sidebar = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = user.token;
     console.log("Token:", token);
-    const res = await axios.get(LOGOUT_API, {
+    const res = await axios.get(ADMIN_LOGOUT_API, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import Link from "next/link";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { PRODUCT_API } from "@/api/apiEndPoint";
 
 const ProductsManage = () => {
   const [data, setData] = useState([]);
@@ -20,7 +21,7 @@ const ProductsManage = () => {
     setErrorMsg("");
 
     try {
-      const res = await axios.get("https://api.techsoibd.com/api/product");
+      const res = await axios.get(PRODUCT_API);
 
       if (res.data?.status !== true || !Array.isArray(res.data.data)) {
         setErrorMsg("Invalid server response");
@@ -61,7 +62,7 @@ const ProductsManage = () => {
           toast("You do not have permission to view products.", { icon: "⚠️" });
         } else {
           setErrorMsg(
-            error.response?.data?.message || "Failed to load products."
+            error.response?.data?.message || "Failed to load products.",
           );
           toast(error.response?.data?.message || "Failed to load products.", {
             icon: "⚠️",
@@ -247,7 +248,6 @@ const ProductsManage = () => {
         </div>
       </div>
       <Table data={data} columns={productColumns} itemsPerPage={10} />
-      <Toaster />
     </div>
   );
 };

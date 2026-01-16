@@ -5,7 +5,7 @@ import { Eye, Trash2, Search, ChevronDown, Loader2 } from "lucide-react";
 import Table from "../../components/BodyContent/Table";
 import Link from "next/link";
 import axios from "axios";
-import { GET_BLOGS_API } from "@/api/apiEndPoint";
+import { BLOG_API } from "@/api/apiEndPoint";
 import toast from "react-hot-toast";
 
 const BlogManage = () => {
@@ -17,7 +17,7 @@ const BlogManage = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get(GET_BLOGS_API);
+        const res = await axios.get(BLOG_API);
         // Based on your JSON, it likely returns { data: [...] }
         setData(res.data.data || res.data);
       } catch (error) {
@@ -49,7 +49,7 @@ const BlogManage = () => {
       sortedData.sort((a, b) => b.status - a.status);
     } else if (type === "newest") {
       sortedData.sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        (a, b) => new Date(b.created_at) - new Date(a.created_at),
       );
     }
 
@@ -58,7 +58,7 @@ const BlogManage = () => {
 
   // --- Filtered Data (Search by Title) ---
   const filteredData = data.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    item.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const columns = [

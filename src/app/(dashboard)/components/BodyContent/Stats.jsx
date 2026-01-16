@@ -72,7 +72,7 @@ const Stats = () => {
           toast.error("Request timeout. Check your internet.");
         } else {
           toast.error(
-            error.response?.data?.message || "Failed to load order data."
+            error.response?.data?.message || "Failed to load order data.",
           );
         }
       } else {

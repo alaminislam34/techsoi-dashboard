@@ -6,9 +6,9 @@ import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {
-  GET_CATEGORY_API,
-  GET_SUB_CATEGORY_API,
-  GET_BRAND_API,
+  CATEGORY_API,
+  SUB_CATEGORY_API,
+  BRAND_API,
 } from "@/api/apiEndPoint";
 
 const ManageProduct = () => {
@@ -47,9 +47,9 @@ const ManageProduct = () => {
     const fetchData = async () => {
       try {
         const [cat, sub, br, productRes] = await Promise.all([
-          axios.get(GET_CATEGORY_API),
-          axios.get(GET_SUB_CATEGORY_API),
-          axios.get(GET_BRAND_API),
+          axios.get(CATEGORY_API),
+          axios.get(SUB_CATEGORY_API),
+          axios.get(BRAND_API),
           axios.get(`https://api.techsoibd.com/api/product/${productId}`),
         ]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { LOGIN_API } from "@/api/apiEndPoint";
+import { ADMIN_LOGIN_API } from "@/api/apiEndPoint";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ const LoginPage = () => {
     }
 
     try {
-      const res = await axios.post(LOGIN_API, {
+      const res = await axios.post(ADMIN_LOGIN_API, {
         email,
         password,
       });
@@ -38,7 +38,7 @@ const LoginPage = () => {
           JSON.stringify({
             email: email,
             token: res.data.token,
-          })
+          }),
         );
         setTimeout(() => {
           router.push("/dashboard");
