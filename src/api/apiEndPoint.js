@@ -12,5 +12,6 @@ export const GET_CATEGORY_API = `${BASE_URL}/category`;
 export const GET_SUB_CATEGORY_API = `${BASE_URL}/sub-category`;
 export const GET_BRAND_API = `${BASE_URL}/brand`;
 export const GET_ORDERS_API = `${BASE_URL}/order`;
+export const GET_SINGLE_ORDER_API = `${BASE_URL}/order`;
 export const GET_REVIEW_API = `${BASE_URL}/review-product`;
 export const GET_BLOGS_API = `${BASE_URL}/blog`;

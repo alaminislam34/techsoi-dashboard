@@ -164,7 +164,7 @@ const DashboardPage = () => {
   ];
 
   return (
-    <div className="w-full max-w-full overflow-hidden">
+    <div className="w-full max-w-full">
       <div className="flex flex-col gap-4">
         <section className="w-full">
           <Stats />
