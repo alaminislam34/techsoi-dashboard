@@ -1,11 +1,11 @@
 "use client";
 
+import apiService from "@/api/api";
 import { ADMIN_LOGIN_API } from "@/api/apiEndPoint";
-import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -16,38 +16,35 @@ const LoginPage = () => {
     e.preventDefault();
 
     if (!email || !password) {
-      return toast.error("Email or password is required!");
+      return toast.error("Email and password are required!");
     }
 
     try {
-      const res = await axios.post(ADMIN_LOGIN_API, {
+      const res = await apiService.post(ADMIN_LOGIN_API, {
         email,
         password,
       });
-
       if (res.data.status === true) {
-        toast.success(res.data.message || "Logged in successful");
+        toast.success(res.data.message || "Logged in successfully");
         Cookies.set("admin_token", res.data.token, {
           expires: 7,
           path: "/",
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
         });
+
         localStorage.setItem(
           "user",
           JSON.stringify({
             email: email,
-            token: res.data.token,
           }),
         );
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1000);
+        router.push("/dashboard");
       } else {
         toast.error(res.data.message || "Login failed!");
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Something went wrong";
+      const errorMsg = error.message || "Something went wrong";
       toast.error(errorMsg);
     }
   };
@@ -60,7 +57,6 @@ const LoginPage = () => {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Email Address
@@ -75,7 +71,6 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Password Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Password
@@ -90,7 +85,6 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Forgot Password Link */}
           <div className="flex items-center justify-end">
             <button
               type="button"
@@ -101,7 +95,6 @@ const LoginPage = () => {
             </button>
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -110,7 +103,6 @@ const LoginPage = () => {
           </button>
         </form>
       </div>
-      {/* <Toaster position="top-center" /> */}
     </div>
   );
 };

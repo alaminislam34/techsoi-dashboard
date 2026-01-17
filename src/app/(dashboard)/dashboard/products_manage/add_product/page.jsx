@@ -122,12 +122,10 @@ const AddProduct = () => {
           Accept: "application/json",
         },
       });
-console.log(response)
+      console.log(response);
       if (response.status === 200) {
-        // --- SUCCESS: RESET ALL FIELDS ---
         toast.success("Product Created!");
 
-        // ১. ফর্মের ইনপুট ফিল্ড খালি করা
         setFormData({
           name: "",
           regular_price: "",
@@ -141,10 +139,8 @@ console.log(response)
           full_description: "",
         });
 
-        // ২. স্পেসিফিকেশন খালি করা (ডিফল্ট ১টি রো রাখা)
         setSpecs([{ name: "", value: "" }]);
 
-        // ৩. ইমেজ অ্যারে খালি করা
         setImages([]);
       } else {
         console.log("somossa ase");
