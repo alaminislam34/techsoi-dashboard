@@ -110,7 +110,7 @@ const LoginPage = () => {
           </button>
         </form>
       </div>
-      <Toaster position="top-center" />
+      {/* <Toaster position="top-center" /> */}
     </div>
   );
 };

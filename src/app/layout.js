@@ -1,4 +1,5 @@
 import "./globals.css";
+import { StateProvider } from "./providers/StateProvider";
 
 export const metadata = {
   title: "Techsoi BD",
@@ -8,7 +9,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <StateProvider>{children}</StateProvider>
+      </body>
     </html>
   );
 }

@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }) {
             {children}
           </div>
         </section>
-        <Toaster position="top-center" />
+        {/* <Toaster position="top-center" /> */}
       </StateProvider>
     </main>
   );

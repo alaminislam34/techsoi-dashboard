@@ -6,11 +6,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import StatsSkeleton from "@/app/components/skeletons/StatsSkeleton";
-import { useRouter } from "next/navigation";
 
 const Stats = () => {
-  const router = useRouter();
-
   const [loading, setLoading] = useState(true);
   const [statsData, setStatsData] = useState({
     total: 0,
@@ -23,12 +20,11 @@ const Stats = () => {
     setLoading(true);
 
     try {
-      // ✅ 1. Token check
+      // ✅ 1. Token check (Redirect সরানো হয়েছে)
       const token = Cookies.get("admin_token");
 
       if (!token) {
-        toast.error("Session expired. Please login again.");
-        router.push("/login");
+        setLoading(false);
         return;
       }
 
@@ -37,7 +33,7 @@ const Stats = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        timeout: 10000, // 10s timeout safety
+        timeout: 10000,
       });
 
       // ✅ 3. Response validation
@@ -56,14 +52,13 @@ const Stats = () => {
     } catch (error) {
       console.error("Order fetch error:", error);
 
-      // ✅ 4. Axios error handling
+      // ✅ 4. Axios error handling (Redirect সরানো হয়েছে)
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
 
         if (status === 401) {
           toast.error("Unauthorized. Please login again.");
-          Cookies.remove("admin_token");
-          router.push("/login");
+          // এখানে কোনো রিডাইরেক্ট বা কুকি রিমুভ করা হচ্ছে না
         } else if (status === 403) {
           toast.error("You do not have permission to view orders.");
         } else if (status >= 500) {
