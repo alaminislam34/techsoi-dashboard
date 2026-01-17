@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ChevronDown, ArrowLeft, Package } from "lucide-react";
 import axios from "axios";
 import {
-  GET_SINGLE_ORDER_API,
+  SINGLE_ORDER_API,
   CATEGORY_API,
   SUB_CATEGORY_API,
   BRAND_API,
@@ -33,7 +33,7 @@ const ProductsDetails = () => {
         const headers = { Authorization: `Bearer ${token}` };
 
         const [orderRes, catRes, subRes, brandRes] = await Promise.all([
-          axios.get(`${GET_SINGLE_ORDER_API}/${orderId}`, { headers }),
+          axios.get(`${SINGLE_ORDER_API}/${orderId}`, { headers }),
           axios.get(CATEGORY_API, { headers }),
           axios.get(SUB_CATEGORY_API, { headers }),
           axios.get(BRAND_API, { headers }),
