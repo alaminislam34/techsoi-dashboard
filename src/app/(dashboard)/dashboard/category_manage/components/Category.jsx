@@ -1,44 +1,58 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, RefreshCw, Layers, Tag, Package } from "lucide-react";
 import { BRAND_API, CATEGORY_API, SUB_CATEGORY_API } from "@/api/apiEndPoint";
 import Image from "next/image";
 import apiService from "@/api/api";
 
 const Category = () => {
-  const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
   const DEFAULT_IMAGE = "/images/hp.png";
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const [catRes, subRes, brandRes] = await Promise.all([
-        apiService.get(CATEGORY_API),
-        apiService.get(SUB_CATEGORY_API),
-        apiService.get(BRAND_API),
-      ]);
+  // --- 1. Fetching Data with useQuery ---
+  // আমরা ৩টি আলাদা কুয়েরি চালাচ্ছি যাতে একটি ফেইল করলেও বাকিগুলো লোড হতে পারে
+  const {
+    data: categories = [],
+    isLoading: loadingCat,
+    isError: catError,
+    refetch: refetchCat,
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await apiService.get(CATEGORY_API);
+      return res.data?.data || res.data || [];
+    },
+  });
 
-      setCategories(catRes.data?.data || catRes.data || []);
-      setSubCategories(subRes.data?.data || subRes.data || []);
-      setBrands(brandRes.data?.data || brandRes.data || []);
-    } catch (err) {
-      setError("Unable to load category data. Please check your connection.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const {
+    data: subCategories = [],
+    isLoading: loadingSub,
+    isError: subError,
+  } = useQuery({
+    queryKey: ["subCategories"],
+    queryFn: async () => {
+      const res = await apiService.get(SUB_CATEGORY_API);
+      return res.data?.data || res.data || [];
+    },
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const {
+    data: brands = [],
+    isLoading: loadingBrand,
+    isError: brandError,
+  } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const res = await apiService.get(BRAND_API);
+      return res.data?.data || res.data || [];
+    },
+  });
 
+  const loading = loadingCat || loadingSub || loadingBrand;
+  const isError = catError || subError || brandError;
+
+  // --- UI Components ---
   const SkeletonRow = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4 animate-pulse border-b">
       <div className="h-10 bg-gray-200 rounded w-full"></div>
@@ -47,14 +61,21 @@ const Category = () => {
     </div>
   );
 
-  if (error) {
+  const handleRetry = () => {
+    refetchCat();
+    // সবগুলো রি-ফেচ করার জন্য queryClient.invalidateQueries(["categories", "subCategories", "brands"]) ব্যবহার করা যায়
+  };
+
+  if (isError) {
     return (
       <div className="w-full flex flex-col items-center justify-center min-h-100 p-6 text-center">
         <AlertCircle size={40} className="text-red-500 mb-4" />
-        <p className="text-gray-600 mb-4">{error}</p>
+        <p className="text-gray-600 mb-4">
+          Unable to load category data. Please check your connection.
+        </p>
         <button
-          onClick={fetchData}
-          className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-lg"
+          onClick={handleRetry}
+          className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-lg transition-transform active:scale-95"
         >
           <RefreshCw size={16} /> Try Again
         </button>
@@ -64,6 +85,7 @@ const Category = () => {
 
   return (
     <div className="w-full p-4 md:p-8 bg-white min-h-screen">
+      {/* Table Header */}
       <div className="hidden md:grid grid-cols-3 pb-6 border-b border-gray-100 text-dark font-bold text-base uppercase tracking-wider">
         <div>Main Category</div>
         <div>Sub Category</div>
@@ -83,6 +105,7 @@ const Category = () => {
                   key={category.id}
                   className="grid grid-cols-1 md:grid-cols-3 py-4 gap-6 md:gap-4 items-start transition-all"
                 >
+                  {/* Category Info */}
                   <div className="flex items-center gap-4">
                     <Image
                       src={category.image || DEFAULT_IMAGE}
@@ -102,6 +125,7 @@ const Category = () => {
                     </div>
                   </div>
 
+                  {/* Sub Categories List */}
                   <div>
                     <span className="md:hidden flex items-center gap-2 text-xs font-bold text-primary uppercase mb-2">
                       <Layers size={14} /> Sub Categories
@@ -125,6 +149,7 @@ const Category = () => {
                     )}
                   </div>
 
+                  {/* Brands List */}
                   <div>
                     <span className="md:hidden flex items-center gap-2 text-xs font-bold text-primary uppercase mb-2">
                       <Tag size={14} /> Brands
