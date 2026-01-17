@@ -1,44 +1,99 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { Upload, Pencil, Trash2 } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Upload, Pencil, Trash2, Loader2 } from "lucide-react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { BANNER_API } from "@/api/apiEndPoint";
+import Swal from "sweetalert2";
 
 const BannerManage = () => {
   const [previewImage, setPreviewImage] = useState("/images/Hero Banner.png");
-  // New state to control visibility of the preview section
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [banners, setBanners] = useState([]);
   const fileInputRef = useRef(null);
 
-  const uploadedBanners = [
-    { id: 1, name: "Hero section banner 1", size: "1.3 mb" },
-    { id: 2, name: "Hero section banner 2", size: "2.3 mb" },
-    { id: 3, name: "Hero section banner 3", size: "1.7 mb" },
-  ];
+  const fetchBanners = async () => {
+    try {
+      const response = await axios.get(BANNER_API);
+      setBanners(response.data?.data || []);
+    } catch (error) {
+      console.error("Fetch Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBanners();
+  }, []);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setSelectedFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPreviewImage(imageUrl);
-      setShowPreview(true); // Show the preview when a file is picked
+      setShowPreview(true);
     }
   };
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
   };
+  const handleSaveChanges = async () => {
+    if (!selectedFile) return toast.error("Please select an image first");
 
-  const handleSaveChanges = () => {
-    // Logic for saving (API calls, etc.) would go here
-    console.log("Image saved!");
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("image", selectedFile);
 
-    setShowPreview(false); // Hide the preview section after saving
-    setPreviewImage("/images/Hero Banner.png"); // Optional: Reset to default
+    try {
+      const response = await axios.post(BANNER_API, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Banner uploaded successfully!");
+        setShowPreview(false);
+        setSelectedFile(null);
+        fetchBanners();
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      toast.error(err.response?.data?.message || "Failed to upload banner");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This banner will be permanently deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Delete!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await axios.delete(`${BANNER_API}/${id}`);
+      toast.success("Banner deleted successfully");
+      fetchBanners();
+    } catch (err) {
+      toast.error("Delete failed");
+    }
   };
 
   return (
     <div className="w-full space-y-8">
-      {/* --- Upload Section --- */}
       <div className="space-y-4">
         <h2 className="text-sm font-medium text-gray-500">Upload Image</h2>
         <div className="flex flex-col md:flex-row gap-4">
@@ -55,18 +110,23 @@ const BannerManage = () => {
             className="flex-1 p-3 bg-white border border-primary/50 rounded-lg flex items-center gap-2 text-gray-400 cursor-pointer hover:bg-gray-50 transition-colors"
           >
             <Upload size={18} className="text-primary" />
-            <span>Choose a file</span>
+            <span>{selectedFile ? selectedFile.name : "Choose a file"}</span>
           </div>
 
           <button
-            onClick={handleUploadClick}
-            className="bg-primary hover:opacity-90 text-white px-10 py-2.5 rounded-lg font-medium transition-all shrink-0"
+            onClick={handleSaveChanges}
+            disabled={loading || !showPreview}
+            className="bg-primary hover:opacity-90 disabled:bg-gray-400 text-white px-10 py-2.5 rounded-lg font-medium transition-all shrink-0 flex items-center gap-2"
           >
-            Upload
+            {loading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : (
+              "Upload"
+            )}
           </button>
         </div>
         <p className="text-xs text-gray-400">
-          Choosen file must be dimension 1520 X 620 pixel.
+          Chosen file must be dimension 1520 X 620 pixel.
         </p>
       </div>
 
@@ -79,18 +139,26 @@ const BannerManage = () => {
               src={previewImage}
               alt="Banner Preview"
               className="w-full h-auto object-cover max-h-140 transition-opacity duration-300"
-              onError={(e) => {
-                e.target.src = "/images/Hero Banner.png";
-              }}
             />
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => {
+                setShowPreview(false);
+                setSelectedFile(null);
+              }}
+              className="px-6 py-2.5 text-gray-500 font-medium"
+            >
+              Cancel
+            </button>
             <button
               onClick={handleSaveChanges}
-              className="bg-primary hover:bg-dark text-white px-8 py-2.5 rounded-lg font-medium transition-all shadow-md active:scale-95"
+              disabled={loading}
+              className="bg-primary hover:bg-dark text-white px-8 py-2.5 rounded-lg font-medium transition-all shadow-md active:scale-95 flex items-center gap-2"
             >
-              Save Changes
+              {loading && <Loader2 className="animate-spin" size={18} />}
+              Confirm & Save
             </button>
           </div>
         </div>
@@ -107,28 +175,43 @@ const BannerManage = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {uploadedBanners.map((banner) => (
-              <tr
-                key={banner.id}
-                className="hover:bg-gray-50 transition-colors"
-              >
-                <td className="p-4 flex items-center gap-3">
-                  <div className="w-10 h-7 bg-gray-200 rounded shrink-0"></div>
-                  <span className="text-dark font-normal">{banner.name}</span>
-                </td>
-                <td className="p-4 text-gray-500">{banner.size}</td>
-                <td className="p-4">
-                  <div className="flex items-center justify-center gap-4">
-                    <button className="text-dark hover:text-primary transition-colors">
-                      <Pencil size={18} />
-                    </button>
-                    <button className="text-primary_red hover:scale-110 transition-transform">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+            {banners.length > 0 ? (
+              banners.map((banner) => (
+                <tr
+                  key={banner.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  <td className="p-4 flex items-center gap-3">
+                    {/* ইমেজ প্রিভিউ ফ্রম এপিআই */}
+                    <img
+                      src={banner.image_url || banner.image}
+                      className="w-12 h-8 bg-gray-200 rounded object-cover shrink-0"
+                      alt="banner"
+                    />
+                    <span className="text-dark font-normal">
+                      {banner.name || `Banner ${banner.id}`}
+                    </span>
+                  </td>
+                  <td className="p-4 text-gray-500">{banner.size || "N/A"}</td>
+                  <td className="p-4">
+                    <div className="flex items-center justify-center gap-4">
+                      <button
+                        onClick={() => handleDelete(banner.id)}
+                        className="text-primary_red hover:scale-110 transition-transform"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" className="p-10 text-center text-gray-400">
+                  No banners found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

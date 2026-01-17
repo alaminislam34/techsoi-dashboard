@@ -5,11 +5,7 @@ import { useParams } from "next/navigation";
 import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import {
-  CATEGORY_API,
-  SUB_CATEGORY_API,
-  BRAND_API,
-} from "@/api/apiEndPoint";
+import { CATEGORY_API, SUB_CATEGORY_API, BRAND_API, PRODUCT_API } from "@/api/apiEndPoint";
 
 const ManageProduct = () => {
   const params = useParams();
@@ -32,14 +28,10 @@ const ManageProduct = () => {
     regular_price: "",
     discount: "10%",
     emi: "1200",
-    display_amount: "250",
+    display_amount: "",
   });
 
-  const [specs, setSpecs] = useState([
-    { key: "Height", value: "5.5 ft" },
-    { key: "", value: "" },
-  ]);
-
+  const [specs, setSpecs] = useState([{ key: "", value: "" }]);
   const [images, setImages] = useState([]);
 
   // Fetch all data and pre-fill form
@@ -50,7 +42,7 @@ const ManageProduct = () => {
           axios.get(CATEGORY_API),
           axios.get(SUB_CATEGORY_API),
           axios.get(BRAND_API),
-          axios.get(`https://api.techsoibd.com/api/product/${productId}`),
+          axios.get(`${PRODUCT_API}/${productId}`),
         ]);
 
         setCategories(cat.data?.data || []);
@@ -66,13 +58,31 @@ const ManageProduct = () => {
             stock: p.stock || "",
             name: p.name || "",
             short_description: p.short_description || "",
-            description: p.description || "",
+            description: p.full_description || p.description || "",
             regular_price: p.regular_price || "",
-            discount: p.discount || "10%",
-            emi: p.emi || "1200",
+            discount: p.discount || "0",
+            emi: p.emi_status || "0",
             display_amount: p.sale_price || "",
           });
-          if (p.specs) setSpecs(JSON.parse(p.specs));
+
+          // Specifications parsing logic
+          if (p.specifications) {
+            try {
+              const parsedSpecs =
+                typeof p.specifications === "string"
+                  ? JSON.parse(p.specifications)
+                  : p.specifications;
+
+              setSpecs(
+                parsedSpecs.map((s) => ({
+                  key: s.name || s.key,
+                  value: s.value,
+                })),
+              );
+            } catch (e) {
+              setSpecs([{ key: "", value: "" }]);
+            }
+          }
         }
       } catch (e) {
         console.error("Fetch error", e);
@@ -107,19 +117,61 @@ const ManageProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
+
     try {
       const data = new FormData();
-      Object.keys(formData).forEach((k) => data.append(k, formData[k]));
-      data.append("specs", JSON.stringify(specs));
-      images.forEach((img) => data.append("images[]", img));
 
-      await axios.post(
-        `https://api.techsoibd.com/api/product/${productId}`,
-        data
+      data.append("name", formData.name);
+      data.append("regular_price", formData.regular_price);
+      data.append("sale_price", formData.display_amount);
+      data.append("category_id", formData.category_id);
+      data.append("sub_category_id", formData.sub_category_id);
+      data.append("brand_id", formData.brand_id);
+      data.append("short_description", formData.short_description);
+      data.append("full_description", formData.description);
+      data.append("stock", formData.stock);
+      data.append("discount", formData.discount);
+      data.append("emi_status", formData.emi);
+
+      const formattedSpecs = specs
+        .filter((s) => s.key && s.value)
+        .map((s) => ({ name: s.key, value: s.value }));
+      data.append("specifications", JSON.stringify(formattedSpecs));
+
+      if (images.length > 0) {
+        data.append("main_image", images[0]);
+
+        const dummyExtraJson = images.slice(1).map((_, idx) => ({ id: idx }));
+        data.append("extra_images", JSON.stringify(dummyExtraJson));
+
+        images.slice(1).forEach((img) => {
+          data.append("extra_images_files[]", img);
+        });
+      }
+
+      // ৪. এপিআই কল
+      await axios.put(
+        `${PRODUCT_API}/${productId}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Accept: "application/json",
+          },
+        },
       );
-      toast.success("Product Updated!");
+
+      toast.success("Product Updated Successfully!");
+      setImages([]); 
     } catch (err) {
-      toast.error("Update failed");
+      console.error("Update failed", err);
+      if (err.response?.status === 422) {
+        const errors = err.response.data.errors;
+        const firstError = Object.values(errors)[0][0];
+        toast.error(firstError);
+      } else {
+        toast.error("Update failed. Please try again.");
+      }
     } finally {
       setUpdating(false);
     }
@@ -166,7 +218,7 @@ const ManageProduct = () => {
               <option value="">Select Sub Category</option>
               {subCategories
                 .filter(
-                  (s) => String(s.category_id) === String(formData.category_id)
+                  (s) => String(s.category_id) === String(formData.category_id),
                 )
                 .map((s) => (
                   <option key={s.id} value={s.id}>

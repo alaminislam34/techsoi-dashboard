@@ -36,6 +36,12 @@ export const BRAND_API = `${BASE_URL}/brand`; // Get all / Post
 export const BRAND_SINGLE_API = (id) => `${BASE_URL}/brand/${id}`; // Get/Put/Delete
 export const BRAND_LIMIT_API = (limit) => `${BASE_URL}/brand-limit/${limit}`;
 
+export const SPECIAL_BRAND_API = `${BASE_URL}/special-brand`; // Get all / Post
+export const SPECIAL_BRAND_SINGLE_API = (id) =>
+  `${BASE_URL}/special-brand/${id}`; // Get/Put/Delete
+export const SPECIAL_BRAND_LIMIT_API = (limit) =>
+  `${BASE_URL}/special-brand-limit/${limit}`;
+
 // --- Banner / Hero Image Management ---
 export const BANNER_API = `${BASE_URL}/hero-image`; // Get all / Post
 export const BANNER_SINGLE_API = (id) => `${BASE_URL}/hero-image/${id}`; // Delete
