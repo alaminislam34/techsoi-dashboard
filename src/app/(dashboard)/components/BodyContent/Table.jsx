@@ -6,10 +6,7 @@ const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
-  // ✅ Always normalize data to array
   const safeData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
-
-  // --- Pagination Logic ---
   const totalPages = Math.max(1, Math.ceil(safeData.length / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -65,13 +62,11 @@ const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
                       className={`p-4 text-sm ${col.cellClassName || ""}`}
                     >
                       {col.render
-                        ? // ✅ SAFE render
-                          col.render(item ?? {}, rowIndex, {
+                        ? col.render(item ?? {}, rowIndex, {
                             openDropdownId,
                             setOpenDropdownId,
                           })
-                        : // ✅ SAFE key access
-                          item?.[col.key] ?? "-"}
+                        : (item?.[col.key] ?? "-")}
                     </td>
                   ))}
                 </tr>
@@ -81,7 +76,6 @@ const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
         </table>
       </div>
 
-      {/* Pagination (unchanged design) */}
       <div className="flex flex-wrap justify-center md:justify-end mt-6 gap-2 pb-4">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}

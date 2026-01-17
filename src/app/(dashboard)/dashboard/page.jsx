@@ -1,27 +1,21 @@
 "use client";
 
-import axios from "axios";
 import Stats from "../components/BodyContent/Stats";
 import Table from "../components/BodyContent/Table";
-import Cookies from "js-cookie";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import apiService from "@/api/api";
 import { ORDER_API } from "@/api/apiEndPoint";
 
 const DashboardPage = () => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const token = Cookies.get("admin_token");
     const getOrders = async () => {
       try {
-        const res = await axios.get(ORDER_API, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.status === 200) {
+        const res = await apiService.get(ORDER_API);
+        if (res.status === true) {
           setOrders(res.data.data);
         } else {
           console.log("No orders data available");

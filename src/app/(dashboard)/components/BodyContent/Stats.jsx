@@ -3,9 +3,9 @@
 import { ORDER_API } from "@/api/apiEndPoint";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import StatsSkeleton from "@/app/components/skeletons/StatsSkeleton";
+import apiService from "@/api/api";
 
 const Stats = () => {
   const [loading, setLoading] = useState(true);
@@ -20,23 +20,8 @@ const Stats = () => {
     setLoading(true);
 
     try {
-      // ✅ 1. Token check (Redirect সরানো হয়েছে)
-      const token = Cookies.get("admin_token");
+      const res = await apiService.get(ORDER_API);
 
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      // ✅ 2. API call
-      const res = await axios.get(ORDER_API, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        timeout: 10000,
-      });
-
-      // ✅ 3. Response validation
       if (res.data?.status !== true || !Array.isArray(res.data.data)) {
         throw new Error("Invalid server response");
       }
@@ -52,13 +37,11 @@ const Stats = () => {
     } catch (error) {
       console.error("Order fetch error:", error);
 
-      // ✅ 4. Axios error handling (Redirect সরানো হয়েছে)
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
 
         if (status === 401) {
           toast.error("Unauthorized. Please login again.");
-          // এখানে কোনো রিডাইরেক্ট বা কুকি রিমুভ করা হচ্ছে না
         } else if (status === 403) {
           toast.error("You do not have permission to view orders.");
         } else if (status >= 500) {
