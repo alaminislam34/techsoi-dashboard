@@ -10,6 +10,7 @@ import {
   SUB_CATEGORY_API,
   BRAND_API,
 } from "@/api/apiEndPoint";
+import apiService from "@/api/api";
 
 const UpdateCategoryForm = () => {
   const [categories, setCategories] = useState([]);
@@ -37,7 +38,7 @@ const UpdateCategoryForm = () => {
   const fetchCategories = async () => {
     setLoadingData(true);
     try {
-      const res = await axios.get(CATEGORY_API);
+      const res = await apiService.get(CATEGORY_API);
       setCategories(res.data.data || []);
     } catch (error) {
       console.error(error);
@@ -51,8 +52,6 @@ const UpdateCategoryForm = () => {
     fetchCategories();
   }, []);
 
-  // --- Handlers ---
-
   const handleCreateCategory = async () => {
     if (!categoryName.trim() || !categoryFile) {
       return toast.error("Missing fields for Category");
@@ -64,7 +63,7 @@ const UpdateCategoryForm = () => {
       formData.append("name", categoryName);
       formData.append("image", categoryFile);
 
-      await axios.post(CATEGORY_API, formData, {
+      await apiService.post(CATEGORY_API, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -91,7 +90,7 @@ const UpdateCategoryForm = () => {
       formData.append("name", subCategoryName);
       formData.append("image", subCategoryFile);
 
-      await axios.post(SUB_CATEGORY_API, formData, {
+      await apiService.post(SUB_CATEGORY_API, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -119,7 +118,7 @@ const UpdateCategoryForm = () => {
       formData.append("image", brandFile);
       formData.append("special", "1");
 
-      await axios.post(BRAND_API, formData, {
+      await apiService.post(BRAND_API, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -134,8 +133,7 @@ const UpdateCategoryForm = () => {
   };
 
   return (
-    <div className="bg-white space-y-10 p-2 md:p-4">
-      {/* Main Category Section */}
+    <div className="bg-white space-y-6 p-2 md:p-4">
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Main Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
@@ -193,9 +191,6 @@ const UpdateCategoryForm = () => {
         </div>
       </section>
 
-      <hr className="border-gray-100" />
-
-      {/* Subcategory Section */}
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Sub Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
@@ -272,9 +267,6 @@ const UpdateCategoryForm = () => {
         </div>
       </section>
 
-      <hr className="border-gray-100" />
-
-      {/* Brand Section */}
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Brands</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">

@@ -2,14 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronDown, ArrowLeft, Package } from "lucide-react";
-import axios from "axios";
 import {
   SINGLE_ORDER_API,
   CATEGORY_API,
   SUB_CATEGORY_API,
   BRAND_API,
 } from "@/api/apiEndPoint";
-import Cookies from "js-cookie";
+import apiService from "@/api/api";
 
 const ProductsDetails = () => {
   const [order, setOrder] = useState(null);
@@ -27,16 +26,11 @@ const ProductsDetails = () => {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        const token = Cookies.get("admin_token");
-        if (!token) return;
-
-        const headers = { Authorization: `Bearer ${token}` };
-
         const [orderRes, catRes, subRes, brandRes] = await Promise.all([
-          axios.get(`${SINGLE_ORDER_API}/${orderId}`, { headers }),
-          axios.get(CATEGORY_API, { headers }),
-          axios.get(SUB_CATEGORY_API, { headers }),
-          axios.get(BRAND_API, { headers }),
+          apiService.get(`${SINGLE_ORDER_API}/${orderId}`),
+          apiService.get(CATEGORY_API),
+          apiService.get(SUB_CATEGORY_API),
+          apiService.get(BRAND_API),
         ]);
 
         if (orderRes.status === 200) {
@@ -146,7 +140,7 @@ const ProductsDetails = () => {
                 <button
                   onClick={() => setIsOpen(!isOpen)}
                   className={`flex items-center justify-between w-full md:w-40 gap-2 border px-4 py-1.5 rounded-lg text-sm font-medium ${getStatusStyles(
-                    statusId
+                    statusId,
                   )}`}
                 >
                   {statusOptions[statusId]}{" "}

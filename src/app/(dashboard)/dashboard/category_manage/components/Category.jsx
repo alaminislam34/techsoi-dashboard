@@ -1,14 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import { AlertCircle, RefreshCw, Layers, Tag, Package } from "lucide-react";
-import {
-  BRAND_API,
-  CATEGORY_API,
-  SUB_CATEGORY_API,
-} from "@/api/apiEndPoint";
+import { BRAND_API, CATEGORY_API, SUB_CATEGORY_API } from "@/api/apiEndPoint";
 import Image from "next/image";
+import apiService from "@/api/api";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -24,9 +20,9 @@ const Category = () => {
       setLoading(true);
       setError(null);
       const [catRes, subRes, brandRes] = await Promise.all([
-        axios.get(CATEGORY_API),
-        axios.get(SUB_CATEGORY_API),
-        axios.get(BRAND_API),
+        apiService.get(CATEGORY_API),
+        apiService.get(SUB_CATEGORY_API),
+        apiService.get(BRAND_API),
       ]);
 
       setCategories(catRes.data?.data || catRes.data || []);
@@ -68,20 +64,18 @@ const Category = () => {
 
   return (
     <div className="w-full p-4 md:p-8 bg-white min-h-screen">
-      {/* Table Header - Hidden on Mobile */}
       <div className="hidden md:grid grid-cols-3 pb-6 border-b border-gray-100 text-dark font-bold text-base uppercase tracking-wider">
         <div>Main Category</div>
         <div>Sub Category</div>
         <div>Brands</div>
       </div>
 
-      {/* Table Body */}
       <div className="divide-y divide-gray-100">
         {loading
           ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
           : categories.map((category) => {
               const filteredSubs = subCategories.filter(
-                (sub) => Number(sub.category_id) === Number(category.id)
+                (sub) => Number(sub.category_id) === Number(category.id),
               );
 
               return (
@@ -89,7 +83,6 @@ const Category = () => {
                   key={category.id}
                   className="grid grid-cols-1 md:grid-cols-3 py-4 gap-6 md:gap-4 items-start transition-all"
                 >
-                  {/* Main Category Column */}
                   <div className="flex items-center gap-4">
                     <Image
                       src={category.image || DEFAULT_IMAGE}
@@ -109,7 +102,6 @@ const Category = () => {
                     </div>
                   </div>
 
-                  {/* Sub Category Column */}
                   <div>
                     <span className="md:hidden flex items-center gap-2 text-xs font-bold text-primary uppercase mb-2">
                       <Layers size={14} /> Sub Categories
@@ -133,7 +125,6 @@ const Category = () => {
                     )}
                   </div>
 
-                  {/* Brands Column */}
                   <div>
                     <span className="md:hidden flex items-center gap-2 text-xs font-bold text-primary uppercase mb-2">
                       <Tag size={14} /> Brands
