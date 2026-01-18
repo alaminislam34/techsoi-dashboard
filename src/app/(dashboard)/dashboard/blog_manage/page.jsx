@@ -5,8 +5,10 @@ import { Eye, Trash2, Search, ChevronDown, Loader2 } from "lucide-react";
 import Table from "../../components/BodyContent/Table";
 import Link from "next/link";
 import axios from "axios";
-import { BLOG_API } from "@/api/apiEndPoint";
+import { BLOG_API, BLOG_SINGLE_API } from "@/api/apiEndPoint";
 import toast from "react-hot-toast";
+import apiService from "@/api/api";
+import Swal from "sweetalert2";
 
 const BlogManage = () => {
   const [data, setData] = useState([]);
@@ -17,8 +19,7 @@ const BlogManage = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get(BLOG_API);
-        // Based on your JSON, it likely returns { data: [...] }
+        const res = await apiService.get(BLOG_API);
         setData(res.data.data || res.data);
       } catch (error) {
         toast.error("Failed to fetch blogs");
@@ -29,16 +30,44 @@ const BlogManage = () => {
     fetchBlogs();
   }, []);
 
-  // --- Delete Logic (Updated to use item.id) ---
-  const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this blog?")) {
-      const filteredData = data.filter((item) => item.id !== id);
-      setData(filteredData);
-      toast.success("Blog removed from view");
-    }
+  const handleDelete = async (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Delete!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await apiService.delete(`${BLOG_SINGLE_API(id)}`);
+
+          if (res.data.status) {
+            Swal.fire({
+              title: "Deleted!",
+              text: "The blog has been deleted.",
+              icon: "success",
+              timer: 1500,
+              showConfirmButton: false,
+            });
+          }
+        } catch (error) {
+          console.error("Delete Error:", error);
+
+          Swal.fire({
+            title: "Error!",
+            text:
+              error.response?.data?.message ||
+              "Something went wrong while deleting.",
+            icon: "error",
+          });
+        }
+      }
+    });
   };
 
-  // --- Sorting Logic (Updated for Blog fields) ---
   const handleSort = (type) => {
     setSortConfig(type);
     let sortedData = [...data];
@@ -56,7 +85,6 @@ const BlogManage = () => {
     setData(sortedData);
   };
 
-  // --- Filtered Data (Search by Title) ---
   const filteredData = data.filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );

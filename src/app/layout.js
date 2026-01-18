@@ -1,4 +1,6 @@
 import "./globals.css";
+import { StateProvider } from "./providers/StateProvider";
+import TanstackqueryProvider from "./providers/TanstackqueryProvider";
 
 export const metadata = {
   title: "Techsoi BD",
@@ -8,7 +10,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <TanstackqueryProvider>
+          <StateProvider>{children}</StateProvider>
+        </TanstackqueryProvider>
+      </body>
     </html>
   );
 }

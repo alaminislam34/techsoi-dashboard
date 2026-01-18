@@ -5,6 +5,8 @@ import { Upload, Trash2, Loader2, X } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { SPECIAL_BRAND_API, SPECIAL_BRAND_SINGLE_API } from "@/api/apiEndPoint";
+import apiService from "@/api/api";
+import Swal from "sweetalert2";
 
 const AddBrands = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -15,10 +17,9 @@ const AddBrands = () => {
 
   const fileInputRef = useRef(null);
 
-  // ১. ব্র্যান্ড লিস্ট ফেচ করা
   const fetchBrands = async () => {
     try {
-      const response = await axios.get(SPECIAL_BRAND_API);
+      const response = await apiService.get(SPECIAL_BRAND_API);
       setBrands(response.data?.data || []);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -43,7 +44,6 @@ const AddBrands = () => {
     fileInputRef.current.click();
   };
 
-  // ২. ব্র্যান্ড অ্যাড অথবা আপডেট করার লজিক
   const handleSubmit = async () => {
     if (!selectedFile) return toast.error("Please select an image");
 
@@ -54,7 +54,11 @@ const AddBrands = () => {
     }
 
     try {
-      await axios.post(SPECIAL_BRAND_API, formData);
+      await apiService.post(SPECIAL_BRAND_API, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       toast.success("Brand added successfully!");
 
       fetchBrands();
@@ -62,24 +66,50 @@ const AddBrands = () => {
       toast.error(error.response?.data?.message || "Operation failed");
     } finally {
       setLoading(false);
+      setFileName("Choose a file");
+      setSelectedFile("");
     }
   };
 
-  // ৩. ডিলিট লজিক
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
-    try {
-      await axios.delete(SPECIAL_BRAND_SINGLE_API(id));
-      toast.success("Brand deleted");
-      fetchBrands();
-    } catch (error) {
-      toast.error("Delete failed");
-    }
+    Swal.fire({
+      title: "Are you sure?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await apiService.delete(SPECIAL_BRAND_SINGLE_API(id));
+
+          Swal.fire({
+            title: "Deleted!",
+            text: "The brand has been deleted.",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+          fetchBrands();
+        } catch (error) {
+          console.error("Delete error:", error);
+          Swal.fire({
+            title: "Error!",
+            text:
+              error.response?.data?.message ||
+              "Something went wrong while deleting.",
+            icon: "error",
+          });
+        }
+      }
+    });
   };
 
   return (
     <div className="w-full space-y-8">
-      {/* --- Upload Logo Section --- */}
       <div className="space-y-4">
         <h2 className="text-sm font-medium text-gray-500">Upload Logo</h2>
         <div className="flex flex-col md:flex-row gap-4">
@@ -121,7 +151,6 @@ const AddBrands = () => {
 
       <hr className="border-gray-100" />
 
-      {/* --- Added Brands Table --- */}
       <div className="overflow-hidden rounded-lg bg-white border border-gray-50">
         <table className="w-full text-left border-collapse">
           <thead>

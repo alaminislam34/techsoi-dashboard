@@ -3,14 +3,11 @@
 import { ORDER_API } from "@/api/apiEndPoint";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import StatsSkeleton from "@/app/components/skeletons/StatsSkeleton";
-import { useRouter } from "next/navigation";
+import apiService from "@/api/api";
 
 const Stats = () => {
-  const router = useRouter();
-
   const [loading, setLoading] = useState(true);
   const [statsData, setStatsData] = useState({
     total: 0,
@@ -23,24 +20,8 @@ const Stats = () => {
     setLoading(true);
 
     try {
-      // ✅ 1. Token check
-      const token = Cookies.get("admin_token");
+      const res = await apiService.get(ORDER_API);
 
-      if (!token) {
-        toast.error("Session expired. Please login again.");
-        router.push("/login");
-        return;
-      }
-
-      // ✅ 2. API call
-      const res = await axios.get(ORDER_API, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        timeout: 10000, // 10s timeout safety
-      });
-
-      // ✅ 3. Response validation
       if (res.data?.status !== true || !Array.isArray(res.data.data)) {
         throw new Error("Invalid server response");
       }
@@ -56,14 +37,11 @@ const Stats = () => {
     } catch (error) {
       console.error("Order fetch error:", error);
 
-      // ✅ 4. Axios error handling
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
 
         if (status === 401) {
           toast.error("Unauthorized. Please login again.");
-          Cookies.remove("admin_token");
-          router.push("/login");
         } else if (status === 403) {
           toast.error("You do not have permission to view orders.");
         } else if (status >= 500) {

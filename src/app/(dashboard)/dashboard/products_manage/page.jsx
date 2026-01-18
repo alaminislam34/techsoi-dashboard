@@ -1,85 +1,68 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Table from "@/app/(dashboard)/components/BodyContent/Table";
-import { Eye, Edit3, Trash2, EyeOff, Search, ChevronDown } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import {
+  Eye,
+  Edit3,
+  Trash2,
+  EyeOff,
+  Search,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
+import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import Link from "next/link";
-import axios from "axios";
-import Cookies from "js-cookie";
 import { PRODUCT_API } from "@/api/apiEndPoint";
+import apiService from "@/api/api";
 
 const ProductsManage = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
+  const queryClient = useQueryClient();
 
-  // --- Fetch products from API ---
-  const fetchProducts = async () => {
-    setLoading(true);
-    setErrorMsg("");
+  // --- 1. Fetch Products using useQuery ---
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const res = await apiService.get(PRODUCT_API);
 
-    try {
-      const res = await axios.get(PRODUCT_API);
-
-      if (res.data?.status !== true || !Array.isArray(res.data.data)) {
-        setErrorMsg("Invalid server response");
-        toast("Invalid server response", { icon: "⚠️" });
-        return;
+      // Data Formatting logic remains same
+      if (res.data?.status === true && Array.isArray(res.data.data)) {
+        return res.data.data.map((product) => ({
+          product: {
+            id: product.id,
+            name: product.name,
+            image_url: product.main_image,
+            category: product.category_id,
+            quantity: product.stock,
+            net_price: product.sale_price,
+          },
+          order_info: {
+            id: product.id,
+            discount: "10%",
+          },
+        }));
       }
+      return [];
+    },
+  });
 
-      const formattedData = res.data.data.map((product) => ({
-        product: {
-          id: product.id,
-          name: product.name,
-          image_url: product.main_image,
-          category: product.category_id,
-          quantity: product.stock,
-          net_price: product.sale_price,
-        },
-        order_info: {
-          id: product.id,
-          discount: "10%",
-        },
-      }));
-
-      if (formattedData.length === 0) {
-        toast("No products found", { icon: "ℹ️" });
-      }
-
-      setData(formattedData);
-    } catch (error) {
-      console.error("Fetch products error:", error);
-
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        if (status === 401) {
-          setErrorMsg("Unauthorized. Please login again.");
-          toast("Unauthorized. Please login again.", { icon: "⚠️" });
-        } else if (status === 403) {
-          setErrorMsg("You do not have permission to view products.");
-          toast("You do not have permission to view products.", { icon: "⚠️" });
-        } else {
-          setErrorMsg(
-            error.response?.data?.message || "Failed to load products.",
-          );
-          toast(error.response?.data?.message || "Failed to load products.", {
-            icon: "⚠️",
-          });
-        }
-      } else {
-        setErrorMsg("Something went wrong. Please try again.");
-        toast("Something went wrong. Please try again.", { icon: "⚠️" });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  // --- 2. Delete Mutation ---
+  const deleteMutation = useMutation({
+    mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["products"]);
+      toast.error("Product has been deleted.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete product");
+    },
+  });
 
   // --- Action Handlers ---
   const handleToggleVisibility = (id) => {
@@ -107,23 +90,12 @@ const ProductsManage = () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        const filteredData = data.filter((item) => item.order_info.id !== id);
-        setData(filteredData);
-        toast.error("Product has been deleted.", {
-          duration: 3000,
-          position: "top-center",
-        });
+        deleteMutation.mutate(id);
       }
     });
   };
 
-  const handleEdit = (productName) => {
-    toast(`Opening editor for: ${productName}`, {
-      icon: "📝",
-    });
-  };
-
-  // --- Table Columns ---
+  // --- Table Columns (Design same to same) ---
   const productColumns = [
     {
       header: "All Products",
@@ -196,7 +168,8 @@ const ProductsManage = () => {
 
           <button
             onClick={() => handleDelete(item.order_info.id)}
-            className="text-red-500 hover:opacity-70 transition-opacity"
+            disabled={deleteMutation.isPending}
+            className="text-red-500 hover:opacity-70 transition-opacity disabled:opacity-30"
           >
             <Trash2 size={18} />
           </button>
@@ -205,22 +178,33 @@ const ProductsManage = () => {
     },
   ];
 
-  if (loading) return <p className="text-center py-10">Loading products...</p>;
-  if (errorMsg)
-    return <p className="text-center py-10 text-red-500">{errorMsg}</p>;
+  if (isLoading)
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="animate-spin text-[#32afe2] mb-2" size={40} />
+        <p className="text-gray-500">Loading products...</p>
+      </div>
+    );
+
+  if (isError)
+    return (
+      <p className="text-center py-10 text-red-500 font-medium">
+        Failed to load products. Please try again.
+      </p>
+    );
 
   return (
     <div className="w-full">
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 py-4">
-        {/* --- Add New Product Button --- */}
+        {/* Add Button */}
         <Link
           href={"/dashboard/products_manage/add_product"}
-          className="w-full md:w-auto bg-[#32afe2] hover:bg-[#2a9ac9] text-white px-10 py-3.5 rounded-2xl font-medium text-lg transition-colors shadow-sm active:scale-95"
+          className="w-full md:w-auto bg-[#32afe2] hover:bg-[#2a9ac9] text-white px-10 py-3.5 rounded-2xl font-medium text-lg transition-colors shadow-sm active:scale-95 text-center"
         >
           Add New Product
         </Link>
 
-        {/* --- Search Bar --- */}
+        {/* Search Bar */}
         <div className="flex-1 w-full max-w-2xl relative">
           <input
             type="text"
@@ -233,7 +217,7 @@ const ProductsManage = () => {
           />
         </div>
 
-        {/* --- Sort By Dropdown --- */}
+        {/* Sort Dropdown */}
         <div className="w-full md:w-auto relative min-w-40">
           <select className="w-full appearance-none bg-white border border-[#32afe2]/40 rounded-2xl px-6 py-3.5 pr-12 text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#32afe2] cursor-pointer">
             <option>Sort By</option>
@@ -247,7 +231,8 @@ const ProductsManage = () => {
           />
         </div>
       </div>
-      <Table data={data} columns={productColumns} itemsPerPage={10} />
+
+      <Table data={products} columns={productColumns} itemsPerPage={10} />
     </div>
   );
 };

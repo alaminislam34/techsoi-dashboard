@@ -1,22 +1,45 @@
 "use client";
 
-import React, { createContext, useContext, useState, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
+import Cookies from "js-cookie";
 
-// 1. Create the Context
 const AppContext = createContext(undefined);
 
-// 2. Create the Provider Component
 export const StateProvider = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const value = {
-    isSidebarOpen,
-    setIsSidebarOpen,
-  };
+
+  const [token, setToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const adminToken = Cookies.get("admin_token");
+    if (adminToken) {
+      setToken(adminToken);
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      isSidebarOpen,
+      setIsSidebarOpen,
+      token,
+      setToken,
+      isAuthenticated,
+      setIsAuthenticated,
+    }),
+    [isSidebarOpen, token, isAuthenticated],
+  );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-// 3. Create a Custom Hook for easy consumption
 export const useGlobalState = () => {
   const context = useContext(AppContext);
   if (!context) {

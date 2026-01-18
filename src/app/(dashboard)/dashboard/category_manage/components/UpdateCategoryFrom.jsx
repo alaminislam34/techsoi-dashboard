@@ -1,141 +1,109 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Upload, Loader2 } from "lucide-react";
-import axios from "axios";
 import toast from "react-hot-toast";
-import {
-  PRODUCT_API,
-  CATEGORY_API,
-  SUB_CATEGORY_API,
-  BRAND_API,
-} from "@/api/apiEndPoint";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CATEGORY_API, SUB_CATEGORY_API, BRAND_API } from "@/api/apiEndPoint";
+import apiService from "@/api/api";
 
 const UpdateCategoryForm = () => {
-  const [categories, setCategories] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
+  const queryClient = useQueryClient();
 
-  // Independent loading states
-  const [loadingCategory, setLoadingCategory] = useState(false);
-  const [loadingSubCategory, setLoadingSubCategory] = useState(false);
-  const [loadingBrand, setLoadingBrand] = useState(false);
-
-  // Category state
+  // --- States for Input Fields (Design Remains Same) ---
   const [categoryName, setCategoryName] = useState("");
   const [categoryFile, setCategoryFile] = useState(null);
 
-  // Subcategory state
   const [selectedParentId, setSelectedParentId] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
   const [subCategoryFile, setSubCategoryFile] = useState(null);
 
-  // Brand state
   const [brandName, setBrandName] = useState("");
   const [brandFile, setBrandFile] = useState(null);
 
-  // Fetch categories for dropdown
-  const fetchCategories = async () => {
-    setLoadingData(true);
-    try {
-      const res = await axios.get(CATEGORY_API);
-      setCategories(res.data.data || []);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to load categories");
-    } finally {
-      setLoadingData(false);
-    }
-  };
+  // --- 1. Fetch Categories using useQuery ---
+  const { data: categories = [], isLoading: loadingData } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await apiService.get(CATEGORY_API);
+      return res.data.data || [];
+    },
+  });
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  // --- Handlers ---
-
-  const handleCreateCategory = async () => {
-    if (!categoryName.trim() || !categoryFile) {
-      return toast.error("Missing fields for Category");
-    }
-
-    setLoadingCategory(true);
-    try {
-      const formData = new FormData();
-      formData.append("name", categoryName);
-      formData.append("image", categoryFile);
-
-      await axios.post(CATEGORY_API, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
+  const categoryMutation = useMutation({
+    mutationFn: (formData) =>
+      apiService.post(CATEGORY_API, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }),
+    onSuccess: () => {
       toast.success("Category created!");
       setCategoryName("");
       setCategoryFile(null);
-      fetchCategories();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create category");
-    } finally {
-      setLoadingCategory(false);
-    }
-  };
+      queryClient.invalidateQueries(["categories"]);
+    },
+    onError: (error) =>
+      toast.error(error.message || "Failed to create category"),
+  });
 
-  const handleCreateSubCategory = async () => {
-    if (!selectedParentId || !subCategoryName.trim() || !subCategoryFile) {
-      return toast.error("Missing fields for Subcategory");
-    }
-
-    setLoadingSubCategory(true);
-    try {
-      const formData = new FormData();
-      formData.append("category_id", selectedParentId);
-      formData.append("name", subCategoryName);
-      formData.append("image", subCategoryFile);
-
-      await axios.post(SUB_CATEGORY_API, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
+  const subCategoryMutation = useMutation({
+    mutationFn: (formData) =>
+      apiService.post(SUB_CATEGORY_API, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }),
+    onSuccess: () => {
       toast.success("Subcategory created!");
       setSubCategoryName("");
       setSubCategoryFile(null);
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to create subcategory",
-      );
-    } finally {
-      setLoadingSubCategory(false);
-    }
-  };
+    },
+    onError: (error) =>
+      toast.error(error.message || "Failed to create subcategory"),
+  });
 
-  const handleCreateBrand = async () => {
-    if (!brandName.trim() || !brandFile) {
-      return toast.error("Missing fields for Brand");
-    }
-
-    setLoadingBrand(true);
-    try {
-      const formData = new FormData();
-      formData.append("name", brandName);
-      formData.append("image", brandFile);
-      formData.append("special", "1");
-
-      await axios.post(BRAND_API, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
+  const brandMutation = useMutation({
+    mutationFn: (formData) => apiService.post(BRAND_API, formData),
+    onSuccess: () => {
       toast.success("Brand created!");
       setBrandName("");
       setBrandFile(null);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create brand");
-    } finally {
-      setLoadingBrand(false);
-    }
+    },
+    onError: (error) => toast.error(error.message || "Failed to create brand"),
+  });
+
+  const handleCreateCategory = () => {
+    if (!categoryName.trim() || !categoryFile)
+      return toast.error("Missing fields for Category");
+    const formData = new FormData();
+    formData.append("name", categoryName);
+    formData.append("image", categoryFile);
+    categoryMutation.mutate(formData);
+  };
+
+  const handleCreateSubCategory = () => {
+    if (!selectedParentId || !subCategoryName.trim() || !subCategoryFile)
+      return toast.error("Missing fields for Subcategory");
+    const formData = new FormData();
+    formData.append("category_id", selectedParentId);
+    formData.append("name", subCategoryName);
+    formData.append("image", subCategoryFile);
+    subCategoryMutation.mutate(formData);
+  };
+
+  const handleCreateBrand = () => {
+    if (!brandName.trim() || !brandFile)
+      return toast.error("Missing fields for Brand");
+    const formData = new FormData();
+    formData.append("name", brandName);
+    formData.append("image", brandFile);
+    formData.append("special", "1");
+    brandMutation.mutate(formData);
   };
 
   return (
-    <div className="bg-white space-y-10 p-2 md:p-4">
-      {/* Main Category Section */}
+    <div className="bg-white space-y-6 p-2 md:p-4">
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Main Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
@@ -180,10 +148,10 @@ const UpdateCategoryForm = () => {
             <button
               type="button"
               onClick={handleCreateCategory}
-              disabled={loadingCategory}
+              disabled={categoryMutation.isPending}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {loadingCategory ? (
+              {categoryMutation.isPending ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 "Create"
@@ -193,9 +161,7 @@ const UpdateCategoryForm = () => {
         </div>
       </section>
 
-      <hr className="border-gray-100" />
-
-      {/* Subcategory Section */}
+      {/* --- Sub Category Section --- */}
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Sub Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
@@ -259,10 +225,10 @@ const UpdateCategoryForm = () => {
             <button
               type="button"
               onClick={handleCreateSubCategory}
-              disabled={loadingSubCategory}
+              disabled={subCategoryMutation.isPending}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {loadingSubCategory ? (
+              {subCategoryMutation.isPending ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 "Create"
@@ -272,9 +238,7 @@ const UpdateCategoryForm = () => {
         </div>
       </section>
 
-      <hr className="border-gray-100" />
-
-      {/* Brand Section */}
+      {/* --- Brands Section --- */}
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Brands</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
@@ -319,10 +283,10 @@ const UpdateCategoryForm = () => {
             <button
               type="button"
               onClick={handleCreateBrand}
-              disabled={loadingBrand}
+              disabled={brandMutation.isPending}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {loadingBrand ? (
+              {brandMutation.isPending ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 "Create"

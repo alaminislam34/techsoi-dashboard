@@ -1,116 +1,115 @@
 "use client";
 
-import { ADMIN_LOGIN_API } from "@/api/apiEndPoint";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import apiService from "@/api/api";
+import { ADMIN_LOGIN_API } from "@/api/apiEndPoint";
+import Cookies from "js-cookie";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
-      return toast.error("Email or password is required!");
+      return toast.error("Please enter both email and password");
     }
 
-    try {
-      const res = await axios.post(ADMIN_LOGIN_API, {
-        email,
-        password,
-      });
+    setIsLoading(true);
 
-      if (res.data.status === true) {
-        toast.success(res.data.message || "Logged in successful");
-        Cookies.set("admin_token", res.data.token, {
+    try {
+      const res = await apiService.post(ADMIN_LOGIN_API, { email, password });
+
+      const { status, token, message } = res.data;
+
+      console.log("Response Status:", status);
+      console.log("Token received:", !!token);
+
+      if (status === true && token) {
+        Cookies.set("admin_token", token, {
           expires: 7,
           path: "/",
-          secure: process.env.NODE_ENV === "production",
+          secure: window.location.protocol === "https:",
           sameSite: "lax",
         });
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email: email,
-            token: res.data.token,
-          }),
-        );
+
+        localStorage.setItem("user", JSON.stringify({ email }));
+
+        toast.success(message || "Welcome back!");
+
         setTimeout(() => {
           router.push("/dashboard");
-        }, 1000);
+          router.refresh();
+        }, 100);
       } else {
-        toast.error(res.data.message || "Login failed!");
+        toast.error(message || "Login failed!");
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Something went wrong";
+      console.error("Login Error Details:", error);
+      const errorMsg = error.message || "Something went wrong";
       toast.error(errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Welcome Back
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-gray-900">Admin Login</h1>
+          <p className="text-gray-500 mt-2">
+            Enter your credentials to manage the portal
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Field */}
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-semibold text-gray-700">
               Email Address
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="you@example.com"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              placeholder="admin@techsoibd.com"
+              disabled={isLoading}
               required
             />
           </div>
 
-          {/* Password Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-semibold text-gray-700">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
+              disabled={isLoading}
               required
             />
           </div>
 
-          {/* Forgot Password Link */}
-          <div className="flex items-center justify-end">
-            <button
-              type="button"
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => console.log("Redirect to forgot password")}
-            >
-              Forgot password?
-            </button>
-          </div>
-
-          {/* Login Button */}
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={isLoading}
+            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white transition-colors
+              ${isLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
           >
-            Sign In
+            {isLoading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+        <Toaster />
       </div>
-      <Toaster position="top-center" />
     </div>
   );
 };

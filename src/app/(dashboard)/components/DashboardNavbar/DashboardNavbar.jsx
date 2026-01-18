@@ -1,11 +1,10 @@
 "use client";
 
 import { useGlobalState } from "@/app/providers/StateProvider";
-import { Bell, Mail, Menu, Search, X } from "lucide-react";
+import { Bell, Menu, Search, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { HiOutlineLogout } from "react-icons/hi";
 
 const sidelinks = [
@@ -59,7 +58,6 @@ const DashboardNavbar = () => {
     <div
       className={`flex p-2 md:p-3 lg:p-4 rounded-xl bg-secondary items-center justify-between gap-3 relative z-30`}
     >
-      {/* Mobile Menu Button */}
       <div className="lg:hidden shrink-0">
         <button
           onClick={() => setIsSidebarOpen(true)}
@@ -69,7 +67,6 @@ const DashboardNavbar = () => {
         </button>
       </div>
 
-      {/* Search Bar */}
       <div className="flex-1 max-w-2xl">
         <div className="relative group">
           <input
@@ -84,7 +81,6 @@ const DashboardNavbar = () => {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex items-center gap-2 xl:gap-4 shrink-0">
         <button className="p-2 hover:bg-primary hover:text-white duration-300 rounded-xl text-primary bg-white cursor-pointer border border-primary/80 relative transition-all">
           <Bell size={20} />
@@ -92,19 +88,16 @@ const DashboardNavbar = () => {
         </button>
       </div>
 
-      {/* --- SIDEBAR OVERLAY & PANEL --- */}
       <div
         className={`fixed inset-0 z-100 transition-all duration-300 ${
           isSidebarOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
-        {/* Dark Backdrop */}
         <div
           className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
         />
 
-        {/* Sidebar Content */}
         <div
           className={`absolute top-0 left-0 w-80 h-full bg-secondary border-r border-gray-300 p-6 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"

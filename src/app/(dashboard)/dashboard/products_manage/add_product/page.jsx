@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import {
   CATEGORY_API,
@@ -10,14 +10,11 @@ import {
   BRAND_API,
   PRODUCT_API,
 } from "@/api/apiEndPoint";
+import apiService from "@/api/api";
 
 const AddProduct = () => {
-  const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Updated state keys to match your JSON structure
   const [formData, setFormData] = useState({
     name: "",
     regular_price: "",
@@ -31,29 +28,62 @@ const AddProduct = () => {
     full_description: "",
   });
 
-  // Specs updated to name/value keys
   const [specs, setSpecs] = useState([{ name: "Height", value: "" }]);
-
   const [images, setImages] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [cat, sub, br] = await Promise.all([
-          axios.get(CATEGORY_API),
-          axios.get(SUB_CATEGORY_API),
-          axios.get(BRAND_API),
-        ]);
-        setCategories(cat.data?.data || []);
-        setSubCategories(sub.data?.data || []);
-        setBrands(br.data?.data || []);
-      } catch (e) {
-        console.error("Data fetch failed");
-        toast.error("Failed to load initial data");
-      }
-    };
-    fetchData();
-  }, []);
+  const {
+    data: dropdowns = { categories: [], subCategories: [], brands: [] },
+  } = useQuery({
+    queryKey: ["product-form-data"],
+    queryFn: async () => {
+      const [cat, sub, br] = await Promise.all([
+        apiService.get(CATEGORY_API),
+        apiService.get(SUB_CATEGORY_API),
+        apiService.get(BRAND_API),
+      ]);
+      return {
+        categories: cat.data?.data || [],
+        subCategories: sub.data?.data || [],
+        brands: br.data?.data || [],
+      };
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (payload) => {
+      return apiService.post(PRODUCT_API, payload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Product Created Successfully!");
+      queryClient.invalidateQueries(["products"]);
+      resetForm();
+    },
+    onError: (err) => {
+      const errMsg = err.response?.data?.errors
+        ? Object.values(err.response.data.errors)[0][0]
+        : "Failed to publish product";
+      toast.error(errMsg);
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      regular_price: "",
+      discount: "",
+      sale_price: "",
+      category_id: "",
+      sub_category_id: "",
+      brand_id: "",
+      short_description: "",
+      emi_status: "1",
+      full_description: "",
+    });
+    setSpecs([{ name: "", value: "" }]);
+    setImages([]);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,9 +96,6 @@ const AddProduct = () => {
     setSpecs(newSpecs);
   };
 
-  const addSpec = () => setSpecs([...specs, { name: "", value: "" }]);
-  const removeSpec = (index) => setSpecs(specs.filter((_, i) => i !== index));
-
   const handleFile = (e) => {
     const files = Array.from(e.target.files);
     if (images.length + files.length > 5)
@@ -80,88 +107,22 @@ const AddProduct = () => {
     e.preventDefault();
     if (images.length === 0) return toast.error("Main image is required");
 
-    setLoading(true);
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
 
-    try {
-      const data = new FormData();
+    data.append("specifications", JSON.stringify(specs));
+    data.append("main_image", images[0]);
 
-      // 1. Basic Text Fields
-      data.append("name", formData.name);
-      data.append("regular_price", formData.regular_price);
-      data.append("discount", formData.discount);
-      data.append("sale_price", formData.sale_price);
-      data.append("category_id", formData.category_id);
-      data.append("sub_category_id", formData.sub_category_id);
-      data.append("brand_id", formData.brand_id);
-      data.append("short_description", formData.short_description);
-      data.append("emi_status", formData.emi_status);
-      data.append("full_description", formData.full_description);
+    const extraImagesJson = images.slice(1).map((_, index) => ({
+      [`extra-image-${index + 1}`]: `image-binary-index-${index}`,
+    }));
+    data.append("extra_images", JSON.stringify(extraImagesJson));
 
-      // 2. Specifications (JSON String)
-      data.append("specifications", JSON.stringify(specs));
+    images.slice(1).forEach((file) => {
+      data.append("extra_images_files[]", file);
+    });
 
-      // 3. Main Image (Binary File)
-      data.append("main_image", images[0]);
-
-      // 4. Extra Images (Laravel Fix)
-      const dummyJson = images.slice(1).map((_, index) => ({
-        index: index,
-      }));
-
-      // Satisfies: "The extra images field must be a valid JSON string"
-      data.append("extra_images", JSON.stringify(dummyJson));
-
-      // Sending actual files
-      images.slice(1).forEach((file) => {
-        data.append("extra_images_files[]", file);
-      });
-
-      const response = await axios.post(PRODUCT_API, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-        },
-      });
-console.log(response)
-      if (response.status === 200) {
-        // --- SUCCESS: RESET ALL FIELDS ---
-        toast.success("Product Created!");
-
-        // ১. ফর্মের ইনপুট ফিল্ড খালি করা
-        setFormData({
-          name: "",
-          regular_price: "",
-          discount: "",
-          sale_price: "",
-          category_id: "",
-          sub_category_id: "",
-          brand_id: "",
-          short_description: "",
-          emi_status: "1",
-          full_description: "",
-        });
-
-        // ২. স্পেসিফিকেশন খালি করা (ডিফল্ট ১টি রো রাখা)
-        setSpecs([{ name: "", value: "" }]);
-
-        // ৩. ইমেজ অ্যারে খালি করা
-        setImages([]);
-      } else {
-        console.log("somossa ase");
-      }
-    } catch (err) {
-      if (err.response?.status === 422) {
-        console.log("Laravel Validation Errors:", err.response.data.errors);
-        const errors = err.response.data.errors;
-        const firstError = Object.values(errors)[0][0];
-        toast.error(firstError);
-      } else {
-        console.log(err);
-        toast.error("Failed to publish product");
-      }
-    } finally {
-      setLoading(false);
-    }
+    mutation.mutate(data);
   };
 
   return (
@@ -178,7 +139,7 @@ console.log(response)
               required
             >
               <option value="">Select Main Category</option>
-              {categories.map((c) => (
+              {dropdowns.categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
@@ -199,7 +160,7 @@ console.log(response)
               required
             >
               <option value="">Select Sub Category</option>
-              {subCategories
+              {dropdowns.subCategories
                 .filter(
                   (s) => String(s.category_id) === String(formData.category_id),
                 )
@@ -227,7 +188,7 @@ console.log(response)
               required
             >
               <option value="">Select brands</option>
-              {brands.map((b) => (
+              {dropdowns.brands.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
                 </option>
@@ -272,7 +233,7 @@ console.log(response)
           />
         </InputWrapper>
 
-        {/* Short Details */}
+        {/* Short & Full Description */}
         <InputWrapper label="Short Details">
           <input
             type="text"
@@ -288,7 +249,6 @@ console.log(response)
           />
         </InputWrapper>
 
-        {/* Description */}
         <InputWrapper label="Full Description">
           <textarea
             name="full_description"
@@ -301,7 +261,7 @@ console.log(response)
           <Pencil className="absolute right-4 top-4 text-slate-300" size={18} />
         </InputWrapper>
 
-        {/* Pricing Grid */}
+        {/* Pricing */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <InputWrapper label="Regular Price">
             <input
@@ -337,7 +297,7 @@ console.log(response)
           </InputWrapper>
         </div>
 
-        {/* Technical Specs */}
+        {/* Specifications */}
         <div className="space-y-4">
           <label className="text-[15px] font-medium text-[#64748b]">
             Specifications
@@ -354,7 +314,7 @@ console.log(response)
                   onChange={(e) =>
                     handleSpecChange(idx, "name", e.target.value)
                   }
-                  placeholder="Spec Name (e.g. Color)"
+                  placeholder="Spec Name"
                   className="custom-input"
                 />
               </div>
@@ -365,14 +325,14 @@ console.log(response)
                   onChange={(e) =>
                     handleSpecChange(idx, "value", e.target.value)
                   }
-                  placeholder="Value (e.g. Red)"
+                  placeholder="Value"
                   className="custom-input"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => removeSpec(idx)}
+                  onClick={() => setSpecs(specs.filter((_, i) => i !== idx))}
                   className="h-13 w-13 flex items-center justify-center bg-[#ff0000] text-white rounded-lg"
                 >
                   <X size={20} />
@@ -380,7 +340,9 @@ console.log(response)
                 {idx === specs.length - 1 && (
                   <button
                     type="button"
-                    onClick={addSpec}
+                    onClick={() =>
+                      setSpecs([...specs, { name: "", value: "" }])
+                    }
                     className="h-13 w-13 flex items-center justify-center bg-[#38bdf8] text-white rounded-lg"
                   >
                     <Plus size={20} />
@@ -391,7 +353,7 @@ console.log(response)
           ))}
         </div>
 
-        {/* Upload Images Section */}
+        {/* Images */}
         <div className="space-y-4 pt-2">
           <label className="text-[15px] font-medium text-[#64748b]">
             Product Images (1st is Main, max 5)
@@ -406,38 +368,55 @@ console.log(response)
               onChange={handleFile}
             />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {images.map((file, i) => (
               <div
                 key={i}
-                className="relative group border rounded-lg p-2 bg-slate-50"
+                className="relative group border rounded-xl p-2 bg-slate-50 shadow-sm max-w-30"
               >
-                <span className="text-[10px] absolute -top-2 left-2 bg-sky-500 text-white px-2 rounded-full">
-                  {i === 0 ? "Main" : `Extra ${i}`}
+                <span className="text-[10px] absolute -top-2 left-2 bg-sky-500 text-white px-2 py-0.5 rounded-full z-10 font-medium">
+                  {i === 0 ? "Main Image" : `Extra ${i}`}
                 </span>
-                <span className="text-xs truncate block pr-6">{file.name}</span>
-                <button
-                  type="button"
-                  className="absolute right-1 top-1 text-red-500"
-                  onClick={() =>
-                    setImages(images.filter((_, idx) => idx !== i))
-                  }
-                >
-                  <X size={16} />
-                </button>
+
+                <div className="relative max-w-30 aspect-square rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`preview-${i}`}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    onLoad={() => {
+                      if (file instanceof File) {
+                      }
+                    }}
+                  />
+
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setImages(images.filter((_, idx) => idx !== i))
+                      }
+                      className="bg-white/90 p-1.5 rounded-full text-red-600 hover:bg-red-500 hover:text-white transition-colors shadow-lg"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="pt-4">
           <button
             type="submit"
-            disabled={loading}
-            className="w-full md:w-auto px-10 py-4 bg-[#38bdf8] text-white rounded-xl font-semibold shadow-lg hover:bg-sky-500 transition-all flex items-center justify-center gap-3"
+            disabled={mutation.isPending}
+            className="w-full md:w-auto px-10 py-4 bg-[#38bdf8] text-white rounded-xl font-semibold shadow-lg hover:bg-sky-500 transition-all flex items-center justify-center gap-3 disabled:opacity-70"
           >
-            {loading ? <Loader2 className="animate-spin" /> : "Publish Product"}
+            {mutation.isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Publish Product"
+            )}
           </button>
         </div>
       </form>

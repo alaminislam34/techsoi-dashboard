@@ -1,6 +1,6 @@
 @URL = https://api.techsoibd.com/api
-@USERTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50ZWNoc29pYmQuY29tL2FwaS9sb2dpbiIsImlhdCI6MTc2ODI1OTI1OSwiZXhwIjoxNzY4MjYyODU5LCJuYmYiOjE3NjgyNTkyNTksImp0aSI6ImhGN2RjMnl2SkNjczJjQkYiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.Wex9-g2wiWuiWNV8GBg4ETT-nqG24QGjI6p5HmQL8OQ
-@ADMINTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50ZWNoc29pYmQuY29tL2FwaS9hZG1pbi9sb2dpbiIsImlhdCI6MTc2ODE3NTE2OCwiZXhwIjoxNzY4MTc4NzY4LCJuYmYiOjE3NjgxNzUxNjgsImp0aSI6IjVDTkdOY1l4c0xGVWdHaWwiLCJzdWIiOiIxIiwicHJ2IjoiZGY4ODNkYjk3YmQwNWVmOGZmODUwODJkNjg2YzQ1ZTgzMmU1OTNhOSJ9.Iog30OF6fdoTjfPEv3NTJ5qoweWncUp3pO7NyqmgtDY
+@USERTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzY1NjQ3OTIyLCJleHAiOjE3NjU2NTE1MjIsIm5iZiI6MTc2NTY0NzkyMiwianRpIjoienV3R241aFg0MUdvMGRzdSIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.TkfDY0DiA05EU8596akX8v8a4S5r-h_6SR9E-RnW2J4
+@ADMINTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzY4NTU3MjIzLCJleHAiOjE3Njg1NjA4MjMsIm5iZiI6MTc2ODU1NzIyMywianRpIjoiNUVRTXJzelR0RGtJZ1lDSiIsInN1YiI6IjEiLCJwcnYiOiJkZjg4M2RiOTdiZDA1ZWY4ZmY4NTA4MmQ2ODZjNDVlODMyZTU5M2E5In0.yDVwvCC4NeYubZa5hOB42G9Qs6_pLkxtiKf5sg_pboA
 
 ### user login           ---------------> user requests
 
@@ -257,15 +257,19 @@ accept: application/json
 content-type: application/json
 
 {
-    "name": "test product 2",
-    "sku": "apple-02022025",
+    "name": "test product 1",
     "regular_price": "2000",
+    "discount": "500",
     "sale_price": "1500",
     "main_image": "FORM-URL",
     "category_id": "1",
     "sub_category_id": "1",
     "brand_id": "1",
     "short_description": "short-description",
+    "emi_status": "1",
+    "full_description": "full-description",
+    "specifications": [{"name":"Height","value":"38.6mm",},{"name":"color","value":"red",}],
+    "extra_images": [{ "FORM-URL-1" },{ "FORM-URL-2" },]
 }
 
 ### update product
@@ -510,6 +514,56 @@ content-type: application/json
 ### delete a brand
 
 DELETE {{URL}}/brand/1
+accept: application/json
+
+### get all special brand             ---------------> special brand requests
+
+GET {{URL}}/special-brand
+accept: application/json
+
+### get limited brand
+
+GET {{URL}}/special-brand-limit/4
+accept: application/json
+
+### store new brand
+
+POST {{URL}}/special-brand
+accept: application/json
+content-type: application/json
+
+{
+    "image": "FORM-URL",
+}
+
+### delete a brand
+
+DELETE {{URL}}/special-brand/1
+accept: application/json
+
+### get all Hero Image             ---------------> Hero Image requests
+
+GET {{URL}}/hero-image
+accept: application/json
+
+### get limited brand
+
+GET {{URL}}/hero-image-limit/4
+accept: application/json
+
+### store new brand
+
+POST {{URL}}/hero-image
+accept: application/json
+content-type: application/json
+
+{
+    "image": "FORM-URL",
+}
+
+### delete a brand
+
+DELETE {{URL}}/hero-image/1
 accept: application/json
 
 ### get all blog             ---------------> blog requests

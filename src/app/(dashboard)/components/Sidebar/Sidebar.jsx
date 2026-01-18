@@ -1,8 +1,9 @@
 "use client";
 
+import apiService from "@/api/api";
 import { ADMIN_LOGOUT_API } from "@/api/apiEndPoint";
-import axios from "axios";
 import Cookies from "js-cookie";
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -56,24 +57,19 @@ const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const handleLogout = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const token = user.token;
-    console.log("Token:", token);
-    const res = await axios.get(ADMIN_LOGOUT_API, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log(res);
-    if (!token) {
-      return toast.error("Invalid token!");
-    } else {
-      toast.success("Logout successful");
-      localStorage.clear("user");
+    try {
+      const res = await apiService.get(ADMIN_LOGOUT_API);
+
+      if (res.data?.status === true) {
+        toast.success("Logout successful");
+      }
+    } catch (error) {
+      console.error("Logout error details:", error);
+    } finally {
       Cookies.remove("admin_token");
-      setTimeout(() => {
-        router.push("/login");
-      }, 1000);
+      localStorage.removeItem("user");
+      toast.success("Logged out");
+      router.push("/login");
     }
   };
 
@@ -82,14 +78,15 @@ const Sidebar = () => {
       <div>
         <div className="flex items-center justify-center mt-6 mb-12">
           <Link href="/dashboard">
-            <Image
+            {/* <Image
               src="/logos/logo.png"
               height={135}
               width={600}
               loading="eager"
               alt="Website logo"
               className="w-55 h-auto object-cover"
-            />
+            /> */}
+            Hello world
           </Link>
         </div>
 
