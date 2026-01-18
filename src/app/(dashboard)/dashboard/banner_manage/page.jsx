@@ -6,6 +6,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { BANNER_API } from "@/api/apiEndPoint";
 import Swal from "sweetalert2";
+import apiService from "@/api/api";
 
 const BannerManage = () => {
   const [previewImage, setPreviewImage] = useState("/images/Hero Banner.png");
@@ -14,10 +15,10 @@ const BannerManage = () => {
   const [loading, setLoading] = useState(false);
   const [banners, setBanners] = useState([]);
   const fileInputRef = useRef(null);
-
+  console.log(banners);
   const fetchBanners = async () => {
     try {
-      const response = await axios.get(BANNER_API);
+      const response = await apiService.get(BANNER_API);
       setBanners(response.data?.data || []);
     } catch (error) {
       console.error("Fetch Error:", error);
@@ -49,7 +50,7 @@ const BannerManage = () => {
     formData.append("image", selectedFile);
 
     try {
-      const response = await axios.post(BANNER_API, formData, {
+      const response = await apiService.post(BANNER_API, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -84,7 +85,7 @@ const BannerManage = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`${BANNER_API}/${id}`);
+      await apiService.delete(`${BANNER_API}/${id}`);
       toast.success("Banner deleted successfully");
       fetchBanners();
     } catch (err) {
@@ -130,7 +131,6 @@ const BannerManage = () => {
         </p>
       </div>
 
-      {/* --- Conditional Preview Section --- */}
       {showPreview && (
         <div className="space-y-4 animate-in fade-in duration-500">
           <h2 className="text-sm font-medium text-gray-500">Preview</h2>
@@ -182,12 +182,15 @@ const BannerManage = () => {
                   className="hover:bg-gray-50 transition-colors"
                 >
                   <td className="p-4 flex items-center gap-3">
-                    {/* ইমেজ প্রিভিউ ফ্রম এপিআই */}
-                    <img
-                      src={banner.image_url || banner.image}
-                      className="w-12 h-8 bg-gray-200 rounded object-cover shrink-0"
-                      alt="banner"
-                    />
+                    {banner.image ? (
+                      <img
+                        src={banner.image}
+                        className="w-12 h-8 bg-gray-200 rounded object-cover shrink-0"
+                        alt="banner"
+                      />
+                    ) : (
+                      <div className="w-10 h-6 rounded-lg bg-gray-50"></div>
+                    )}
                     <span className="text-dark font-normal">
                       {banner.name || `Banner ${banner.id}`}
                     </span>
