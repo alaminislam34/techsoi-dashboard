@@ -41,15 +41,15 @@ const Stats = () => {
         const status = error.response?.status;
 
         if (status === 401) {
-          toast.error("Unauthorized. Please login again.");
+          console.error("Unauthorized. Please login again.");
         } else if (status === 403) {
-          toast.error("You do not have permission to view orders.");
+          console.error("You do not have permission to view orders.");
         } else if (status >= 500) {
-          toast.error("Server error. Please try again later.");
+          console.error("Server error. Please try again later.");
         } else if (error.code === "ECONNABORTED") {
-          toast.error("Request timeout. Check your internet.");
+          console.error("Request timeout. Check your internet.");
         } else {
-          toast.error(
+          console.error(
             error.response?.data?.message || "Failed to load order data.",
           );
         }
