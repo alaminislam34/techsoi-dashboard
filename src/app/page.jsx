@@ -8,7 +8,7 @@ const WelcomeSimple = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push("/dashboard");
+      router.push("/login");
     }, 2000);
 
     return () => clearTimeout(timer);
