@@ -21,7 +21,6 @@ const Stats = () => {
 
     try {
       const res = await apiService.get(ORDER_API);
-
       if (res.data?.status !== true || !Array.isArray(res.data.data)) {
         throw new Error("Invalid server response");
       }
@@ -37,7 +36,7 @@ const Stats = () => {
     } catch (error) {
       console.error("Order fetch error:", error);
 
-      if (axios.isAxiosError(error)) {
+      if (apiService.isAxiosError(error)) {
         const status = error.response?.status;
 
         if (status === 401) {

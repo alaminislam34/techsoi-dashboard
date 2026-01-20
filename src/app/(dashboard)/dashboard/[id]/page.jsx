@@ -27,7 +27,7 @@ const ProductsDetails = () => {
     const fetchAllData = async () => {
       try {
         const [orderRes, catRes, subRes, brandRes] = await Promise.all([
-          apiService.get(`${SINGLE_ORDER_API}/${orderId}`),
+          apiService.get(`${SINGLE_ORDER_API(orderId)}`),
           apiService.get(CATEGORY_API),
           apiService.get(SUB_CATEGORY_API),
           apiService.get(BRAND_API),

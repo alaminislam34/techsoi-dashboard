@@ -5,6 +5,8 @@ import { Upload, Trash2, Loader2, X } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { SPECIAL_BRAND_API, SPECIAL_BRAND_SINGLE_API } from "@/api/apiEndPoint";
+import apiService from "@/api/api";
+import Swal from "sweetalert2";
 
 const AddBrands = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -15,10 +17,9 @@ const AddBrands = () => {
 
   const fileInputRef = useRef(null);
 
-  // ১. ব্র্যান্ড লিস্ট ফেচ করা
   const fetchBrands = async () => {
     try {
-      const response = await axios.get(SPECIAL_BRAND_API);
+      const response = await apiService.get(SPECIAL_BRAND_API);
       setBrands(response.data?.data || []);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -43,7 +44,6 @@ const AddBrands = () => {
     fileInputRef.current.click();
   };
 
-  // ২. ব্র্যান্ড অ্যাড অথবা আপডেট করার লজিক
   const handleSubmit = async () => {
     if (!selectedFile) return toast.error("Please select an image");
 
@@ -54,9 +54,9 @@ const AddBrands = () => {
     }
 
     try {
-      await axios.post(SPECIAL_BRAND_API, formData);
+      await apiService.post(SPECIAL_BRAND_API, formData);
       toast.success("Brand added successfully!");
-
+      setSelectedFile("");
       fetchBrands();
     } catch (error) {
       toast.error(error.response?.data?.message || "Operation failed");
@@ -65,11 +65,22 @@ const AddBrands = () => {
     }
   };
 
-  // ৩. ডিলিট লজিক
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This Brand will be permanently deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Delete!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
-      await axios.delete(SPECIAL_BRAND_SINGLE_API(id));
+      await apiService.delete(SPECIAL_BRAND_SINGLE_API(id));
       toast.success("Brand deleted");
       fetchBrands();
     } catch (error) {

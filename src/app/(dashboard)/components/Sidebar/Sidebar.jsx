@@ -86,7 +86,9 @@ const Sidebar = () => {
               alt="Website logo"
               className="w-55 h-auto object-cover"
             /> */}
-            Hello world
+            <h1 className="text-xl md:text-2xl font-semibold text-primary">
+              Tech Hat
+            </h1>
           </Link>
         </div>
 
