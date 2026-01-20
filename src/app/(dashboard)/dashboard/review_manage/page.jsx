@@ -1,44 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Eye, Trash2, Star } from "lucide-react";
+import React from "react";
+import { Eye, Trash2, Star, Loader2 } from "lucide-react";
 import Table from "../../components/BodyContent/Table";
-import Cookies from "js-cookie";
-import axios from "axios";
-import { REVIEW_API } from "@/api/apiEndPoint";
+import { useReviews } from "@/api/hooks/useReviews";
+// import { useReviews } from "@/hooks/useReviews"; // আপনার হুক পাথ অনুযায়ী ঠিক করে নিন
 
 const ReviewManage = () => {
-  const [data, setData] = useState([]);
+  // হুক থেকে ফাংশনগুলো কল করা
+  const { useGetAllReviews, useDeleteReview } = useReviews();
 
-  useEffect(() => {
-    const token = Cookies.get("admin_token");
-    if (!token) {
-      return console.log("Token expired");
-    }
-    const fetchReviews = async () => {
-      try {
-        const res = await axios.get(REVIEW_API, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log(res.data);
-        if (res.status === 200) {
-          setData(res.data.data);
-        } else {
-          setData([]);
-        }
-      } catch (error) {
-        console.log(error.message || "Something went wrong");
-      }
-    };
-    fetchReviews();
-  }, []);
+  // ডাটা ফেচ করা
+  const { data: reviews = [], isLoading } = useGetAllReviews();
+  console.log(reviews);
+  // ডিলিট মিউটেশন
+  const deleteMutation = useDeleteReview();
 
   const handleDelete = (id) => {
-    const filteredData = data.filter((item) => item.order_info.id !== id);
-    setData(filteredData);
+    if (window.confirm("Are you sure you want to delete this review?")) {
+      deleteMutation.mutate(id);
+    }
   };
+
   const columns = [
     {
       header: "Product",
@@ -47,13 +30,13 @@ const ReviewManage = () => {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gray-100 rounded shrink-0 overflow-hidden border border-gray-100">
             <img
-              src={item.product.image_url}
-              alt={item.product.name}
+              src={item.product?.image_url}
+              alt={item.product?.name}
               className="w-full h-full object-contain p-1"
             />
           </div>
           <span className="text-dark text-sm font-normal line-clamp-1 max-w-55">
-            {item.product.name}
+            {item.product?.name}
           </span>
         </div>
       ),
@@ -62,7 +45,7 @@ const ReviewManage = () => {
       header: "Customer",
       key: "customer",
       render: (item) => (
-        <span className="text-sm text-dark italic">{item.customer.name}</span>
+        <span className="text-sm text-dark italic">{item.customer?.name}</span>
       ),
     },
     {
@@ -70,7 +53,8 @@ const ReviewManage = () => {
       className: "text-center",
       render: (item) => (
         <div className="flex items-center justify-center gap-1 text-sm font-medium">
-          {item.review.rating.toFixed(1)}
+          {/* আপনার API কনফিগারেশন অনুযায়ী star ফিল্ড */}
+          {Number(item.star || 0).toFixed(1)}
           <Star size={14} className="fill-yellow-400 text-yellow-400" />
         </div>
       ),
@@ -79,7 +63,7 @@ const ReviewManage = () => {
       header: "Review",
       render: (item) => (
         <p className="text-sm text-gray-500 line-clamp-1 max-w-75">
-          {item.review.feedback_bn}
+          {item.message || item.review?.feedback_bn}
         </p>
       ),
     },
@@ -92,10 +76,15 @@ const ReviewManage = () => {
             <Eye size={18} />
           </button>
           <button
-            onClick={() => handleDelete(item.order_info.id)}
-            className="text-primary_red hover:scale-110 transition-transform"
+            onClick={() => handleDelete(item.id)} // সরাসরি আইটেম আইডি ব্যবহার করা হয়েছে
+            disabled={deleteMutation.isPending}
+            className="text-primary_red hover:scale-110 transition-transform disabled:opacity-50"
           >
-            <Trash2 size={18} />
+            {deleteMutation.isPending ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Trash2 size={18} />
+            )}
           </button>
         </div>
       ),
@@ -104,7 +93,13 @@ const ReviewManage = () => {
 
   return (
     <div className="w-full">
-      <Table data={data} columns={columns} itemsPerPage={10} />
+      {isLoading ? (
+        <div className="flex justify-center items-center h-40">
+          <Loader2 className="animate-spin text-primary" size={30} />
+        </div>
+      ) : (
+        <Table data={reviews} columns={columns} itemsPerPage={10} />
+      )}
     </div>
   );
 };

@@ -37,14 +37,18 @@ const UpdateCategoryForm = () => {
           "Content-Type": "multipart/form-data",
         },
       }),
-    onSuccess: () => {
-      toast.success("Category created!");
-      setCategoryName("");
-      setCategoryFile(null);
-      queryClient.invalidateQueries(["categories"]);
+    onSuccess: (res) => {
+      const ok = res?.data?.status === true;
+      if (ok) {
+        toast.success("Category created!");
+        setCategoryName("");
+        setCategoryFile(null);
+        queryClient.invalidateQueries(["categories"]);
+      } else {
+        toast.error(res?.data?.message || "Failed to create category");
+      }
     },
-    onError: (error) =>
-      toast.error(error.message || "Failed to create category"),
+    onError: (error) => toast.error(error.message || "Failed to create category"),
   });
 
   const subCategoryMutation = useMutation({
@@ -54,21 +58,32 @@ const UpdateCategoryForm = () => {
           "Content-Type": "multipart/form-data",
         },
       }),
-    onSuccess: () => {
-      toast.success("Subcategory created!");
-      setSubCategoryName("");
-      setSubCategoryFile(null);
+    onSuccess: (res) => {
+      const ok = res?.data?.status === true;
+      if (ok) {
+        toast.success("Subcategory created!");
+        setSubCategoryName("");
+        setSubCategoryFile(null);
+        queryClient.invalidateQueries(["subCategories", "categories"]);
+      } else {
+        toast.error(res?.data?.message || "Failed to create subcategory");
+      }
     },
-    onError: (error) =>
-      toast.error(error.message || "Failed to create subcategory"),
+    onError: (error) => toast.error(error.message || "Failed to create subcategory"),
   });
 
   const brandMutation = useMutation({
     mutationFn: (formData) => apiService.post(BRAND_API, formData),
-    onSuccess: () => {
-      toast.success("Brand created!");
-      setBrandName("");
-      setBrandFile(null);
+    onSuccess: (res) => {
+      const ok = res?.data?.status === true;
+      if (ok) {
+        toast.success("Brand created!");
+        setBrandName("");
+        setBrandFile(null);
+        queryClient.invalidateQueries(["brands"]);
+      } else {
+        toast.error(res?.data?.message || "Failed to create brand");
+      }
     },
     onError: (error) => toast.error(error.message || "Failed to create brand"),
   });
@@ -85,10 +100,33 @@ const UpdateCategoryForm = () => {
   const handleCreateSubCategory = () => {
     if (!selectedParentId || !subCategoryName.trim() || !subCategoryFile)
       return toast.error("Missing fields for Subcategory");
+
+    // Prevent duplicate subcategory under same parent (client-side check)
+    try {
+      const parent = categories.find((c) => String(c.id) === String(selectedParentId));
+      const existing = parent?.subcategory || [];
+      const dup = existing.some(
+        (s) => String(s.name).trim().toLowerCase() === subCategoryName.trim().toLowerCase(),
+      );
+      if (dup) return toast.error("Subcategory with this name already exists for the selected category");
+    } catch (e) {
+      // ignore - categories may not be loaded
+    }
     const formData = new FormData();
-    formData.append("category_id", selectedParentId);
+    formData.append("category_id", Number(selectedParentId));
     formData.append("name", subCategoryName);
     formData.append("image", subCategoryFile);
+    // debug
+    try {
+      const entries = [];
+      for (const pair of formData.entries()) {
+        if (pair[1] instanceof File) entries.push([pair[0], pair[1].name]);
+        else entries.push(pair);
+      }
+      console.log("Create SubCategory FormData:", entries);
+    } catch (e) {
+      console.warn("Unable to enumerate FormData", e);
+    }
     subCategoryMutation.mutate(formData);
   };
 

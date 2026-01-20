@@ -3,15 +3,7 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Table from "@/app/(dashboard)/components/BodyContent/Table";
-import {
-  Eye,
-  Edit3,
-  Trash2,
-  EyeOff,
-  Search,
-  ChevronDown,
-  Loader2,
-} from "lucide-react";
+import { Edit3, Trash2, Search, ChevronDown, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import Link from "next/link";
@@ -51,7 +43,7 @@ const ProductsManage = () => {
       return [];
     },
   });
-
+  console.log(products);
   // --- 2. Delete Mutation ---
   const deleteMutation = useMutation({
     mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
@@ -65,12 +57,6 @@ const ProductsManage = () => {
   });
 
   // --- Action Handlers ---
-  const handleToggleVisibility = (id) => {
-    toast.success(`Product visibility updated`, {
-      icon: "👁️",
-      style: { borderRadius: "10px", background: "#333", color: "#fff" },
-    });
-  };
 
   const handleDelete = (id) => {
     Swal.fire({
@@ -148,17 +134,6 @@ const ProductsManage = () => {
       className: "text-center",
       render: (item, index) => (
         <div className="flex items-center gap-3 justify-center">
-          <button
-            onClick={() => handleToggleVisibility(item.order_info.id)}
-            className="text-[#3b82f6] hover:opacity-70 transition-opacity"
-          >
-            {[2, 3].includes(index % 10) ? (
-              <EyeOff size={18} />
-            ) : (
-              <Eye size={18} />
-            )}
-          </button>
-
           <Link
             href={`/dashboard/products_manage/${item.order_info.id}`}
             className="text-slate-500 hover:text-dark transition-colors"

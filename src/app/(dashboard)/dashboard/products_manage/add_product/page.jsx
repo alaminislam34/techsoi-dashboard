@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -9,6 +9,7 @@ import {
   SUB_CATEGORY_API,
   BRAND_API,
   PRODUCT_API,
+  PRODUCT_DETAILS_MANAGE_API,
 } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
 
@@ -30,6 +31,7 @@ const AddProduct = () => {
 
   const [specs, setSpecs] = useState([{ name: "Height", value: "" }]);
   const [images, setImages] = useState([]);
+  const lastPayloadRef = useRef(null);
 
   const {
     data: dropdowns = { categories: [], subCategories: [], brands: [] },
@@ -51,20 +53,46 @@ const AddProduct = () => {
 
   const mutation = useMutation({
     mutationFn: async (payload) => {
-      return apiService.post(PRODUCT_API, payload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      return apiService.post(PRODUCT_API, payload);
     },
     onSuccess: () => {
       toast.success("Product Created Successfully!");
       queryClient.invalidateQueries(["products"]);
       resetForm();
     },
-    onError: (err) => {
-      const errMsg = err.response?.data?.errors
-        ? Object.values(err.response.data.errors)[0][0]
-        : "Failed to publish product";
-      toast.error(errMsg);
+    onError: async (err) => {
+      // support both axios error shape and our apiService custom error
+      console.error("Product create error:", err);
+      const serverData = err.response?.data || err.data || null;
+
+      if (serverData && serverData.errors) {
+        const first = Object.values(serverData.errors)[0];
+        const msg = Array.isArray(first) ? first[0] : first;
+        toast.error(msg || "Validation failed");
+        return;
+      }
+
+      // If backend failed with product_id null, try two-step fallback
+      const msg = serverData?.message || err.message || "Failed to publish product";
+      if (typeof msg === "string" && msg.includes("product_id") && lastPayloadRef.current) {
+        toast.loading("Primary upload failed, trying fallback...");
+        try {
+          await twoStepCreate(lastPayloadRef.current);
+          toast.dismiss();
+          toast.success("Product created (fallback)");
+          queryClient.invalidateQueries(["products"]);
+          resetForm();
+          return;
+        } catch (e) {
+          toast.dismiss();
+          console.error("Fallback failed", e);
+          toast.error("Fallback create failed");
+          return;
+        }
+      }
+
+      // fallback to message
+      toast.error(msg);
     },
   });
 
@@ -85,48 +113,116 @@ const AddProduct = () => {
     setImages([]);
   };
 
+  const twoStepCreate = async ({ fields, specs: specsPayload, images: imgs }) => {
+    // Step 1: create product (without details)
+    const productForm = new FormData();
+    productForm.append("name", fields.name);
+    productForm.append("regular_price", Number(fields.regular_price));
+    productForm.append("discount", Number(fields.discount || 0));
+    productForm.append("sale_price", Number(fields.sale_price));
+    productForm.append("category_id", Number(fields.category_id));
+    productForm.append("sub_category_id", Number(fields.sub_category_id));
+    productForm.append("brand_id", Number(fields.brand_id));
+    productForm.append("short_description", fields.short_description || "");
+    productForm.append("emi_status", fields.emi_status === "1" ? 1 : 0);
+    if (imgs && imgs.length) productForm.append("main_image", imgs[0]);
+
+    const res = await apiService.post(PRODUCT_API, productForm);
+    const newId = res?.data?.data?.id || res?.data?.data?.product_id || null;
+    if (!newId) throw new Error("Product creation did not return id");
+
+    // Step 2: push product details via PUT to product-details/{id}
+    const detailsForm = new FormData();
+    detailsForm.append("full_description", fields.full_description || "");
+    detailsForm.append("specifications", JSON.stringify(specsPayload || []));
+    if (imgs && imgs.length > 1) {
+      imgs.slice(1).forEach((file, idx) => {
+        detailsForm.append("extra_images[]", JSON.stringify({ id: idx }));
+        detailsForm.append("extra_images_files[]", file);
+      });
+    }
+
+    await apiService.put(PRODUCT_DETAILS_MANAGE_API(newId), detailsForm, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSpecChange = (index, field, value) => {
-    const newSpecs = [...specs];
-    newSpecs[index][field] = value;
-    setSpecs(newSpecs);
+    const updated = [...specs];
+    updated[index][field] = value;
+    setSpecs(updated);
   };
 
   const handleFile = (e) => {
     const files = Array.from(e.target.files);
-    if (images.length + files.length > 5)
+    if (images.length + files.length > 5) {
       return toast.error("Max 5 images allowed");
+    }
     setImages([...images, ...files]);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (images.length === 0) return toast.error("Main image is required");
+
+    if (!images.length) {
+      return toast.error("Main image is required");
+    }
+
+    const validSpecs = specs.filter((s) => s.name.trim() && s.value.trim());
+
+    if (!validSpecs.length) {
+      return toast.error("At least one specification required");
+    }
 
     const data = new FormData();
 
-    Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
-    });
+    data.append("name", formData.name);
+    data.append("regular_price", Number(formData.regular_price));
+    data.append("discount", Number(formData.discount || 0));
+    data.append("sale_price", Number(formData.sale_price));
+    data.append("category_id", Number(formData.category_id));
+    data.append("sub_category_id", Number(formData.sub_category_id));
+    data.append("brand_id", Number(formData.brand_id));
+    data.append("short_description", formData.short_description || "");
+    data.append("full_description", formData.full_description || "");
+    data.append("emi_status", formData.emi_status === "1" ? 1 : 0);
 
-    specs.forEach((spec, index) => {
-      if (!spec.name || !spec.value) return;
-      data.append(`specifications[${index}][name]`, spec.name);
-      data.append(`specifications[${index}][value]`, spec.value);
-    });
+    // Backend expects a JSON string for `specifications` field
+    data.append("specifications", JSON.stringify(validSpecs));
 
+    // Images
     data.append("main_image", images[0]);
-    images.slice(1).forEach((file, index) => {
-      data.append(`extra_images[${index}][image]`, file);
-    });
+    if (images.length > 1) {
+      // send extra_images as an array of metadata entries and files as extra_images_files[]
+      images.slice(1).forEach((file, idx) => {
+        data.append("extra_images[]", JSON.stringify({ id: idx }));
+        data.append("extra_images_files[]", file);
+      });
+    }
+
+    // Save payload for potential fallback
+    lastPayloadRef.current = { fields: formData, specs: validSpecs, images };
+
+    // Debug: log FormData entries so we can inspect what's being sent
+    try {
+      const entries = [];
+      for (const pair of data.entries()) {
+        // for files, print the file name
+        if (pair[1] instanceof File) entries.push([pair[0], pair[1].name]);
+        else entries.push(pair);
+      }
+      console.log("FormData entries:", entries);
+    } catch (e) {
+      console.warn("Could not enumerate FormData entries", e);
+    }
 
     mutation.mutate(data);
   };
-
   return (
     <div className="w-full text-[#475569]">
       <form onSubmit={handleSubmit} className="space-y-5">

@@ -2,14 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import {
-  AlertCircle,
-  RefreshCw,
-  Package,
-  Tag,
-  Layers,
-  ChevronRight,
-} from "lucide-react";
+import { AlertCircle, RefreshCw, Package, Tag, Layers } from "lucide-react";
 import { useInventory } from "@/api/hooks/useInventory";
 
 const Category = () => {
@@ -22,7 +15,7 @@ const Category = () => {
     isError,
     refreshInventory,
   } = useInventory();
-  console.log(brands);
+  console.log(categories);
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-100 w-full">

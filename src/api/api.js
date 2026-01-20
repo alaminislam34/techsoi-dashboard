@@ -6,13 +6,19 @@ const BASE_URL = "https://api.techsoibd.com/api";
 const apiService = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 apiService.interceptors.request.use(
   (config) => {
+    // If sending FormData, let the browser/axios set the Content-Type
+    if (config.data && typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      if (config.headers && config.headers['Content-Type']) {
+        delete config.headers['Content-Type'];
+      }
+    } else {
+      // default to JSON for non-FormData requests
+      config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json';
+    }
     if (!config.url.includes("/admin/login")) {
       const token = Cookies.get("admin_token");
       if (!token) {

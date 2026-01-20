@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
-import axios from "axios";
+import apiService from "@/api/api";
 import toast from "react-hot-toast";
 import { CATEGORY_API, SUB_CATEGORY_API, BRAND_API, PRODUCT_API } from "@/api/apiEndPoint";
 
@@ -33,16 +33,17 @@ const ManageProduct = () => {
 
   const [specs, setSpecs] = useState([{ key: "", value: "" }]);
   const [images, setImages] = useState([]);
+  const [existingMainImage, setExistingMainImage] = useState(null);
 
   // Fetch all data and pre-fill form
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [cat, sub, br, productRes] = await Promise.all([
-          axios.get(CATEGORY_API),
-          axios.get(SUB_CATEGORY_API),
-          axios.get(BRAND_API),
-          axios.get(`${PRODUCT_API}/${productId}`),
+          apiService.get(CATEGORY_API),
+          apiService.get(SUB_CATEGORY_API),
+          apiService.get(BRAND_API),
+          apiService.get(`${PRODUCT_API}/${productId}`),
         ]);
 
         setCategories(cat.data?.data || []);
@@ -83,6 +84,8 @@ const ManageProduct = () => {
               setSpecs([{ key: "", value: "" }]);
             }
           }
+          // store existing main image URL so we can send it when user doesn't upload new file
+          if (p.image) setExistingMainImage(p.image);
         }
       } catch (e) {
         console.error("Fetch error", e);
@@ -147,30 +150,28 @@ const ManageProduct = () => {
         images.slice(1).forEach((img) => {
           data.append("extra_images_files[]", img);
         });
+      } else if (existingMainImage) {
+        // backend expects main_image; if user didn't upload a new file, send existing URL
+        data.append("main_image", existingMainImage);
       }
 
       // ৪. এপিআই কল
-      await axios.put(
-        `${PRODUCT_API}/${productId}`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-          },
-        },
-      );
+      // Laravel does not reliably parse multipart data on PUT requests.
+      // Use POST with _method=PUT so files and fields are parsed correctly.
+      data.append("_method", "PUT");
+      await apiService.post(`${PRODUCT_API}/${productId}`, data);
 
       toast.success("Product Updated Successfully!");
       setImages([]); 
     } catch (err) {
       console.error("Update failed", err);
-      if (err.response?.status === 422) {
-        const errors = err.response.data.errors;
-        const firstError = Object.values(errors)[0][0];
-        toast.error(firstError);
+      const serverData = err.response?.data || err.data || null;
+      if (serverData && serverData.errors) {
+        const first = Object.values(serverData.errors)[0];
+        const msg = Array.isArray(first) ? first[0] : first;
+        toast.error(msg || "Update failed");
       } else {
-        toast.error("Update failed. Please try again.");
+        toast.error(serverData?.message || err.message || "Update failed. Please try again.");
       }
     } finally {
       setUpdating(false);
