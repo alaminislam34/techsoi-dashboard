@@ -1,184 +1,193 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, RefreshCw, Layers, Tag, Package } from "lucide-react";
-import { BRAND_API, CATEGORY_API, SUB_CATEGORY_API } from "@/api/apiEndPoint";
 import Image from "next/image";
-import apiService from "@/api/api";
+import {
+  AlertCircle,
+  RefreshCw,
+  Package,
+  Tag,
+  Layers,
+  ChevronRight,
+} from "lucide-react";
+import { useInventory } from "@/api/hooks/useInventory";
 
 const Category = () => {
   const DEFAULT_IMAGE = "/images/hp.png";
-
-  // --- 1. Fetching Data with useQuery ---
-  // আমরা ৩টি আলাদা কুয়েরি চালাচ্ছি যাতে একটি ফেইল করলেও বাকিগুলো লোড হতে পারে
   const {
-    data: categories = [],
-    isLoading: loadingCat,
-    isError: catError,
-    refetch: refetchCat,
-  } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await apiService.get(CATEGORY_API);
-      return res.data?.data || res.data || [];
-    },
-  });
-
-  const {
-    data: subCategories = [],
-    isLoading: loadingSub,
-    isError: subError,
-  } = useQuery({
-    queryKey: ["subCategories"],
-    queryFn: async () => {
-      const res = await apiService.get(SUB_CATEGORY_API);
-      return res.data?.data || res.data || [];
-    },
-  });
-
-  const {
-    data: brands = [],
-    isLoading: loadingBrand,
-    isError: brandError,
-  } = useQuery({
-    queryKey: ["brands"],
-    queryFn: async () => {
-      const res = await apiService.get(BRAND_API);
-      return res.data?.data || res.data || [];
-    },
-  });
-
-  const loading = loadingCat || loadingSub || loadingBrand;
-  const isError = catError || subError || brandError;
-
-  // --- UI Components ---
-  const SkeletonRow = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4 animate-pulse border-b">
-      <div className="h-10 bg-gray-200 rounded w-full"></div>
-      <div className="h-10 bg-gray-100 rounded w-full"></div>
-      <div className="h-10 bg-gray-200 rounded w-full"></div>
-    </div>
-  );
-
-  const handleRetry = () => {
-    refetchCat();
-    // সবগুলো রি-ফেচ করার জন্য queryClient.invalidateQueries(["categories", "subCategories", "brands"]) ব্যবহার করা যায়
-  };
-
+    categories,
+    subCategories,
+    brands,
+    isLoading,
+    isError,
+    refreshInventory,
+  } = useInventory();
+  console.log(brands);
   if (isError) {
     return (
-      <div className="w-full flex flex-col items-center justify-center min-h-100 p-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-100 w-full">
         <AlertCircle size={40} className="text-red-500 mb-4" />
-        <p className="text-gray-600 mb-4">
-          Unable to load category data. Please check your connection.
+        <p className="text-slate-600 mb-4 font-medium">
+          Unable to sync inventory data.
         </p>
         <button
-          onClick={handleRetry}
-          className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-lg transition-transform active:scale-95"
+          onClick={refreshInventory}
+          className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-lg hover:bg-slate-800 transition-all"
         >
-          <RefreshCw size={16} /> Try Again
+          <RefreshCw size={16} /> Reconnect
         </button>
       </div>
     );
   }
 
   return (
-    <div className="w-full p-4 md:p-8 bg-white min-h-screen">
-      {/* Table Header */}
-      <div className="hidden md:grid grid-cols-3 pb-6 border-b border-gray-100 text-dark font-bold text-base uppercase tracking-wider">
-        <div>Main Category</div>
-        <div>Sub Category</div>
-        <div>Brands</div>
-      </div>
-
-      <div className="divide-y divide-gray-100">
-        {loading
-          ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
-          : categories.map((category) => {
-              const filteredSubs = subCategories.filter(
-                (sub) => Number(sub.category_id) === Number(category.id),
-              );
-
-              return (
-                <div
-                  key={category.id}
-                  className="grid grid-cols-1 md:grid-cols-3 py-4 gap-6 md:gap-4 items-start transition-all"
-                >
-                  {/* Category Info */}
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src={category.image || DEFAULT_IMAGE}
-                      height={200}
-                      width={200}
-                      unoptimized
-                      alt={category.name}
-                      className="w-12 h-12 md:w-10 md:h-10 object-cover rounded-lg bg-gray-50 shadow-sm"
-                    />
-                    <div>
-                      <span className="md:hidden block text-xs font-bold text-primary uppercase mb-1">
-                        Main Category
-                      </span>
-                      <h3 className="text-dark text-base md:text-[15px] font-semibold">
-                        {category.name}
-                      </h3>
-                    </div>
-                  </div>
-
-                  {/* Sub Categories List */}
-                  <div>
-                    <span className="md:hidden flex items-center gap-2 text-xs font-bold text-primary uppercase mb-2">
-                      <Layers size={14} /> Sub Categories
-                    </span>
-                    {filteredSubs.length > 0 ? (
-                      <ul className="grid grid-cols-2 md:grid-cols-1 gap-2">
-                        {filteredSubs.map((sub) => (
-                          <li
-                            key={sub.id}
-                            className="text-gray-600 text-sm flex items-center gap-2"
-                          >
-                            <span className="w-1.5 h-1.5 bg-primary/40 rounded-full shrink-0"></span>
-                            {sub.name}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span className="text-gray-300 italic text-sm">
-                        No items
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Brands List */}
-                  <div>
-                    <span className="md:hidden flex items-center gap-2 text-xs font-bold text-primary uppercase mb-2">
-                      <Tag size={14} /> Brands
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {brands.length > 0 ? (
-                        brands.map((brand) => (
-                          <span
-                            key={brand.id}
-                            className="bg-white border border-gray-200 px-3 py-1 rounded-md text-[11px] font-medium text-gray-600 shadow-sm"
-                          >
-                            {brand.name}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-gray-300">—</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-        {!loading && categories.length === 0 && (
-          <div className="py-20 text-center">
-            <Package size={48} className="mx-auto text-gray-200 mb-4" />
-            <p className="text-gray-400">No data found in your inventory.</p>
+    <div className="w-full min-h-screen bg-white">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-2">
+          <div className="flex items-center gap-2 mb-4">
+            <Layers size={18} className="text-slate-400" />
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+              Categories
+            </h2>
           </div>
-        )}
+
+          <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <table className="w-full text-left">
+              <thead className="">
+                <tr>
+                  <th className="px-6 py-4 text-[13px] font-bold text-slate-700">
+                    Main Category
+                  </th>
+                  <th className="px-6 py-4 text-[13px] font-bold text-slate-700">
+                    Sub-Categories
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {isLoading
+                  ? [...Array(5)].map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td className="px-6 py-5">
+                          <div className="h-10 bg-slate-100 rounded w-40"></div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="h-10 bg-slate-50 rounded w-full"></div>
+                        </td>
+                      </tr>
+                    ))
+                  : categories.map((category) => {
+                      const filteredSubs = subCategories.filter(
+                        (sub) =>
+                          Number(sub.category_id) === Number(category.id),
+                      );
+                      return (
+                        <tr
+                          key={category.id}
+                          className="hover:bg-slate-50/30 transition-colors"
+                        >
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-4">
+                              <div className="h-10 w-10 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 relative shrink-0">
+                                <Image
+                                  src={category.image || DEFAULT_IMAGE}
+                                  fill
+                                  alt=""
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              </div>
+                              <span className="font-semibold text-slate-800 text-[15px]">
+                                {category.name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-2">
+                              {filteredSubs.length > 0 ? (
+                                filteredSubs.map((sub) => (
+                                  <p key={sub.id}>
+                                    <span className="text-slate-500 px-2 py-1 border border-gray-200">
+                                      {sub.name}
+                                    </span>
+                                  </p>
+                                ))
+                              ) : (
+                                <span className="text-slate-300 text-xs italic">
+                                  Empty
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* RIGHT: Brands Sidebar */}
+        <div className="flex-1 lg:max-w-[320px]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Tag size={18} className="text-slate-400" />
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                Global Brands
+              </h2>
+            </div>
+            <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold">
+              {brands.length}
+            </span>
+          </div>
+
+          <div className="rounded-xl border border-gray-100 bg-gray-50 overflow-hidden flex flex-col">
+            {/* Scrollable Brand Area */}
+            <div className="p-3 space-y-2 max-h-150 overflow-y-auto custom-scrollbar">
+              {isLoading ? (
+                [...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-12 bg-slate-200 rounded-lg animate-pulse"
+                  ></div>
+                ))
+              ) : brands.length > 0 ? (
+                brands.map((brand) => (
+                  <div
+                    key={brand.id}
+                    className="flex items-center gap-3 p-2 group"
+                  >
+                    <div className="h-10 w-10 rounded-md overflow-hidden border border-slate-100 bg-slate-50 relative shrink-0">
+                      <Image
+                        src={brand.image || DEFAULT_IMAGE}
+                        fill
+                        alt={brand.slug}
+                        className="object-cover group-hover:scale-110 transition-transform duration-300"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-slate-700 leading-none mb-1">
+                        {brand.name}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-10">
+                  <Package size={24} className="mx-auto text-slate-300 mb-2" />
+                  <p className="text-slate-400 text-xs">No brands found</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Info */}
+            <div className="p-3 bg-slate-50/80 border-t border-slate-200">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter text-center">
+                Syncing with master directory
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
