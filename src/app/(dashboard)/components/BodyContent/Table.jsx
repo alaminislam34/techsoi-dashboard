@@ -29,9 +29,9 @@ const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
   return (
     <div className="w-full text-dark">
       <div className="relative overflow-x-auto min-h-100">
-        <table className="text-left border-collapse min-w-250 w-full">
+        <table className="text-left border-collapse min-w-250 w-full overflow-y-auto">
           <thead>
-            <tr className="text-gray-500 text-sm border-b border-gray-100 bg-gray-50/50 *:p-4 *:font-medium truncate">
+            <tr className="text-gray-500 text-base border-b border-gray-100 bg-gray-50/50 *:p-4 lg:*:py-6 *:font-medium truncate">
               {columns.map((col, idx) => (
                 <th key={idx} className={col.className || ""}>
                   {col.header}

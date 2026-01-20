@@ -1,7 +1,8 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronDown, ArrowLeft, Package } from "lucide-react";
+import { ChevronDown, ArrowLeft, Package, Trash2 } from "lucide-react";
 import {
   SINGLE_ORDER_API,
   CATEGORY_API,
@@ -9,6 +10,7 @@ import {
   BRAND_API,
 } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
+import { useOrderActions } from "@/api/hooks/useOrderActions";
 
 const ProductsDetails = () => {
   const [order, setOrder] = useState(null);
@@ -21,34 +23,36 @@ const ProductsDetails = () => {
   const router = useRouter();
   const orderId = params.id;
   const [isOpen, setIsOpen] = useState(false);
-  const [statusId, setStatusId] = useState(null);
+
+  const fetchAllData = async () => {
+    try {
+      const [orderRes, catRes, subRes, brandRes] = await Promise.all([
+        apiService.get(`${SINGLE_ORDER_API(orderId)}`),
+        apiService.get(CATEGORY_API),
+        apiService.get(SUB_CATEGORY_API),
+        apiService.get(BRAND_API),
+      ]);
+
+      if (orderRes.status === 200) {
+        setOrder(orderRes.data.data);
+      }
+
+      setCategories(catRes.data.data || []);
+      setSubCategories(subRes.data.data || []);
+      setBrands(brandRes.data.data || []);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const [orderRes, catRes, subRes, brandRes] = await Promise.all([
-          apiService.get(`${SINGLE_ORDER_API(orderId)}`),
-          apiService.get(CATEGORY_API),
-          apiService.get(SUB_CATEGORY_API),
-          apiService.get(BRAND_API),
-        ]);
-
-        if (orderRes.status === 200) {
-          setOrder(orderRes.data.data);
-          setStatusId(orderRes.data.data.status);
-        }
-
-        setCategories(catRes.data.data || []);
-        setSubCategories(subRes.data.data || []);
-        setBrands(brandRes.data.data || []);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchAllData();
   }, [orderId]);
+
+  const { updateStatus, deleteOrder, isUpdating } =
+    useOrderActions(fetchAllData);
 
   const getCategoryName = (id) =>
     categories.find((c) => c.id === id)?.name || "N/A";
@@ -56,20 +60,26 @@ const ProductsDetails = () => {
     subCategories.find((s) => s.id === id)?.name || "N/A";
   const getBrandName = (id) => brands.find((b) => b.id === id)?.name || "N/A";
 
-  const statusOptions = {
-    0: "Cancelled",
-    1: "New Order",
-    2: "Pending",
-    3: "Delivered",
-  };
+  const statusOptions = [
+    { label: "New Order", value: 1 },
+    { label: "Pending", value: 2 },
+    { label: "Processing", value: 3 },
+    { label: "In Delivery", value: 4 },
+    { label: "Complete", value: 5 },
+    { label: "Cancelled", value: 0 },
+  ];
 
   const getStatusStyles = (id) => {
     switch (Number(id)) {
       case 0:
         return "text-red-600 border-red-500 bg-red-50";
+      case 1:
+        return "text-blue-600 border-blue-500 bg-blue-50";
       case 2:
         return "text-orange-500 border-orange-500 bg-orange-50";
       case 3:
+        return "text-purple-600 border-purple-500 bg-purple-50";
+      case 5:
         return "text-green-600 border-green-600 bg-green-50";
       default:
         return "text-primary border-primary bg-secondary/50";
@@ -89,13 +99,11 @@ const ProductsDetails = () => {
       </button>
 
       <div className="space-y-6">
-        {/* ORDER SUMMARY */}
         <section>
           <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
             Order Summary
           </div>
           <div className="bg-white p-6 md:p-8 rounded-b-xl flex flex-col md:flex-row gap-6 md:gap-8 relative shadow-sm border border-gray-100">
-            {/* Image/Icon Box - Hidden on very small screens or made smaller */}
             <div className="w-full md:w-48 h-32 md:h-48 bg-gray-100 rounded-2xl shrink-0 flex flex-col items-center justify-center border border-dashed border-gray-300">
               <Package size={32} className="text-gray-300 mb-1" />
               <span className="text-gray-400 text-xs italic">
@@ -117,9 +125,7 @@ const ProductsDetails = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
                   <span className="text-gray-500 w-24">Payment:</span>
                   <span
-                    className={`font-medium ${
-                      order.pay_status === 1 ? "text-green-600" : "text-red-500"
-                    }`}
+                    className={`font-medium ${order.pay_status === 1 ? "text-green-600" : "text-red-500"}`}
                   >
                     {order.pay_status === 1 ? "Paid" : "Unpaid"} (
                     {order.pay_method})
@@ -134,43 +140,67 @@ const ProductsDetails = () => {
               </div>
             </div>
 
-            {/* Status Dropdown - Moved for mobile flow, Absolute for Desktop */}
             <div className="md:absolute top-4 right-4 md:top-8 md:right-8">
               <div className="relative">
                 <button
+                  disabled={isUpdating}
                   onClick={() => setIsOpen(!isOpen)}
-                  className={`flex items-center justify-between w-full md:w-40 gap-2 border px-4 py-1.5 rounded-lg text-sm font-medium ${getStatusStyles(
-                    statusId,
-                  )}`}
+                  className={`flex items-center justify-between w-full md:w-44 gap-2 border px-4 py-2 rounded-lg text-sm font-medium transition-all ${getStatusStyles(order.status)} ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  {statusOptions[statusId]}{" "}
+                  {statusOptions.find(
+                    (opt) => opt.value === Number(order.status),
+                  )?.label || "Select Status"}
                   <ChevronDown
                     size={16}
-                    className={isOpen ? "rotate-180" : ""}
+                    className={
+                      isOpen
+                        ? "rotate-180 transition-transform"
+                        : "transition-transform"
+                    }
                   />
                 </button>
+
                 {isOpen && (
-                  <div className="absolute right-0 mt-2 w-full bg-white border border-gray-100 rounded-lg shadow-xl z-20 py-1">
-                    {Object.entries(statusOptions).map(([id, label]) => (
-                      <button
-                        key={id}
-                        onClick={() => {
-                          setStatusId(id);
-                          setIsOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors"
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-full md:w-44 bg-white border border-gray-100 rounded-lg shadow-xl z-20 py-1 overflow-hidden">
+                      {statusOptions.map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => {
+                            updateStatus(order.id, order.pay_status, opt.value);
+                            setIsOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-secondary hover:text-primary transition-colors border-b border-gray-50 last:border-0"
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                      <div className="bg-red-50 mt-1 border-t">
+                        <button
+                          onClick={() => {
+                            deleteOrder(
+                              order.id,
+                              "Admin Cancelled from details",
+                            );
+                            setIsOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-100 flex items-center gap-2 transition-colors"
+                        >
+                          <Trash2 size={14} /> Delete Order
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
           </div>
         </section>
 
-        {/* UPDATED PRODUCT ITEMS TABLE */}
         <section>
           <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
             Items in this Order
@@ -222,13 +252,12 @@ const ProductsDetails = () => {
           </div>
         </section>
 
-        {/* CUSTOMER DETAILS */}
         <section>
           <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
             Customer Details
           </div>
           <div className="bg-white p-6 md:p-8 rounded-b-xl flex flex-col sm:flex-row gap-6 md:gap-8 shadow-sm border border-gray-100">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary rounded-full flex items-center justify-center text-xl md:text-2xl font-bold text-primary shrink-0">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary rounded-full flex items-center justify-center text-xl md:text-2xl font-bold text-primary shrink-0 uppercase">
               {order.name?.charAt(0)}
             </div>
             <div className="space-y-3 flex-1">
@@ -242,13 +271,11 @@ const ProductsDetails = () => {
                 },
               ].map((item, idx) => (
                 <div key={idx} className="flex flex-col sm:flex-row sm:gap-4">
-                  <span className="text-gray-400 sm:text-gray-500 text-xs sm:text-base w-32 uppercase sm:capitalize tracking-wider sm:tracking-normal">
+                  <span className="text-gray-400 sm:text-gray-500 text-xs sm:text-base w-32 uppercase sm:capitalize tracking-wider">
                     {item.label}:
                   </span>
                   <span
-                    className={`text-gray-800 ${
-                      item.bold ? "font-semibold" : ""
-                    }`}
+                    className={`text-gray-800 ${item.bold ? "font-semibold" : ""}`}
                   >
                     {item.value || "N/A"}
                   </span>

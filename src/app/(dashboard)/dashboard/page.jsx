@@ -1,55 +1,67 @@
 "use client";
 
+import React from "react";
+import Link from "next/link";
+import { ChevronDown, Trash2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
 import Stats from "../components/BodyContent/Stats";
 import Table from "../components/BodyContent/Table";
-import { ChevronDown } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import apiService from "@/api/api";
 import { ORDER_API } from "@/api/apiEndPoint";
+import { useOrderActions } from "@/api/hooks/useOrderActions";
 
 const DashboardPage = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  console.log(orders);
-  useEffect(() => {
-    const getOrders = async () => {
-      try {
-        const res = await apiService.get(ORDER_API);
-        console.log(res.data);
-        if (res.status === 200) {
-          setOrders(res.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getOrders();
-  }, []);
+  // TanStack Query দিয়ে ডাটা ফেচিং
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["orders-list"],
+    queryFn: async () => {
+      const res = await apiService.get(ORDER_API);
+      // আপনার API স্ট্রাকচার অনুযায়ী ডাটা এক্সট্রাকশন
+      return res.data?.data?.data || res.data?.data || [];
+    },
+    refetchOnWindowFocus: true, // অন্য ট্যাব থেকে ফিরলে ডাটা অটো আপডেট হবে
+  });
 
-  const getStatusStyles = (status) => {
-    switch (status) {
-      case 1:
-      case "Pending":
-        return "text-orange-500 border-orange-500 bg-orange-50";
-      case "Delivered":
-        return "text-green-600 border-green-600 bg-green-50";
-      case "Cancelled":
-        return "text-primary_red border-primary_red bg-red-50";
-      default:
-        return "text-primary border-primary bg-secondary";
-    }
+  // Mutation হুক (অটোমেটিক ইনভ্যালিডেশন হ্যান্ডেল করবে)
+  const { updateStatus, deleteOrder, isUpdating } = useOrderActions();
+
+  const statusConfig = {
+    1: { label: "New Order", style: "text-primary border-primary bg-blue-50" },
+    2: {
+      label: "Pending",
+      style: "text-orange-500 border-orange-500/40 bg-orange-50",
+    },
+    3: {
+      label: "Processing",
+      style: "text-purple-500 border-purple-500/40 bg-purple-50",
+    },
+    4: {
+      label: "In Delivery",
+      style: "text-green-600 border-green-600 bg-green-50",
+    },
+    5: { label: "Complete", style: "text-white border-green-700 bg-green-600" },
+    0: { label: "Cancelled", style: "text-red-600 border-red-600 bg-red-50" },
   };
 
-  const statusOptions = ["Pending", "Delivered", "Cancelled"];
+  const statusOptions = [
+    { label: "New Order", value: 1 },
+    { label: "Pending", value: 2 },
+    { label: "Processing", value: 3 },
+    { label: "In Delivery", value: 4 },
+    { label: "Complete", value: 5 },
+    { label: "Cancelled", value: 0 },
+  ];
 
   const orderColumns = [
     {
       header: "Order Ref",
       render: (item) => (
-        <span className="font-medium text-dark">{item?.order_ref ?? "-"}</span>
+        <span className="text-dark font-medium">{item?.order_ref ?? "-"}</span>
       ),
     },
     {
@@ -64,7 +76,7 @@ const DashboardPage = () => {
               e.target.src = "/placeholder.png";
             }}
           />
-          <span className="truncate max-w-45 block text-xs">
+          <span className="truncate max-w-45 block text-sm">
             {item?.product?.name ?? "-"}
           </span>
         </div>
@@ -77,35 +89,41 @@ const DashboardPage = () => {
     {
       header: "Total Amount",
       render: (item) => (
-        <span className="font-semibold">{item?.total_amount} BDT</span>
+        <div className="flex flex-col">
+          <span className="font-semibold text-sm">
+            {item?.total_amount} BDT
+          </span>
+        </div>
       ),
     },
     {
       header: "Customer",
       render: (item) => (
         <div className="flex flex-col">
-          <span className="text-xs font-medium">{item?.name}</span>
-          <span className="text-[10px] text-gray-500">{item?.phone}</span>
+          <span className="text-sm font-medium">{item?.name}</span>
         </div>
       ),
     },
     {
       header: "Status",
       render: (item, index, { openDropdownId, setOpenDropdownId }) => {
-        const displayStatus = item?.status === 1 ? "Pending" : item?.status;
+        const config = statusConfig[item?.status] || statusConfig[1];
+        const isLastItems = index > 5;
 
         return (
           <div className="relative">
             <button
+              disabled={isUpdating}
               onClick={() =>
                 setOpenDropdownId(openDropdownId === index ? null : index)
               }
-              className={`flex items-center justify-between w-28 px-2 py-1.5 border rounded-md text-[11px] font-medium transition-all ${getStatusStyles(
-                item?.status,
-              )}`}
+              className={`flex items-center justify-between w-28 px-2 py-1.5 border rounded-md text-sm transition-all ${config.style} ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              {displayStatus}
-              <ChevronDown size={12} />
+              {config.label}
+              <ChevronDown
+                size={12}
+                className={openDropdownId === index ? "rotate-180" : ""}
+              />
             </button>
 
             {openDropdownId === index && (
@@ -114,15 +132,34 @@ const DashboardPage = () => {
                   className="fixed inset-0 z-10"
                   onClick={() => setOpenDropdownId(null)}
                 />
-                <div className="absolute left-0 mt-1 w-28 bg-white border border-gray-200 rounded-md shadow-xl z-50 py-1">
+                <div
+                  className={`absolute left-0 w-32 bg-white border border-gray-200 rounded-md shadow-xl z-50 py-1 
+                ${isLastItems ? "bottom-full mb-1" : "top-full mt-1"}
+              `}
+                >
                   {statusOptions.map((opt) => (
                     <button
-                      key={opt}
-                      className="w-full text-left px-3 py-2 text-[11px] hover:bg-gray-100"
+                      key={opt.value}
+                      onClick={() => {
+                        updateStatus(item.id, item.pay_status, opt.value);
+                        setOpenDropdownId(null);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors"
                     >
-                      {opt}
+                      {opt.label}
                     </button>
                   ))}
+                  <div className="border-t mt-1">
+                    <button
+                      onClick={() => {
+                        deleteOrder(item.id, "Out of Stock");
+                        setOpenDropdownId(null);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <Trash2 size={12} /> Delete Order
+                    </button>
+                  </div>
                 </div>
               </>
             )}
@@ -132,11 +169,11 @@ const DashboardPage = () => {
     },
     {
       header: "Details",
-      className: "text-center",
+      className: "text-left",
       render: (item) => (
         <Link
           href={`/dashboard/${item.id}`}
-          className="text-primary border border-primary/20 bg-secondary px-3 py-1.5 rounded-md text-[11px] hover:bg-primary hover:text-white transition-all inline-block"
+          className="text-primary truncate border border-primary/60 bg-primary/1 px-3 py-1.5 rounded-md text-sm hover:bg-primary hover:text-white transition-all inline-block"
         >
           View Details
         </Link>
@@ -145,7 +182,7 @@ const DashboardPage = () => {
   ];
 
   return (
-    <div className="w-full p-4 lg:p-6">
+    <div className="w-full">
       <div className="flex flex-col gap-6">
         <section>
           <Stats />
@@ -155,8 +192,15 @@ const DashboardPage = () => {
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-bold text-lg text-dark">Recent Orders</h2>
           </div>
-          {loading ? (
-            <div className="p-10 text-center">Loading orders...</div>
+
+          {isLoading ? (
+            <div className="p-10 text-center animate-pulse text-gray-400 font-medium">
+              Loading orders...
+            </div>
+          ) : isError ? (
+            <div className="p-10 text-center text-red-500">
+              Error loading orders. Please refresh.
+            </div>
           ) : (
             <Table data={orders} columns={orderColumns} itemsPerPage={10} />
           )}

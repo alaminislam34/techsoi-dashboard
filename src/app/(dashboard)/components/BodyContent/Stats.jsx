@@ -1,97 +1,58 @@
 "use client";
 
 import { ORDER_API } from "@/api/apiEndPoint";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import toast from "react-hot-toast";
+import React from "react";
 import StatsSkeleton from "@/app/components/skeletons/StatsSkeleton";
 import apiService from "@/api/api";
+import { useQuery } from "@tanstack/react-query";
 
 const Stats = () => {
-  const [loading, setLoading] = useState(true);
-  const [statsData, setStatsData] = useState({
-    total: 0,
-    pending: 0,
-    delivered: 0,
-    canceled: 0,
+  // TanStack Query Fetcher
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["orders-stats"],
+    queryFn: async () => {
+      const res = await apiService.get(ORDER_API);
+      return res.data?.data?.data || res.data?.data || [];
+    },
+    refetchOnWindowFocus: true, // উইন্ডো ফোকাস করলে ডাটা আপডেট হবে
   });
 
-  const fetchStats = async () => {
-    setLoading(true);
+  if (isLoading) return <StatsSkeleton />;
 
-    try {
-      const res = await apiService.get(ORDER_API);
-      if (res.data?.status !== true || !Array.isArray(res.data.data)) {
-        throw new Error("Invalid server response");
-      }
-
-      const allOrders = res.data.data;
-
-      setStatsData({
-        total: allOrders.length,
-        pending: allOrders.filter((o) => o.status === "Pending").length,
-        delivered: allOrders.filter((o) => o.status === "Delivered").length,
-        canceled: allOrders.filter((o) => o.status === "Cancelled").length,
-      });
-    } catch (error) {
-      console.error("Order fetch error:", error);
-
-      if (apiService.isAxiosError(error)) {
-        const status = error.response?.status;
-
-        if (status === 401) {
-          console.error("Unauthorized. Please login again.");
-        } else if (status === 403) {
-          console.error("You do not have permission to view orders.");
-        } else if (status >= 500) {
-          console.error("Server error. Please try again later.");
-        } else if (error.code === "ECONNABORTED") {
-          console.error("Request timeout. Check your internet.");
-        } else {
-          console.error(
-            error.response?.data?.message || "Failed to load order data.",
-          );
-        }
-      } else {
-        toast.error("Something went wrong. Please refresh.");
-      }
-    } finally {
-      setLoading(false);
-    }
+  // স্ট্যাটাস ফিল্টারিং
+  const statsData = {
+    new: orders.filter((o) => Number(o.status) === 1).length,
+    pending: orders.filter((o) => Number(o.status) === 2).length,
+    processing: orders.filter((o) => Number(o.status) === 3).length,
+    inDelivery: orders.filter((o) => Number(o.status) === 4).length,
+    complete: orders.filter((o) => Number(o.status) === 5).length,
+    cancelled: orders.filter((o) => Number(o.status) === 0).length,
   };
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  if (loading) return <StatsSkeleton />;
-
   const statsConfig = [
-    { label: "New Order", count: statsData.total, color: "#2CACE2" },
-    { label: "Pending Products", count: statsData.pending, color: "#E2872C" },
-    {
-      label: "Delivered Products",
-      count: statsData.delivered,
-      color: "#0D9800",
-    },
-    { label: "Cancel Order", count: statsData.canceled, color: "#E22C2C" },
+    { label: "New Order", count: statsData.new, color: "#2CACE2" },
+    { label: "Pending", count: statsData.pending, color: "#E2872C" },
+    { label: "Processing", count: statsData.processing, color: "#9333EA" },
+    { label: "In Delivery", count: statsData.inDelivery, color: "#4F46E5" },
+    { label: "Complete", count: statsData.complete, color: "#0D9800" },
+    { label: "Cancelled", count: statsData.cancelled, color: "#E22C2C" },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-6 mt-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {statsConfig.map((item) => (
         <div
           key={item.label}
-          className="flex flex-col gap-2 items-start rounded-2xl p-6 transition-transform hover:scale-[1.02] duration-300"
-          style={{ backgroundColor: `${item.color}10` }}
+          className="flex flex-col gap-1 items-start rounded-xl shadow-md hover:shadow-lg min-h-28 p-4 transition-all hover:scale-105 border border-transparent hover:border-gray-100 duration-300"
+          style={{ backgroundColor: `${item.color}08` }}
         >
           <p
             style={{ color: item.color }}
-            className="text-sm xl:text-lg font-medium"
+            className="text-sm md:text-base font-semibold"
           >
             {item.label}
           </p>
-          <h1 className="text-2xl sm:text-4xl font-semibold text-gray-800">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
             {item.count.toLocaleString()}
           </h1>
         </div>
