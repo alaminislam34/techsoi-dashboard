@@ -108,18 +108,20 @@ const AddProduct = () => {
     if (images.length === 0) return toast.error("Main image is required");
 
     const data = new FormData();
-    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
 
-    data.append("specifications", JSON.stringify(specs));
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, value);
+    });
+
+    specs.forEach((spec, index) => {
+      if (!spec.name || !spec.value) return;
+      data.append(`specifications[${index}][name]`, spec.name);
+      data.append(`specifications[${index}][value]`, spec.value);
+    });
+
     data.append("main_image", images[0]);
-
-    const extraImagesJson = images.slice(1).map((_, index) => ({
-      [`extra-image-${index + 1}`]: `image-binary-index-${index}`,
-    }));
-    data.append("extra_images", JSON.stringify(extraImagesJson));
-
-    images.slice(1).forEach((file) => {
-      data.append("extra_images_files[]", file);
+    images.slice(1).forEach((file, index) => {
+      data.append(`extra_images[${index}][image]`, file);
     });
 
     mutation.mutate(data);
@@ -128,7 +130,6 @@ const AddProduct = () => {
   return (
     <div className="w-full text-[#475569]">
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Row 1: Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputWrapper label="Select Main Category">
             <select
@@ -177,7 +178,6 @@ const AddProduct = () => {
           </InputWrapper>
         </div>
 
-        {/* Row 2: Brand & EMI */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputWrapper label="Select Brands">
             <select
@@ -216,7 +216,6 @@ const AddProduct = () => {
           </InputWrapper>
         </div>
 
-        {/* Product Name */}
         <InputWrapper label="Products Name">
           <input
             type="text"
@@ -233,7 +232,6 @@ const AddProduct = () => {
           />
         </InputWrapper>
 
-        {/* Short & Full Description */}
         <InputWrapper label="Short Details">
           <input
             type="text"
@@ -261,7 +259,6 @@ const AddProduct = () => {
           <Pencil className="absolute right-4 top-4 text-slate-300" size={18} />
         </InputWrapper>
 
-        {/* Pricing */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <InputWrapper label="Regular Price">
             <input
@@ -297,7 +294,6 @@ const AddProduct = () => {
           </InputWrapper>
         </div>
 
-        {/* Specifications */}
         <div className="space-y-4">
           <label className="text-[15px] font-medium text-[#64748b]">
             Specifications
@@ -353,7 +349,6 @@ const AddProduct = () => {
           ))}
         </div>
 
-        {/* Images */}
         <div className="space-y-4 pt-2">
           <label className="text-[15px] font-medium text-[#64748b]">
             Product Images (1st is Main, max 5)
@@ -383,12 +378,7 @@ const AddProduct = () => {
                     src={URL.createObjectURL(file)}
                     alt={`preview-${i}`}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    onLoad={() => {
-                      if (file instanceof File) {
-                      }
-                    }}
                   />
-
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
                       type="button"

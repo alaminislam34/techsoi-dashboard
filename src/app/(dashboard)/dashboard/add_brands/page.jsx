@@ -54,7 +54,11 @@ const AddBrands = () => {
     }
 
     try {
-      await apiService.post(SPECIAL_BRAND_API, formData);
+      await apiService.post(SPECIAL_BRAND_API, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       toast.success("Brand added successfully!");
       setSelectedFile("");
       fetchBrands();
@@ -62,6 +66,8 @@ const AddBrands = () => {
       toast.error(error.response?.data?.message || "Operation failed");
     } finally {
       setLoading(false);
+      setFileName("Choose a file");
+      setSelectedFile("");
     }
   };
 
@@ -90,7 +96,6 @@ const AddBrands = () => {
 
   return (
     <div className="w-full space-y-8">
-      {/* --- Upload Logo Section --- */}
       <div className="space-y-4">
         <h2 className="text-sm font-medium text-gray-500">Upload Logo</h2>
         <div className="flex flex-col md:flex-row gap-4">
@@ -132,7 +137,6 @@ const AddBrands = () => {
 
       <hr className="border-gray-100" />
 
-      {/* --- Added Brands Table --- */}
       <div className="overflow-hidden rounded-lg bg-white border border-gray-50">
         <table className="w-full text-left border-collapse">
           <thead>

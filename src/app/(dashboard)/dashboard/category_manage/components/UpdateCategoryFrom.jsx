@@ -4,11 +4,7 @@ import React, { useState } from "react";
 import { Upload, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  CATEGORY_API,
-  SUB_CATEGORY_API,
-  BRAND_API,
-} from "@/api/apiEndPoint";
+import { CATEGORY_API, SUB_CATEGORY_API, BRAND_API } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
 
 const UpdateCategoryForm = () => {
@@ -34,32 +30,39 @@ const UpdateCategoryForm = () => {
     },
   });
 
-  // --- 2. Mutations for Creating Data ---
-
-  // Create Category Mutation
   const categoryMutation = useMutation({
-    mutationFn: (formData) => apiService.post(CATEGORY_API, formData),
+    mutationFn: (formData) =>
+      apiService.post(CATEGORY_API, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }),
     onSuccess: () => {
       toast.success("Category created!");
       setCategoryName("");
       setCategoryFile(null);
-      queryClient.invalidateQueries(["categories"]); // ড্রপডাউন রিফ্রেশ করবে
+      queryClient.invalidateQueries(["categories"]);
     },
-    onError: (error) => toast.error(error.message || "Failed to create category"),
+    onError: (error) =>
+      toast.error(error.message || "Failed to create category"),
   });
 
-  // Create Sub-Category Mutation
   const subCategoryMutation = useMutation({
-    mutationFn: (formData) => apiService.post(SUB_CATEGORY_API, formData),
+    mutationFn: (formData) =>
+      apiService.post(SUB_CATEGORY_API, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }),
     onSuccess: () => {
       toast.success("Subcategory created!");
       setSubCategoryName("");
       setSubCategoryFile(null);
     },
-    onError: (error) => toast.error(error.message || "Failed to create subcategory"),
+    onError: (error) =>
+      toast.error(error.message || "Failed to create subcategory"),
   });
 
-  // Create Brand Mutation
   const brandMutation = useMutation({
     mutationFn: (formData) => apiService.post(BRAND_API, formData),
     onSuccess: () => {
@@ -70,9 +73,9 @@ const UpdateCategoryForm = () => {
     onError: (error) => toast.error(error.message || "Failed to create brand"),
   });
 
-  // --- Handlers ---
   const handleCreateCategory = () => {
-    if (!categoryName.trim() || !categoryFile) return toast.error("Missing fields for Category");
+    if (!categoryName.trim() || !categoryFile)
+      return toast.error("Missing fields for Category");
     const formData = new FormData();
     formData.append("name", categoryName);
     formData.append("image", categoryFile);
@@ -80,7 +83,8 @@ const UpdateCategoryForm = () => {
   };
 
   const handleCreateSubCategory = () => {
-    if (!selectedParentId || !subCategoryName.trim() || !subCategoryFile) return toast.error("Missing fields for Subcategory");
+    if (!selectedParentId || !subCategoryName.trim() || !subCategoryFile)
+      return toast.error("Missing fields for Subcategory");
     const formData = new FormData();
     formData.append("category_id", selectedParentId);
     formData.append("name", subCategoryName);
@@ -89,7 +93,8 @@ const UpdateCategoryForm = () => {
   };
 
   const handleCreateBrand = () => {
-    if (!brandName.trim() || !brandFile) return toast.error("Missing fields for Brand");
+    if (!brandName.trim() || !brandFile)
+      return toast.error("Missing fields for Brand");
     const formData = new FormData();
     formData.append("name", brandName);
     formData.append("image", brandFile);
@@ -99,12 +104,13 @@ const UpdateCategoryForm = () => {
 
   return (
     <div className="bg-white space-y-6 p-2 md:p-4">
-      {/* --- Main Category Section --- */}
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Main Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-6">
-            <label className="block text-sm md:text-base text-dark mb-2">Category Name</label>
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Category Name
+            </label>
             <input
               type="text"
               value={categoryName}
@@ -114,21 +120,27 @@ const UpdateCategoryForm = () => {
             />
           </div>
           <div className="md:col-span-4">
-            <label className="block text-sm md:text-base text-dark mb-2">Upload Icon</label>
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Upload Icon
+            </label>
             <div className="relative">
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
                 id="category-upload"
-                onChange={(e) => e.target.files.length && setCategoryFile(e.target.files[0])}
+                onChange={(e) =>
+                  e.target.files.length && setCategoryFile(e.target.files[0])
+                }
               />
               <label
                 htmlFor="category-upload"
                 className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400 bg-white"
               >
                 <Upload size={18} className="text-primary shrink-0" />
-                <span className="truncate text-sm">{categoryFile ? categoryFile.name : "Choose icon"}</span>
+                <span className="truncate text-sm">
+                  {categoryFile ? categoryFile.name : "Choose icon"}
+                </span>
               </label>
             </div>
           </div>
@@ -139,7 +151,11 @@ const UpdateCategoryForm = () => {
               disabled={categoryMutation.isPending}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {categoryMutation.isPending ? <Loader2 className="animate-spin" size={20} /> : "Create"}
+              {categoryMutation.isPending ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                "Create"
+              )}
             </button>
           </div>
         </div>
@@ -150,20 +166,28 @@ const UpdateCategoryForm = () => {
         <h2 className="text-lg font-semibold text-dark mb-4">Sub Category</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-3">
-            <label className="block text-sm md:text-base text-dark mb-2">Select Parent</label>
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Select Parent
+            </label>
             <select
               value={selectedParentId}
               onChange={(e) => setSelectedParentId(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none text-gray-600 bg-white appearance-none text-sm"
             >
-              <option value="">{loadingData ? "Loading..." : "Select Category"}</option>
+              <option value="">
+                {loadingData ? "Loading..." : "Select Category"}
+              </option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
               ))}
             </select>
           </div>
           <div className="md:col-span-4">
-            <label className="block text-sm md:text-base text-dark mb-2">Sub Category Name</label>
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Sub Category Name
+            </label>
             <input
               type="text"
               value={subCategoryName}
@@ -173,21 +197,27 @@ const UpdateCategoryForm = () => {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-sm md:text-base text-dark mb-2">Sub Icon</label>
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Sub Icon
+            </label>
             <div className="relative">
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
                 id="subcategory-upload"
-                onChange={(e) => e.target.files.length && setSubCategoryFile(e.target.files[0])}
+                onChange={(e) =>
+                  e.target.files.length && setSubCategoryFile(e.target.files[0])
+                }
               />
               <label
                 htmlFor="subcategory-upload"
                 className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400 bg-white"
               >
                 <Upload size={18} className="text-primary shrink-0" />
-                <span className="truncate text-sm">{subCategoryFile ? subCategoryFile.name : "Choose icon"}</span>
+                <span className="truncate text-sm">
+                  {subCategoryFile ? subCategoryFile.name : "Choose icon"}
+                </span>
               </label>
             </div>
           </div>
@@ -198,7 +228,11 @@ const UpdateCategoryForm = () => {
               disabled={subCategoryMutation.isPending}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {subCategoryMutation.isPending ? <Loader2 className="animate-spin" size={20} /> : "Create"}
+              {subCategoryMutation.isPending ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                "Create"
+              )}
             </button>
           </div>
         </div>
@@ -209,7 +243,9 @@ const UpdateCategoryForm = () => {
         <h2 className="text-lg font-semibold text-dark mb-4">Brands</h2>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-6">
-            <label className="block text-sm md:text-base text-dark mb-2">Brand Name</label>
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Brand Name
+            </label>
             <input
               type="text"
               value={brandName}
@@ -219,21 +255,27 @@ const UpdateCategoryForm = () => {
             />
           </div>
           <div className="md:col-span-4">
-            <label className="block text-sm md:text-base text-dark mb-2">Brand Image</label>
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Brand Image
+            </label>
             <div className="relative">
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
                 id="brand-upload"
-                onChange={(e) => e.target.files.length && setBrandFile(e.target.files[0])}
+                onChange={(e) =>
+                  e.target.files.length && setBrandFile(e.target.files[0])
+                }
               />
               <label
                 htmlFor="brand-upload"
                 className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400 bg-white"
               >
                 <Upload size={18} className="text-primary shrink-0" />
-                <span className="truncate text-sm">{brandFile ? brandFile.name : "Choose image"}</span>
+                <span className="truncate text-sm">
+                  {brandFile ? brandFile.name : "Choose image"}
+                </span>
               </label>
             </div>
           </div>
@@ -244,7 +286,11 @@ const UpdateCategoryForm = () => {
               disabled={brandMutation.isPending}
               className="w-full flex justify-center items-center bg-primary hover:bg-[#2591be] text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
-              {brandMutation.isPending ? <Loader2 className="animate-spin" size={20} /> : "Create"}
+              {brandMutation.isPending ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                "Create"
+              )}
             </button>
           </div>
         </div>

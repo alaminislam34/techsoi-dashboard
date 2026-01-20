@@ -1,63 +1,92 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Eye, Trash2, Search, ChevronDown, Loader2 } from "lucide-react";
 import Table from "../../components/BodyContent/Table";
 import Link from "next/link";
-import axios from "axios";
-import { BLOG_API } from "@/api/apiEndPoint";
+import { BLOG_API, BLOG_SINGLE_API } from "@/api/apiEndPoint";
 import toast from "react-hot-toast";
+import apiService from "@/api/api";
+import Swal from "sweetalert2";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const BlogManage = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState("");
 
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const res = await axios.get(BLOG_API);
-        // Based on your JSON, it likely returns { data: [...] }
-        setData(res.data.data || res.data);
-      } catch (error) {
-        toast.error("Failed to fetch blogs");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBlogs();
-  }, []);
+  // ১. ব্লগ ফেচ করা (TanStack Query)
+  const { data: blogs = [], isLoading } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: async () => {
+      const res = await apiService.get(BLOG_API);
+      return res.data.data || res.data;
+    },
+    onError: () => toast.error("Failed to fetch blogs"),
+  });
 
-  // --- Delete Logic (Updated to use item.id) ---
+  // ২. ব্লগ ডিলিট করা (TanStack Mutation)
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await apiService.delete(`${BLOG_SINGLE_API(id)}`);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.status) {
+        Swal.fire({
+          title: "Deleted!",
+          text: "The blog has been deleted.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        // ডিলিট সফল হলে লিস্ট রি-ফেচ করবে
+        queryClient.invalidateQueries(["blogs"]);
+      }
+    },
+    onError: (error) => {
+      Swal.fire({
+        title: "Error!",
+        text:
+          error.response?.data?.message ||
+          "Something went wrong while deleting.",
+        icon: "error",
+      });
+    },
+  });
+
   const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this blog?")) {
-      const filteredData = data.filter((item) => item.id !== id);
-      setData(filteredData);
-      toast.success("Blog removed from view");
-    }
+    Swal.fire({
+      title: "Are you sure?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Delete!",
+      cancelButtonText: "No, cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(id);
+      }
+    });
   };
 
-  // --- Sorting Logic (Updated for Blog fields) ---
-  const handleSort = (type) => {
-    setSortConfig(type);
-    let sortedData = [...data];
-
-    if (type === "title") {
+  // ৩. সর্টিং এবং ফিল্টারিং লজিক
+  const getSortedData = () => {
+    let sortedData = [...blogs];
+    if (sortConfig === "title") {
       sortedData.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (type === "status") {
+    } else if (sortConfig === "status") {
       sortedData.sort((a, b) => b.status - a.status);
-    } else if (type === "newest") {
+    } else if (sortConfig === "newest") {
       sortedData.sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at),
       );
     }
-
-    setData(sortedData);
+    return sortedData;
   };
 
-  // --- Filtered Data (Search by Title) ---
-  const filteredData = data.filter((item) =>
+  const filteredData = getSortedData().filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
@@ -110,7 +139,7 @@ const BlogManage = () => {
       render: (item) => (
         <div className="flex items-center justify-center gap-4">
           <Link
-            href={`/dashboard/blog_manage/view/${item.slug}`}
+            href={`/dashboard/blog_manage/`}
             className="text-primary hover:opacity-80"
           >
             <Eye size={18} />
@@ -157,31 +186,22 @@ const BlogManage = () => {
               <ChevronDown size={16} />
             </button>
             <div className="absolute right-0 w-40 bg-white border border-gray-100 rounded-lg shadow-xl hidden group-hover:block z-50">
-              <button
-                onClick={() => handleSort("title")}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20"
-              >
-                Title
-              </button>
-              <button
-                onClick={() => handleSort("status")}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20"
-              >
-                Status
-              </button>
-              <button
-                onClick={() => handleSort("newest")}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20"
-              >
-                Newest
-              </button>
+              {["title", "status", "newest"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSortConfig(type)}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-secondary/20 capitalize"
+                >
+                  {type}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
       <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-primary" />
           </div>
