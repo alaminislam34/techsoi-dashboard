@@ -2,10 +2,24 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
+import {
+  Pencil,
+  Upload,
+  ChevronDown,
+  X,
+  Loader2,
+  Plus,
+  ArrowLeft,
+} from "lucide-react";
 import apiService from "@/api/api";
 import toast from "react-hot-toast";
-import { CATEGORY_API, SUB_CATEGORY_API, BRAND_API, PRODUCT_API } from "@/api/apiEndPoint";
+import {
+  CATEGORY_API,
+  SUB_CATEGORY_API,
+  BRAND_API,
+  PRODUCT_API,
+} from "@/api/apiEndPoint";
+import Link from "next/link";
 
 const ManageProduct = () => {
   const params = useParams();
@@ -35,7 +49,6 @@ const ManageProduct = () => {
   const [images, setImages] = useState([]);
   const [existingMainImage, setExistingMainImage] = useState(null);
 
-  // Fetch all data and pre-fill form
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -45,13 +58,13 @@ const ManageProduct = () => {
           apiService.get(BRAND_API),
           apiService.get(`${PRODUCT_API}/${productId}`),
         ]);
-
         setCategories(cat.data?.data || []);
         setSubCategories(sub.data?.data || []);
         setBrands(br.data?.data || []);
 
         if (productRes.data?.data) {
           const p = productRes.data.data;
+          console.log(p);
           setFormData({
             category_id: p.category_id || "",
             sub_category_id: p.sub_category_id || "",
@@ -66,7 +79,6 @@ const ManageProduct = () => {
             display_amount: p.sale_price || "",
           });
 
-          // Specifications parsing logic
           if (p.specifications) {
             try {
               const parsedSpecs =
@@ -84,8 +96,8 @@ const ManageProduct = () => {
               setSpecs([{ key: "", value: "" }]);
             }
           }
-          // store existing main image URL so we can send it when user doesn't upload new file
-          if (p.image) setExistingMainImage(p.image);
+          // backend may return `main_image` or `image`
+          setExistingMainImage(p.main_image || p.image || null);
         }
       } catch (e) {
         console.error("Fetch error", e);
@@ -151,18 +163,14 @@ const ManageProduct = () => {
           data.append("extra_images_files[]", img);
         });
       } else if (existingMainImage) {
-        // backend expects main_image; if user didn't upload a new file, send existing URL
         data.append("main_image", existingMainImage);
       }
 
-      // ৪. এপিআই কল
-      // Laravel does not reliably parse multipart data on PUT requests.
-      // Use POST with _method=PUT so files and fields are parsed correctly.
       data.append("_method", "PUT");
       await apiService.post(`${PRODUCT_API}/${productId}`, data);
 
       toast.success("Product Updated Successfully!");
-      setImages([]); 
+      setImages([]);
     } catch (err) {
       console.error("Update failed", err);
       const serverData = err.response?.data || err.data || null;
@@ -171,7 +179,11 @@ const ManageProduct = () => {
         const msg = Array.isArray(first) ? first[0] : first;
         toast.error(msg || "Update failed");
       } else {
-        toast.error(serverData?.message || err.message || "Update failed. Please try again.");
+        toast.error(
+          serverData?.message ||
+            err.message ||
+            "Update failed. Please try again.",
+        );
       }
     } finally {
       setUpdating(false);
@@ -187,6 +199,13 @@ const ManageProduct = () => {
 
   return (
     <div className="w-full text-[#475569]">
+      <Link
+        href={"/dashboard/products_manage"}
+        className="text-sm md:text-base text-gray-400 pb-4 flex flex-row items-center gap-2"
+      >
+        <ArrowLeft />
+        Back
+      </Link>
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Row 1: Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -440,6 +459,32 @@ const ManageProduct = () => {
             />
           </div>
           <div className="space-y-3">
+            {/* Show existing main image when no new images selected */}
+            {existingMainImage && images.length === 0 && (
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-100">
+                  <img
+                    src={existingMainImage}
+                    alt={formData.name || "main image"}
+                    className="w-full h-full object-cover"
+                    onError={(e) =>
+                      (e.currentTarget.src = "/images/monitor.jpg")
+                    }
+                  />
+                </div>
+                <div className="flex-1 text-sm text-gray-700">
+                  Current Main Image
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setExistingMainImage(null)}
+                  className="text-[#ff4d4f]"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            )}
+
             {images.map((file, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="text-[#38bdf8]">

@@ -4,8 +4,11 @@ import { useGlobalState } from "@/app/providers/StateProvider";
 import { Bell, Menu, Search, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineLogout } from "react-icons/hi";
+import React, { useEffect, useRef, useState } from "react";
+import apiService from "@/api/api";
+import { PRODUCT_API } from "@/api/apiEndPoint";
 
 const sidelinks = [
   {
@@ -54,6 +57,52 @@ const sidelinks = [
 const DashboardNavbar = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useGlobalState();
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const timerRef = useRef(null);
+  const searchParams = useSearchParams();
+  const activeQ = searchParams?.get("q") || "";
+
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    const term = searchTerm?.trim();
+
+    if (!term) {
+      setSuggestions([]);
+      setIsSearching(false);
+      if (activeQ) router.replace("/dashboard/products_manage");
+      return;
+    }
+
+    setIsSearching(true);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const res = await apiService.get(PRODUCT_API, {
+          params: { q: term, limit: 6 },
+        });
+        const list = res.data?.data || [];
+        setSuggestions(list);
+
+        router.replace(
+          `/dashboard/products_manage?q=${encodeURIComponent(term)}`,
+        );
+      } catch (err) {
+        setSuggestions([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [searchTerm]);
+
   return (
     <div
       className={`flex p-2 md:p-3 lg:p-4 rounded-xl bg-secondary items-center justify-between gap-3 relative z-30`}
@@ -69,15 +118,122 @@ const DashboardNavbar = () => {
 
       <div className="flex-1 max-w-2xl">
         <div className="relative group">
-          <input
-            type="text"
-            placeholder="Search products"
-            className="border bg-white border-primary/50 focus:outline-primary text-gray-500 py-2 px-4 md:px-6 pr-10 md:pr-12 rounded-xl w-full text-sm md:text-base transition-all"
-          />
-          <Search
-            size={18}
-            className="absolute top-1/2 -translate-y-1/2 right-3 md:right-6 text-primary pointer-events-none"
-          />
+          {/* ---------- SEARCH ---------- */}
+          <div className="hidden px-2 md:flex justify-between items-center md:w-xs lg:w-2xl relative mx-4 sm:mx-0 lg:mx-3 md:mx-4 py-2 rounded-xl bg-white border border-[#bee5f6]">
+            <div className="relative flex-1">
+              <input
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (searchTerm.trim()) {
+                      router.push(
+                        `/dashboard/products_manage?q=${encodeURIComponent(searchTerm.trim())}`,
+                      );
+                      setShowSuggestions(false);
+                    }
+                  }
+                }}
+                className="lg:text-lg w-full focus:outline-none"
+                placeholder="Search products.."
+              />
+
+              {showSuggestions && (suggestions.length > 0 || isSearching) && (
+                <div className="absolute left-0 right-0 mt-2 bg-white border border-[#e6f6fd] rounded-lg shadow-lg z-50 max-h-60 overflow-auto max-w-xl">
+                  {isSearching ? (
+                    <div className="p-3 text-sm text-gray-500">
+                      Searching...
+                    </div>
+                  ) : (
+                    suggestions.map((s) => (
+                      <div
+                        key={s.id}
+                        onMouseDown={() => {
+                          router.push(`/dashboard/products_manage/${s.id}`);
+                          setShowSuggestions(false);
+                        }}
+                        className="p-3 hover:bg-[#f5fbff] cursor-pointer flex items-center gap-3"
+                      >
+                        <img
+                          src={s.main_image || "/images/monitor.jpg"}
+                          alt={s.name}
+                          className="w-10 h-10 object-contain"
+                          onError={(e) =>
+                            (e.currentTarget.src = "/images/monitor.jpg")
+                          }
+                        />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-800 truncate">
+                            {s.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            ৳{s.sale_price?.toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+            {(searchTerm.trim() || activeQ) && (
+              <button
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  router.push("/dashboard/products_manage");
+                  setSearchTerm("");
+                  setSuggestions([]);
+                  setShowSuggestions(false);
+                }}
+                className="flex items-center relative gap-2.5 px-3 border-l border-[#9ed9f2] cursor-pointer"
+                aria-label="Clear search"
+              >
+                <X size={18} />
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                if (searchTerm.trim()) {
+                  router.push(
+                    `/dashboard/products_manage?q=${encodeURIComponent(searchTerm.trim())}`,
+                  );
+                  setShowSuggestions(false);
+                } else {
+                  // if empty, navigate to base list (clears query)
+                  router.push("/dashboard/products_manage");
+                }
+              }}
+              className="flex items-center relative gap-2.5 pl-3 border-l border-[#9ed9f2] cursor-pointer"
+            >
+              <svg
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.5 17.5L22 22"
+                  stroke="#303030"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20C15.9706 20 20 15.9706 20 11Z"
+                  stroke="#303030"
+                  strokeWidth="1.5"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -73,8 +73,13 @@ const AddProduct = () => {
       }
 
       // If backend failed with product_id null, try two-step fallback
-      const msg = serverData?.message || err.message || "Failed to publish product";
-      if (typeof msg === "string" && msg.includes("product_id") && lastPayloadRef.current) {
+      const msg =
+        serverData?.message || err.message || "Failed to publish product";
+      if (
+        typeof msg === "string" &&
+        msg.includes("product_id") &&
+        lastPayloadRef.current
+      ) {
         toast.loading("Primary upload failed, trying fallback...");
         try {
           await twoStepCreate(lastPayloadRef.current);
@@ -113,7 +118,11 @@ const AddProduct = () => {
     setImages([]);
   };
 
-  const twoStepCreate = async ({ fields, specs: specsPayload, images: imgs }) => {
+  const twoStepCreate = async ({
+    fields,
+    specs: specsPayload,
+    images: imgs,
+  }) => {
     // Step 1: create product (without details)
     const productForm = new FormData();
     productForm.append("name", fields.name);

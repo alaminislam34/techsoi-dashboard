@@ -9,23 +9,36 @@ import Swal from "sweetalert2";
 import Link from "next/link";
 import { PRODUCT_API } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
+import { useSearchParams } from "next/navigation";
 
 const ProductsManage = () => {
   const queryClient = useQueryClient();
 
   // --- 1. Fetch Products using useQuery ---
+  const searchParams = useSearchParams();
+  const q = searchParams?.get("q") || "";
+
   const {
     data: products = [],
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["products"],
+    queryKey: ["products", q],
     queryFn: async () => {
-      const res = await apiService.get(PRODUCT_API);
+      const res = await apiService.get(PRODUCT_API, {
+        params: q ? { q } : {},
+      });
 
-      // Data Formatting logic remains same
-      if (res.data?.status === true && Array.isArray(res.data.data)) {
-        return res.data.data.map((product) => ({
+      // normalize list
+      const all = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      // If backend doesn't support server-side `q`, apply client-side filtering
+      const filtered = q
+        ? all.filter((p) => (p.name || "").toLowerCase().includes(q.toLowerCase()))
+        : all;
+
+      if (filtered.length > 0) {
+        return filtered.map((product) => ({
           product: {
             id: product.id,
             name: product.name,
@@ -40,6 +53,7 @@ const ProductsManage = () => {
           },
         }));
       }
+
       return [];
     },
   });
@@ -49,7 +63,7 @@ const ProductsManage = () => {
     mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries(["products"]);
-      toast.error("Product has been deleted.");
+      toast.success("Product has been deleted.");
     },
     onError: (error) => {
       toast.error(error.message || "Failed to delete product");
@@ -61,12 +75,11 @@ const ProductsManage = () => {
   const handleDelete = (id) => {
     Swal.fire({
       title: "Are you sure?",
-      text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#64748b",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Yes, Delete!",
       cancelButtonText: "No, cancel",
       background: "#ffffff",
       customClass: {
@@ -178,19 +191,6 @@ const ProductsManage = () => {
         >
           Add New Product
         </Link>
-
-        {/* Search Bar */}
-        <div className="flex-1 w-full max-w-2xl relative">
-          <input
-            type="text"
-            placeholder="Search products"
-            className="w-full pl-6 pr-12 py-3.5 bg-white border border-[#32afe2]/40 rounded-2xl text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#32afe2] placeholder:text-gray-400"
-          />
-          <Search
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#32afe2]"
-            size={24}
-          />
-        </div>
 
         {/* Sort Dropdown */}
         <div className="w-full md:w-auto relative min-w-40">

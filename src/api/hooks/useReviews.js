@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 export const useReviews = () => {
   const queryClient = useQueryClient();
 
-  // 1. Get All Reviews (Admin/Request List)
   const useGetAllReviews = () => {
     return useQuery({
       queryKey: ["reviews"],

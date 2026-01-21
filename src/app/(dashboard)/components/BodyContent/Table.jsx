@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 
 const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const router = useRouter();
 
   const safeData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
   const totalPages = Math.max(1, Math.ceil(safeData.length / itemsPerPage));
@@ -51,26 +53,34 @@ const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
                 </td>
               </tr>
             ) : (
-              currentItems.map((item, rowIndex) => (
-                <tr
-                  key={item?.id ?? rowIndex}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  {columns.map((col, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={`p-4 text-sm ${col.cellClassName || ""}`}
-                    >
-                      {col.render
-                        ? col.render(item ?? {}, rowIndex, {
-                            openDropdownId,
-                            setOpenDropdownId,
-                          })
-                        : (item?.[col.key] ?? "-")}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              currentItems.map((item, rowIndex) => {
+                const linkId = item?.id ?? item?.order_info?.id ?? item?.product?.id ?? null;
+                const rowKey = linkId ?? rowIndex;
+                return (
+                  <tr
+                    key={rowKey}
+                    className={`hover:bg-gray-50 transition-colors ${linkId ? 'cursor-pointer' : ''}`}
+                    onClick={linkId ? () => router.push(`/dashboard/products_manage/${linkId}`) : undefined}
+                    role={linkId ? 'button' : undefined}
+                    tabIndex={linkId ? 0 : undefined}
+                    onKeyDown={linkId ? (e) => { if (e.key === 'Enter') router.push(`/dashboard/products_manage/${linkId}`); } : undefined}
+                  >
+                    {columns.map((col, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className={`p-4 text-sm ${col.cellClassName || ""}`}
+                      >
+                        {col.render
+                          ? col.render(item ?? {}, rowIndex, {
+                              openDropdownId,
+                              setOpenDropdownId,
+                            })
+                          : (item?.[col.key] ?? "-")}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
