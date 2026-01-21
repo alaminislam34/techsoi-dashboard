@@ -49,7 +49,7 @@ const ProductsManage = () => {
     mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries(["products"]);
-      toast.error("Product has been deleted.");
+      toast.success("Product has been deleted.");
     },
     onError: (error) => {
       toast.error(error.message || "Failed to delete product");
@@ -61,12 +61,11 @@ const ProductsManage = () => {
   const handleDelete = (id) => {
     Swal.fire({
       title: "Are you sure?",
-      text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#64748b",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Yes, Delete!",
       cancelButtonText: "No, cancel",
       background: "#ffffff",
       customClass: {
@@ -81,7 +80,6 @@ const ProductsManage = () => {
     });
   };
 
-  // --- Table Columns (Design same to same) ---
   const productColumns = [
     {
       header: "All Products",

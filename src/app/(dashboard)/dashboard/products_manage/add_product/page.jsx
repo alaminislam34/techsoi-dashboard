@@ -29,7 +29,7 @@ const AddProduct = () => {
     full_description: "",
   });
 
-  const [specs, setSpecs] = useState([{ name: "Height", value: "" }]);
+  const [specs, setSpecs] = useState([{ name: "", value: "" }]);
   const [images, setImages] = useState([]);
   const lastPayloadRef = useRef(null);
 
@@ -61,10 +61,26 @@ const AddProduct = () => {
       resetForm();
     },
     onError: async (err) => {
-      // support both axios error shape and our apiService custom error
-      console.error("Product create error:", err);
-      const serverData = err.response?.data || err.data || null;
+      // richer logging to capture odd/empty error objects
+      try {
+        console.error("Product create error (full):", {
+          err,
+          message: err?.message,
+          isAxiosError: err?.isAxiosError,
+          responseData: err?.response?.data,
+          responseStatus: err?.response?.status,
+          config: err?.config,
+          stack: err?.stack,
+          toJSON: typeof err?.toJSON === "function" ? err.toJSON() : undefined,
+        });
+      } catch (dumpErr) {
+        console.error("Product create error (dump failed)", dumpErr, err);
+      }
 
+      // support both axios error shape and our apiService custom error
+      const serverData = err?.response?.data || err?.data || null;
+
+      // If validation errors from server, show first message
       if (serverData && serverData.errors) {
         const first = Object.values(serverData.errors)[0];
         const msg = Array.isArray(first) ? first[0] : first;
@@ -72,29 +88,204 @@ const AddProduct = () => {
         return;
       }
 
-      // If backend failed with product_id null, try two-step fallback
-      const msg = serverData?.message || err.message || "Failed to publish product";
-      if (typeof msg === "string" && msg.includes("product_id") && lastPayloadRef.current) {
-        toast.loading("Primary upload failed, trying fallback...");
+      const msg = (serverData && serverData.message) || err?.message || "Failed to publish product";
+
+      // If server returned a missing/empty response (err object empty) or product_id mention or server error, try fallback
+      const shouldFallback = lastPayloadRef.current && ((typeof msg === "string" && msg.includes("product_id")) || !serverData || (err?.response?.status && err.response.status >= 500));
+
+      if (shouldFallback) {
+        console.log("Triggering fallback due to missing server response or product_id error");
+        doFallback(lastPayloadRef.current, err);
+        return;
+      }
+
+      toast.error(msg);
+    },
+  });
+
+  // Extract created id from various server error shapes
+  const extractCreatedIdFromError = (err) => {
+    try {
+      const data = err?.response?.data || err?.data || null;
+      if (!data) return null;
+      return (
+        data?.data?.id ||
+        data?.data?.product_id ||
+        data?.id ||
+        data?.product_id ||
+        null
+      );
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // Push only details to an existing product (used when server created product but failed details)
+  const pushDetails = async (productId, payload) => {
+    const detailsForm = new FormData();
+    detailsForm.append("full_description", payload.fields.full_description || "");
+    detailsForm.append("specifications", JSON.stringify(payload.specs || []));
+    if (payload.images && payload.images.length > 1) {
+      payload.images.slice(1).forEach((file, idx) => {
+        detailsForm.append("extra_images[]", JSON.stringify({ id: idx }));
+        detailsForm.append("extra_images_files[]", file);
+      });
+    }
+
+    await apiService.put(PRODUCT_DETAILS_MANAGE_API(productId), detailsForm, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  };
+
+  // Try the full primary POST (single multipart request) a few times — mirrors user second-click behavior
+  const attemptPrimaryWithRetries = async (p, retries = 3, delayMs = 1200) => {
+    let lastErr = null;
+    for (let i = 0; i < retries; i++) {
+      try {
+        console.log(`primary retry attempt ${i + 1}`);
+        const form = new FormData();
+        form.append("name", p.fields.name);
+        form.append("regular_price", Number(p.fields.regular_price));
+        form.append("discount", Number(p.fields.discount || 0));
+        form.append("sale_price", Number(p.fields.sale_price));
+        form.append("category_id", Number(p.fields.category_id));
+        form.append("sub_category_id", Number(p.fields.sub_category_id));
+        form.append("brand_id", Number(p.fields.brand_id));
+        form.append("short_description", p.fields.short_description || "");
+        form.append("full_description", p.fields.full_description || "");
+        form.append("emi_status", p.fields.emi_status === "1" ? 1 : 0);
+        form.append("specifications", JSON.stringify(p.specs || []));
+        if (p.images && p.images.length) {
+          form.append("main_image", p.images[0]);
+          if (p.images.length > 1) {
+            p.images.slice(1).forEach((file, idx) => {
+              form.append("extra_images[]", JSON.stringify({ id: idx }));
+              form.append("extra_images_files[]", file);
+            });
+          }
+        }
+
+        const res = await apiService.post(PRODUCT_API, form);
+        // If request succeeded (returned an id), consider it success — otherwise, continue retrying
+        const newId = res?.data?.data?.id || res?.data?.data?.product_id || res?.data?.id || res?.data?.product_id || null;
+        if (newId) return res;
+        // if no id but 2xx, still return and let normal onSuccess handle it
+        return res;
+      } catch (e) {
+        console.warn(`primary attempt ${i + 1} failed`, e);
+        lastErr = e;
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
+    }
+    throw lastErr;
+  };
+
+  // Helper: attempt two-step create with retries (shared)
+  const attemptTwoStepWithRetries = async (p, retries = 4, delayMs = 1500) => {
+    let lastErr = null;
+    for (let i = 0; i < retries; i++) {
+      try {
+        console.log(`twoStep retry attempt ${i + 1}`);
+        await twoStepCreate(p);
+        return;
+      } catch (e) {
+        // If server partially created product and returned an id inside the error, push details and succeed
+        const maybeId = extractCreatedIdFromError(e);
+        if (maybeId) {
+          console.log(`Detected created id ${maybeId} in error; pushing details`);
+          await pushDetails(maybeId, p);
+          return;
+        }
+
+        console.warn(`twoStep attempt ${i + 1} failed`, e);
+        lastErr = e;
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
+    }
+    throw lastErr;
+  };
+
+  const [fallbackPending, setFallbackPending] = useState(false);
+  const fallbackRunningRef = useRef(false);
+
+  // Shared fallback that handles immediate retries and then background retries
+  const doFallback = async (payload, maybeErr) => {
+    if (fallbackRunningRef.current) {
+      console.log("doFallback already running — skipping duplicate call");
+      return;
+    }
+    fallbackRunningRef.current = true;
+    setFallbackPending(true);
+
+    try {
+      // If server already returned an id in the error, try pushing details directly first
+      const errProvidedId = extractCreatedIdFromError(maybeErr);
+      if (errProvidedId) {
         try {
-          await twoStepCreate(lastPayloadRef.current);
+          console.log("doFallback: found id in error, finishing details", errProvidedId);
+          toast.loading("Primary upload partially succeeded — finishing details...");
+          await pushDetails(errProvidedId, payload);
           toast.dismiss();
-          toast.success("Product created (fallback)");
+          toast.success("Product created (completed)");
           queryClient.invalidateQueries(["products"]);
           resetForm();
           return;
         } catch (e) {
-          toast.dismiss();
-          console.error("Fallback failed", e);
-          toast.error("Fallback create failed");
-          return;
+          console.warn("pushDetails failed for provided id, falling back to retries", e);
+          // continue to full retry path
         }
       }
 
-      // fallback to message
-      toast.error(msg);
-    },
-  });
+      toast.loading("Primary upload failed, retrying fallback...");
+      try {
+        // First try the full primary POST a few times (mirrors "click again" behavior)
+        try {
+          const primaryRes = await attemptPrimaryWithRetries(payload, 3, 1200);
+          console.log("Primary retry succeeded", primaryRes);
+          toast.dismiss();
+          toast.success("Product Created Successfully (primary retry)");
+          queryClient.invalidateQueries(["products"]);
+          resetForm();
+          return;
+        } catch (primErr) {
+          console.warn("Primary retries failed, falling back to two-step", primErr);
+        }
+
+        await attemptTwoStepWithRetries(payload, 4, 1500);
+        toast.dismiss();
+        toast.success("Product created (fallback)");
+        queryClient.invalidateQueries(["products"]);
+        resetForm();
+        return;
+      } catch (e) {
+        toast.dismiss();
+        console.error("Fallback failed after retries", e);
+
+        // show a non-blocking background retry toast so user is not shown an error
+        const bgToastId = toast.loading("Upload issue — retrying in background...");
+
+        // background retries
+        (async () => {
+          try {
+            await attemptTwoStepWithRetries(payload, 6, 3000);
+            console.log("Background fallback succeeded");
+            toast.dismiss(bgToastId);
+            toast.success("Product created (background retry)");
+            queryClient.invalidateQueries(["products"]);
+            resetForm();
+          } catch (be) {
+            console.error("Background retry also failed", be);
+            toast.dismiss(bgToastId);
+            // don't show an immediate error to avoid forcing the user to click twice;
+            // log will assist debugging on the console
+          }
+        })();
+      }
+    } finally {
+      fallbackRunningRef.current = false;
+      setFallbackPending(false);
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -113,7 +304,11 @@ const AddProduct = () => {
     setImages([]);
   };
 
-  const twoStepCreate = async ({ fields, specs: specsPayload, images: imgs }) => {
+  const twoStepCreate = async ({
+    fields,
+    specs: specsPayload,
+    images: imgs,
+  }) => {
     // Step 1: create product (without details)
     const productForm = new FormData();
     productForm.append("name", fields.name);
@@ -166,7 +361,7 @@ const AddProduct = () => {
     setImages([...images, ...files]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!images.length) {
@@ -205,8 +400,12 @@ const AddProduct = () => {
       });
     }
 
-    // Save payload for potential fallback
-    lastPayloadRef.current = { fields: formData, specs: validSpecs, images };
+    // Save a deep-cloned payload for potential fallback (avoid referencing mutable state)
+    lastPayloadRef.current = {
+      fields: { ...formData },
+      specs: JSON.parse(JSON.stringify(validSpecs)),
+      images: [...images],
+    };
 
     // Debug: log FormData entries so we can inspect what's being sent
     try {
@@ -221,7 +420,32 @@ const AddProduct = () => {
       console.warn("Could not enumerate FormData entries", e);
     }
 
-    mutation.mutate(data);
+    try {
+      await mutation.mutateAsync(data);
+    } catch (err) {
+      // mutateAsync will trigger onError, but also handle fallback here
+      try {
+        const serverData = err?.response?.data || err?.data || null;
+        const msg = (serverData && serverData.message) || err?.message || null;
+
+        // if server response missing or indicates product_id issue, run fallback immediately
+        const shouldFallback = lastPayloadRef.current && (!serverData || (typeof msg === "string" && msg.includes("product_id")) || (err?.response?.status && err.response.status >= 500));
+        if (shouldFallback) {
+          console.log("handleSubmit: immediate fallback trigger");
+          doFallback(lastPayloadRef.current, err);
+          return;
+        }
+
+        console.error("mutation.mutateAsync error (non-fallback):", {
+          message: err?.message,
+          responseStatus: err?.response?.status,
+          responseData: serverData,
+        });
+        toast.error(msg || "Failed to publish product");
+      } catch (dumpErr) {
+        console.error("mutation.mutateAsync error (dump failed)", dumpErr, err);
+      }
+    }
   };
   return (
     <div className="w-full text-[#475569]">
@@ -495,7 +719,7 @@ const AddProduct = () => {
         <div className="pt-4">
           <button
             type="submit"
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || fallbackPending}
             className="w-full md:w-auto px-10 py-4 bg-[#38bdf8] text-white rounded-xl font-semibold shadow-lg hover:bg-sky-500 transition-all flex items-center justify-center gap-3 disabled:opacity-70"
           >
             {mutation.isPending ? (
