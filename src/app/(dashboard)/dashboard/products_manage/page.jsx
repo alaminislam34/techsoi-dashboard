@@ -13,7 +13,6 @@ import apiService from "@/api/api";
 const ProductsManage = () => {
   const queryClient = useQueryClient();
 
-  // --- 1. Fetch Products using useQuery ---
   const {
     data: products = [],
     isLoading,
@@ -23,7 +22,6 @@ const ProductsManage = () => {
     queryFn: async () => {
       const res = await apiService.get(PRODUCT_API);
 
-      // Data Formatting logic remains same
       if (res.data?.status === true && Array.isArray(res.data.data)) {
         return res.data.data.map((product) => ({
           product: {
@@ -43,8 +41,7 @@ const ProductsManage = () => {
       return [];
     },
   });
-  console.log(products);
-  // --- 2. Delete Mutation ---
+
   const deleteMutation = useMutation({
     mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
     onSuccess: () => {
@@ -55,8 +52,6 @@ const ProductsManage = () => {
       toast.error(error.message || "Failed to delete product");
     },
   });
-
-  // --- Action Handlers ---
 
   const handleDelete = (id) => {
     Swal.fire({
@@ -169,7 +164,6 @@ const ProductsManage = () => {
   return (
     <div className="w-full">
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 py-4">
-        {/* Add Button */}
         <Link
           href={"/dashboard/products_manage/add_product"}
           className="w-full md:w-auto bg-[#32afe2] hover:bg-[#2a9ac9] text-white px-10 py-3.5 rounded-2xl font-medium text-lg transition-colors shadow-sm active:scale-95 text-center"
@@ -177,7 +171,6 @@ const ProductsManage = () => {
           Add New Product
         </Link>
 
-        {/* Search Bar */}
         <div className="flex-1 w-full max-w-2xl relative">
           <input
             type="text"
@@ -190,7 +183,6 @@ const ProductsManage = () => {
           />
         </div>
 
-        {/* Sort Dropdown */}
         <div className="w-full md:w-auto relative min-w-40">
           <select className="w-full appearance-none bg-white border border-[#32afe2]/40 rounded-2xl px-6 py-3.5 pr-12 text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#32afe2] cursor-pointer">
             <option>Sort By</option>
