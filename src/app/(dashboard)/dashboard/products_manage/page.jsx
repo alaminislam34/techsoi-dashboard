@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react"; // Added Suspense
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Table from "@/app/(dashboard)/components/BodyContent/Table";
 import { Edit3, Trash2, Search, ChevronDown, Loader2 } from "lucide-react";
@@ -11,7 +11,8 @@ import { PRODUCT_API } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const ProductsManage = () => {
+// I renamed this to Content to wrap it in Suspense below
+const ProductsManageContent = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -217,4 +218,18 @@ const ProductsManage = () => {
   );
 };
 
-export default ProductsManage;
+// Main Export with Suspense wrapper to fix the build error
+export default function ProductsManage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="animate-spin text-[#32afe2] mb-2" size={40} />
+          <p className="text-gray-500">Initializing...</p>
+        </div>
+      }
+    >
+      <ProductsManageContent />
+    </Suspense>
+  );
+}

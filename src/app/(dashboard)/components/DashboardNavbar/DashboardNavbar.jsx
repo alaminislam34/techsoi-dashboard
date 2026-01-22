@@ -6,9 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineLogout } from "react-icons/hi";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, Suspense } from "react"; // Added Suspense
 import apiService from "@/api/api";
-import { PRODUCT_API } from "@/api/apiEndPoint";
+import { PRODUCT_SEARCH_API } from "@/api/apiEndPoint";
 
 const sidelinks = [
   {
@@ -54,7 +54,8 @@ const sidelinks = [
   },
 ];
 
-const DashboardNavbar = () => {
+// Inner component to handle the search logic and params
+const NavbarContent = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useGlobalState();
   const pathname = usePathname();
   const router = useRouter();
@@ -71,7 +72,6 @@ const DashboardNavbar = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
 
     const term = searchTerm?.trim();
-
     if (!term) {
       setSuggestions([]);
       setIsSearching(false);
@@ -82,14 +82,12 @@ const DashboardNavbar = () => {
     setIsSearching(true);
     timerRef.current = setTimeout(async () => {
       try {
-        const res = await apiService.get(PRODUCT_API, {
-          params: { q: term, limit: 6 },
-        });
+        const res = await apiService.get(PRODUCT_SEARCH_API(term));
         const list = res.data?.data || [];
         setSuggestions(list);
 
         router.replace(
-          `/dashboard/products_manage?q=${encodeURIComponent(term)}`,
+          `/dashboard/products_manage?query=${encodeURIComponent(term)}`,
         );
       } catch (err) {
         setSuggestions([]);
@@ -206,7 +204,6 @@ const DashboardNavbar = () => {
                   );
                   setShowSuggestions(false);
                 } else {
-                  // if empty, navigate to base list (clears query)
                   router.push("/dashboard/products_manage");
                 }
               }}
@@ -308,6 +305,23 @@ const DashboardNavbar = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Main Export wrapped in Suspense
+const DashboardNavbar = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex p-2 md:p-3 lg:p-4 rounded-xl bg-secondary items-center justify-between animate-pulse">
+          <div className="h-10 w-32 bg-gray-200 rounded-lg"></div>
+          <div className="h-10 flex-1 max-w-2xl bg-gray-200 rounded-lg mx-4"></div>
+          <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
+        </div>
+      }
+    >
+      <NavbarContent />
+    </Suspense>
   );
 };
 

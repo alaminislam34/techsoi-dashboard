@@ -14,6 +14,7 @@ export const ORDER_DETAILS_API = (id) => `/order-details/${id}`; // Put/Delete
 // --- Product Management ---
 export const PRODUCT_API = "/product"; // Get all / Post
 export const PRODUCT_SINGLE_API = (id) => `/product/${id}`; // Get/Put/Delete
+export const PRODUCT_SEARCH_API = (query) => `/product-search/${query}`;
 export const PRODUCT_LIMIT_API = (limit) => `/product-limit/${limit}`;
 export const PRODUCT_DETAILS_MANAGE_API = (id) => `/product-details/${id}`;
 
@@ -33,7 +34,8 @@ export const BRAND_LIMIT_API = (limit) => `/brand-limit/${limit}`;
 
 export const SPECIAL_BRAND_API = "/special-brand"; // Get all / Post
 export const SPECIAL_BRAND_SINGLE_API = (id) => `/special-brand/${id}`; // Get/Put/Delete
-export const SPECIAL_BRAND_LIMIT_API = (limit) => `/special-brand-limit/${limit}`;
+export const SPECIAL_BRAND_LIMIT_API = (limit) =>
+  `/special-brand-limit/${limit}`;
 
 // --- Banner / Hero Image Management ---
 export const BANNER_API = "/hero-image"; // Get all / Post
