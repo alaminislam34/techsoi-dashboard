@@ -10,9 +10,10 @@ import Table from "../components/BodyContent/Table";
 import apiService from "@/api/api";
 import { ORDER_API } from "@/api/apiEndPoint";
 import { useOrderActions } from "@/api/hooks/useOrderActions";
+import { useRouter } from "next/navigation";
 
 const DashboardPage = () => {
-  // TanStack Query দিয়ে ডাটা ফেচিং
+  const router = useRouter();
   const {
     data: orders = [],
     isLoading,
@@ -21,13 +22,11 @@ const DashboardPage = () => {
     queryKey: ["orders-list"],
     queryFn: async () => {
       const res = await apiService.get(ORDER_API);
-      // আপনার API স্ট্রাকচার অনুযায়ী ডাটা এক্সট্রাকশন
       return res.data?.data?.data || res.data?.data || [];
     },
-    refetchOnWindowFocus: true, // অন্য ট্যাব থেকে ফিরলে ডাটা অটো আপডেট হবে
+    refetchOnWindowFocus: true,
   });
 
-  // Mutation হুক (অটোমেটিক ইনভ্যালিডেশন হ্যান্ডেল করবে)
   const { updateStatus, deleteOrder, isUpdating } = useOrderActions();
 
   const statusConfig = {
@@ -67,7 +66,10 @@ const DashboardPage = () => {
     {
       header: "Product",
       render: (item) => (
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => router.push(`/dashboard/${item.id}`)}
+          className="flex items-center gap-3 cursor-pointer"
+        >
           <img
             src={item?.product?.main_image || "/placeholder.png"}
             alt="product"
@@ -202,7 +204,12 @@ const DashboardPage = () => {
               Error loading orders. Please refresh.
             </div>
           ) : (
-            <Table data={orders} columns={orderColumns} itemsPerPage={10} />
+            <Table
+              data={orders}
+              columns={orderColumns}
+              itemsPerPage={10}
+              redirectPath={`/dashboard`}
+            />
           )}
         </section>
       </div>

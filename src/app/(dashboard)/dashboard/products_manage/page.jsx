@@ -9,12 +9,12 @@ import Swal from "sweetalert2";
 import Link from "next/link";
 import { PRODUCT_API } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ProductsManage = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
-  // --- 1. Fetch Products using useQuery ---
   const searchParams = useSearchParams();
   const q = searchParams?.get("q") || "";
 
@@ -29,12 +29,12 @@ const ProductsManage = () => {
         params: q ? { q } : {},
       });
 
-      // normalize list
       const all = Array.isArray(res.data?.data) ? res.data.data : [];
 
-      // If backend doesn't support server-side `q`, apply client-side filtering
       const filtered = q
-        ? all.filter((p) => (p.name || "").toLowerCase().includes(q.toLowerCase()))
+        ? all.filter((p) =>
+            (p.name || "").toLowerCase().includes(q.toLowerCase()),
+          )
         : all;
 
       if (filtered.length > 0) {
@@ -57,8 +57,7 @@ const ProductsManage = () => {
       return [];
     },
   });
-  console.log(products);
-  // --- 2. Delete Mutation ---
+
   const deleteMutation = useMutation({
     mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
     onSuccess: () => {
@@ -69,8 +68,6 @@ const ProductsManage = () => {
       toast.error(error.message || "Failed to delete product");
     },
   });
-
-  // --- Action Handlers ---
 
   const handleDelete = (id) => {
     Swal.fire({
@@ -94,12 +91,18 @@ const ProductsManage = () => {
     });
   };
 
-  // --- Table Columns (Design same to same) ---
   const productColumns = [
     {
-      header: "All Products",
+      header: "Product Title",
       render: (item) => (
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => {
+            const id = item?.product?.id;
+            if (!id) return toast.error("Product id is missing");
+            router.push(`/dashboard/products_manage/${id}`);
+          }}
+          className="flex items-center gap-3 cursor-pointer"
+        >
           <div className="w-10 h-10 bg-gray-200 rounded-md shrink-0 overflow-hidden">
             <img
               src={item.product.image_url}
@@ -184,7 +187,6 @@ const ProductsManage = () => {
   return (
     <div className="w-full">
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 py-4">
-        {/* Add Button */}
         <Link
           href={"/dashboard/products_manage/add_product"}
           className="w-full md:w-auto bg-[#32afe2] hover:bg-[#2a9ac9] text-white px-10 py-3.5 rounded-2xl font-medium text-lg transition-colors shadow-sm active:scale-95 text-center"
@@ -192,7 +194,6 @@ const ProductsManage = () => {
           Add New Product
         </Link>
 
-        {/* Sort Dropdown */}
         <div className="w-full md:w-auto relative min-w-40">
           <select className="w-full appearance-none bg-white border border-[#32afe2]/40 rounded-2xl px-6 py-3.5 pr-12 text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#32afe2] cursor-pointer">
             <option>Sort By</option>

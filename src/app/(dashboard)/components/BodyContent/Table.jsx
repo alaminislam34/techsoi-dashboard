@@ -1,12 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 
 const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const router = useRouter();
 
   const safeData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
   const totalPages = Math.max(1, Math.ceil(safeData.length / itemsPerPage));
@@ -54,16 +52,12 @@ const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
               </tr>
             ) : (
               currentItems.map((item, rowIndex) => {
-                const linkId = item?.id ?? item?.order_info?.id ?? item?.product?.id ?? null;
-                const rowKey = linkId ?? rowIndex;
+                const rowKey = rowIndex;
                 return (
                   <tr
                     key={rowKey}
-                    className={`hover:bg-gray-50 transition-colors ${linkId ? 'cursor-pointer' : ''}`}
-                    onClick={linkId ? () => router.push(`/dashboard/products_manage/${linkId}`) : undefined}
-                    role={linkId ? 'button' : undefined}
-                    tabIndex={linkId ? 0 : undefined}
-                    onKeyDown={linkId ? (e) => { if (e.key === 'Enter') router.push(`/dashboard/products_manage/${linkId}`); } : undefined}
+                    className={`hover:bg-gray-50 transition-colors`}
+                    role={"button"}
                   >
                     {columns.map((col, colIndex) => (
                       <td

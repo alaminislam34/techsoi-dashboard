@@ -96,7 +96,6 @@ const ManageProduct = () => {
               setSpecs([{ key: "", value: "" }]);
             }
           }
-          // backend may return `main_image` or `image`
           setExistingMainImage(p.main_image || p.image || null);
         }
       } catch (e) {
