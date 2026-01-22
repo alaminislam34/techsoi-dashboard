@@ -19,7 +19,6 @@ const Stats = () => {
 
   if (isLoading) return <StatsSkeleton />;
 
-  // স্ট্যাটাস ফিল্টারিং
   const statsData = {
     new: orders.filter((o) => Number(o.status) === 1).length,
     pending: orders.filter((o) => Number(o.status) === 2).length,

@@ -9,13 +9,14 @@ import toast from "react-hot-toast";
 import apiService from "@/api/api";
 import Swal from "sweetalert2";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 const BlogManage = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState("");
+  const router = useRouter();
 
-  // ১. ব্লগ ফেচ করা (TanStack Query)
   const { data: blogs = [], isLoading } = useQuery({
     queryKey: ["blogs"],
     queryFn: async () => {
@@ -25,7 +26,6 @@ const BlogManage = () => {
     onError: () => toast.error("Failed to fetch blogs"),
   });
 
-  // ২. ব্লগ ডিলিট করা (TanStack Mutation)
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       const res = await apiService.delete(`${BLOG_SINGLE_API(id)}`);
@@ -40,7 +40,6 @@ const BlogManage = () => {
           timer: 1500,
           showConfirmButton: false,
         });
-        // ডিলিট সফল হলে লিস্ট রি-ফেচ করবে
         queryClient.invalidateQueries(["blogs"]);
       }
     },
@@ -71,7 +70,6 @@ const BlogManage = () => {
     });
   };
 
-  // ৩. সর্টিং এবং ফিল্টারিং লজিক
   const getSortedData = () => {
     let sortedData = [...blogs];
     if (sortConfig === "title") {
@@ -94,7 +92,10 @@ const BlogManage = () => {
     {
       header: "Blog Info",
       render: (item) => (
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => router.push(`/dashboard/blog_manage/${item.id}`)}
+          className="flex items-center gap-3 cursor-pointer"
+        >
           <div className="w-12 h-10 bg-[#F2F4F7] rounded shrink-0 overflow-hidden border border-gray-100">
             <img
               src={item.image}

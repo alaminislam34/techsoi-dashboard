@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 export const useOrderActions = () => {
   const queryClient = useQueryClient();
 
-  // ১. সাধারণ স্ট্যাটাস পরিবর্তন (Processing, Pending etc.)
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, currentPayStatus, newStatus }) => {
       const res = await apiService.put(SINGLE_ORDER_API(orderId), {
@@ -23,10 +22,8 @@ export const useOrderActions = () => {
     onError: () => toast.error("Failed to update status"),
   });
 
-  // ২. ডিলিট অ্যাকশন (যা মূলত ক্যানসেল হিসেবে কাজ করে আপনার API-তে)
   const deleteOrderMutation = useMutation({
     mutationFn: async ({ orderId, message }) => {
-      // আপনার API ডক অনুযায়ী DELETE মেথড বডি গ্রহণ করে
       const res = await apiService.delete(SINGLE_ORDER_API(orderId), {
         data: { cancel_message: message || "Admin Action" },
       });

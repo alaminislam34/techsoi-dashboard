@@ -51,26 +51,30 @@ const Table = ({ data = [], columns = [], itemsPerPage = 10 }) => {
                 </td>
               </tr>
             ) : (
-              currentItems.map((item, rowIndex) => (
-                <tr
-                  key={item?.id ?? rowIndex}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  {columns.map((col, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={`p-4 text-sm ${col.cellClassName || ""}`}
-                    >
-                      {col.render
-                        ? col.render(item ?? {}, rowIndex, {
-                            openDropdownId,
-                            setOpenDropdownId,
-                          })
-                        : (item?.[col.key] ?? "-")}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              currentItems.map((item, rowIndex) => {
+                const rowKey = rowIndex;
+                return (
+                  <tr
+                    key={rowKey}
+                    className={`hover:bg-gray-50 transition-colors`}
+                    role={"button"}
+                  >
+                    {columns.map((col, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className={`p-4 text-sm ${col.cellClassName || ""}`}
+                      >
+                        {col.render
+                          ? col.render(item ?? {}, rowIndex, {
+                              openDropdownId,
+                              setOpenDropdownId,
+                            })
+                          : (item?.[col.key] ?? "-")}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

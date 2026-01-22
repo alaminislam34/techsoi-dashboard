@@ -4,16 +4,13 @@ import React from "react";
 import { Eye, Trash2, Star, Loader2 } from "lucide-react";
 import Table from "../../components/BodyContent/Table";
 import { useReviews } from "@/api/hooks/useReviews";
-// import { useReviews } from "@/hooks/useReviews"; // আপনার হুক পাথ অনুযায়ী ঠিক করে নিন
+import { useRouter } from "next/navigation";
 
 const ReviewManage = () => {
-  // হুক থেকে ফাংশনগুলো কল করা
   const { useGetAllReviews, useDeleteReview } = useReviews();
-
-  // ডাটা ফেচ করা
+  const router = useRouter();
   const { data: reviews = [], isLoading } = useGetAllReviews();
   console.log(reviews);
-  // ডিলিট মিউটেশন
   const deleteMutation = useDeleteReview();
 
   const handleDelete = (id) => {
@@ -27,7 +24,10 @@ const ReviewManage = () => {
       header: "Product",
       key: "product",
       render: (item) => (
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => router.push(`/dashboard/review_manage/${item.id}`)}
+          className="flex items-center gap-3 cursor-pointer"
+        >
           <div className="w-10 h-10 bg-gray-100 rounded shrink-0 overflow-hidden border border-gray-100">
             <img
               src={item.product?.image_url}
@@ -53,7 +53,6 @@ const ReviewManage = () => {
       className: "text-center",
       render: (item) => (
         <div className="flex items-center justify-center gap-1 text-sm font-medium">
-          {/* আপনার API কনফিগারেশন অনুযায়ী star ফিল্ড */}
           {Number(item.star || 0).toFixed(1)}
           <Star size={14} className="fill-yellow-400 text-yellow-400" />
         </div>
@@ -76,7 +75,7 @@ const ReviewManage = () => {
             <Eye size={18} />
           </button>
           <button
-            onClick={() => handleDelete(item.id)} // সরাসরি আইটেম আইডি ব্যবহার করা হয়েছে
+            onClick={() => handleDelete(item.id)}
             disabled={deleteMutation.isPending}
             className="text-primary_red hover:scale-110 transition-transform disabled:opacity-50"
           >

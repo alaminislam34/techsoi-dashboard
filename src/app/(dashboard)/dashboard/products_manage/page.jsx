@@ -9,18 +9,25 @@ import Swal from "sweetalert2";
 import Link from "next/link";
 import { PRODUCT_API } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ProductsManage = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const q = searchParams?.get("q") || "";
 
   const {
     data: products = [],
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["products"],
+    queryKey: ["products", q],
     queryFn: async () => {
-      const res = await apiService.get(PRODUCT_API);
+      const res = await apiService.get(PRODUCT_API, {
+        params: q ? { q } : {},
+      });
 
       if (res.data?.status === true && Array.isArray(res.data.data)) {
         return res.data.data.map((product) => ({
@@ -38,6 +45,7 @@ const ProductsManage = () => {
           },
         }));
       }
+
       return [];
     },
   });
@@ -77,9 +85,16 @@ const ProductsManage = () => {
 
   const productColumns = [
     {
-      header: "All Products",
+      header: "Product Title",
       render: (item) => (
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => {
+            const id = item?.product?.id;
+            if (!id) return toast.error("Product id is missing");
+            router.push(`/dashboard/products_manage/${id}`);
+          }}
+          className="flex items-center gap-3 cursor-pointer"
+        >
           <div className="w-10 h-10 bg-gray-200 rounded-md shrink-0 overflow-hidden">
             <img
               src={item.product.image_url}
