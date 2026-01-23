@@ -24,6 +24,7 @@ const AddProduct = () => {
     regular_price: "",
     discount: "",
     sale_price: "",
+    stock: "",
     category_id: "",
     sub_category_id: "",
     brand_id: "",
@@ -84,6 +85,7 @@ const AddProduct = () => {
       regular_price: "",
       discount: "",
       sale_price: "",
+      stock: "",
       category_id: "",
       sub_category_id: "",
       brand_id: "",
@@ -135,12 +137,26 @@ const AddProduct = () => {
     data.append("regular_price", Number(formData.regular_price));
     data.append("discount", Number(formData.discount || 0));
     data.append("sale_price", Number(formData.sale_price));
+    data.append("stock", Number(formData.stock));
     data.append("category_id", Number(formData.category_id));
     data.append("sub_category_id", Number(formData.sub_category_id));
     data.append("brand_id", Number(formData.brand_id));
     data.append("short_description", formData.short_description || "");
     data.append("full_description", formData.full_description || "");
     data.append("emi_status", formData.emi_status === "1" ? 1 : 0);
+
+    // Validate stock: required and must be a non-negative integer
+    const stockValue = Number(formData.stock);
+    if (
+      formData.stock === "" ||
+      Number.isNaN(stockValue) ||
+      stockValue < 0 ||
+      !Number.isInteger(stockValue)
+    ) {
+      return toast.error(
+        "Stock is required and must be a non-negative integer",
+      );
+    }
 
     const payload = {
       fields: { ...formData },
@@ -152,8 +168,22 @@ const AddProduct = () => {
       await submitProduct(payload);
       resetForm();
     } catch (err) {
-      console.error("submitProduct failed", err);
-      toast.error("Failed to publish product");
+      // Log detailed error information to help debugging
+      try {
+        console.error("submitProduct failed (raw):", err);
+        console.error(
+          "submitProduct failed (serialized):",
+          JSON.stringify(err, Object.getOwnPropertyNames(err)),
+        );
+      } catch (logErr) {
+        console.error("Failed to serialize submit error", logErr);
+      }
+
+      const msg =
+        err?.message ||
+        (err?.data && err.data.message) ||
+        "Failed to publish product";
+      toast.error(msg);
     }
   };
   return (
@@ -296,7 +326,7 @@ const AddProduct = () => {
           <Pencil className="absolute right-4 top-4 text-slate-300" size={18} />
         </InputWrapper>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <InputWrapper label="Regular Price">
             <input
               type="number"
@@ -324,6 +354,19 @@ const AddProduct = () => {
               name="sale_price"
               value={formData.sale_price}
               placeholder="0.00"
+              onChange={handleChange}
+              className="custom-input"
+              required
+            />
+          </InputWrapper>
+          <InputWrapper label="Stock">
+            <input
+              type="number"
+              name="stock"
+              value={formData.stock}
+              placeholder="0"
+              min={0}
+              step={1}
               onChange={handleChange}
               className="custom-input"
               required

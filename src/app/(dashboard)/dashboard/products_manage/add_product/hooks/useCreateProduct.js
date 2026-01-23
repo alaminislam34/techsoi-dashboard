@@ -18,6 +18,7 @@ export default function useCreateProduct() {
         form.append("regular_price", Number(p.fields.regular_price));
         form.append("discount", Number(p.fields.discount || 0));
         form.append("sale_price", Number(p.fields.sale_price));
+        form.append("stock", Number(p.fields.stock || 0));
         form.append("category_id", Number(p.fields.category_id));
         form.append("sub_category_id", Number(p.fields.sub_category_id));
         form.append("brand_id", Number(p.fields.brand_id));
@@ -29,8 +30,10 @@ export default function useCreateProduct() {
         if (p.images && p.images.length) {
           form.append("main_image", p.images[0]);
           if (p.images.length > 1) {
-            p.images.slice(1).forEach((file, idx) => {
-              form.append("extra_images[]", JSON.stringify({ id: idx }));
+            const extraFiles = p.images.slice(1);
+            const dummyExtraJson = extraFiles.map((_, idx) => ({ id: idx }));
+            form.append("extra_images", JSON.stringify(dummyExtraJson));
+            extraFiles.forEach((file) => {
               form.append("extra_images_files[]", file);
             });
           }
@@ -39,11 +42,28 @@ export default function useCreateProduct() {
         const res = await apiService.post(PRODUCT_API, form);
         return res;
       } catch (e) {
+        // Detailed logging for debugging failures (includes non-enumerable props)
+        try {
+          console.error("attemptPrimaryWithRetries error:", e);
+          console.error("attemptPrimaryWithRetries error (serialized):", JSON.stringify(e, Object.getOwnPropertyNames(e)));
+        } catch (logErr) {
+          console.error("Failed to serialize error", logErr);
+        }
+
         lastErr = e;
         await new Promise((r) => setTimeout(r, delayMs));
       }
     }
-    throw lastErr;
+
+    // Normalize thrown error so callers can inspect message/status/data easily
+    const normalized = {
+      message: lastErr?.message || "Unknown error",
+      status: lastErr?.status || lastErr?.response?.status || null,
+      data: lastErr?.data || lastErr?.response?.data || null,
+      original: lastErr,
+    };
+
+    throw normalized;
   };
 
   const doFallback = async (payload) => {
