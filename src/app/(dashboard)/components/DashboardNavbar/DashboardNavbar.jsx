@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineLogout } from "react-icons/hi";
-import React, { useEffect, useRef, useState, Suspense } from "react"; // Added Suspense
+import React, { useEffect, useRef, useState, Suspense } from "react";
 import apiService from "@/api/api";
 import { PRODUCT_SEARCH_API } from "@/api/apiEndPoint";
 
@@ -54,7 +54,6 @@ const sidelinks = [
   },
 ];
 
-// Inner component to handle the search logic and params
 const NavbarContent = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useGlobalState();
   const pathname = usePathname();
@@ -68,14 +67,26 @@ const NavbarContent = () => {
   const searchParams = useSearchParams();
   const activeQ = searchParams?.get("q") || "";
 
+  // সার্চ সাবমিট করার কমন ফাংশন
+  const handleSearchSubmit = (term) => {
+    const query = term?.trim();
+    if (query) {
+      router.push(`/dashboard/products_manage?q=${encodeURIComponent(query)}`);
+      setShowSuggestions(false);
+    } else {
+      router.push("/dashboard/products_manage");
+    }
+  };
+
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
 
     const term = searchTerm?.trim();
+
     if (!term) {
       setSuggestions([]);
       setIsSearching(false);
-      if (activeQ) router.replace("/dashboard/products_manage");
+      // এখানে কোন রিডাইরেক্ট রাখা যাবে না যাতে ডিটেইলস পেজে সমস্যা না হয়
       return;
     }
 
@@ -85,10 +96,6 @@ const NavbarContent = () => {
         const res = await apiService.get(PRODUCT_SEARCH_API(term));
         const list = res.data?.data || [];
         setSuggestions(list);
-
-        router.replace(
-          `/dashboard/products_manage?query=${encodeURIComponent(term)}`,
-        );
       } catch (err) {
         setSuggestions([]);
       } finally {
@@ -116,7 +123,6 @@ const NavbarContent = () => {
 
       <div className="flex-1 max-w-2xl">
         <div className="relative group">
-          {/* ---------- SEARCH ---------- */}
           <div className="hidden px-2 md:flex justify-between items-center md:w-xs lg:w-2xl relative mx-4 sm:mx-0 lg:mx-3 md:mx-4 py-2 rounded-xl bg-white border border-[#bee5f6]">
             <div className="relative flex-1">
               <input
@@ -126,16 +132,11 @@ const NavbarContent = () => {
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    if (searchTerm.trim()) {
-                      router.push(
-                        `/dashboard/products_manage?q=${encodeURIComponent(searchTerm.trim())}`,
-                      );
-                      setShowSuggestions(false);
-                    }
+                    handleSearchSubmit(searchTerm);
                   }
                 }}
                 className="lg:text-lg w-full focus:outline-none"
@@ -180,14 +181,20 @@ const NavbarContent = () => {
                 </div>
               )}
             </div>
+
+            {/* ---------- CLEAR (X) BUTTON ---------- */}
             {(searchTerm.trim() || activeQ) && (
               <button
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  router.push("/dashboard/products_manage");
                   setSearchTerm("");
                   setSuggestions([]);
                   setShowSuggestions(false);
+
+                  // শুধু যদি প্রোডাক্ট লিস্ট পেজে থাকি তবেই URL ক্লিন করবো
+                  if (pathname === "/dashboard/products_manage") {
+                    router.push("/dashboard/products_manage");
+                  }
                 }}
                 className="flex items-center relative gap-2.5 px-3 border-l border-[#9ed9f2] cursor-pointer"
                 aria-label="Clear search"
@@ -196,39 +203,12 @@ const NavbarContent = () => {
               </button>
             )}
 
+            {/* ---------- SEARCH BUTTON ---------- */}
             <button
-              onClick={() => {
-                if (searchTerm.trim()) {
-                  router.push(
-                    `/dashboard/products_manage?q=${encodeURIComponent(searchTerm.trim())}`,
-                  );
-                  setShowSuggestions(false);
-                } else {
-                  router.push("/dashboard/products_manage");
-                }
-              }}
+              onClick={() => handleSearchSubmit(searchTerm)}
               className="flex items-center relative gap-2.5 pl-3 border-l border-[#9ed9f2] cursor-pointer"
             >
-              <svg
-                width={24}
-                height={24}
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M17.5 17.5L22 22"
-                  stroke="#303030"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20C15.9706 20 20 15.9706 20 11Z"
-                  stroke="#303030"
-                  strokeWidth="1.5"
-                />
-              </svg>
+              <Search size={22} color="#303030" strokeWidth={1.5} />
             </button>
           </div>
         </div>
@@ -241,6 +221,7 @@ const NavbarContent = () => {
         </button>
       </div>
 
+      {/* ---------- MOBILE SIDEBAR ---------- */}
       <div
         className={`fixed inset-0 z-100 transition-all duration-300 ${
           isSidebarOpen ? "visible opacity-100" : "invisible opacity-0"
@@ -250,7 +231,6 @@ const NavbarContent = () => {
           className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
         />
-
         <div
           className={`absolute top-0 left-0 w-80 h-full bg-secondary border-r border-gray-300 p-6 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -262,7 +242,6 @@ const NavbarContent = () => {
           >
             <X size={20} />
           </button>
-
           <div>
             <div className="flex items-center justify-center mt-6 mb-12">
               <Link href="/dashboard" onClick={() => setIsSidebarOpen(false)}>
@@ -275,7 +254,6 @@ const NavbarContent = () => {
                 />
               </Link>
             </div>
-
             <ul className="flex flex-col gap-3">
               {sidelinks.map((link) => {
                 const active = link.match(pathname);
@@ -297,7 +275,6 @@ const NavbarContent = () => {
               })}
             </ul>
           </div>
-
           <button className="text-primary_red hover:bg-primary_red hover:text-white duration-300 w-full flex items-center gap-3 rounded-xl py-3 px-5 font-semibold transition-all">
             <HiOutlineLogout className="rotate-180 text-xl" />
             Logout
@@ -308,7 +285,6 @@ const NavbarContent = () => {
   );
 };
 
-// Main Export wrapped in Suspense
 const DashboardNavbar = () => {
   return (
     <Suspense
