@@ -5,12 +5,22 @@ import ImageUploader from "../add_product/components/ImageUploader";
 import { Loader2 } from "lucide-react";
 
 export default function EditFieldModal({ open, onClose, fieldKey, originalValue, onSave }) {
-  const [local, setLocal] = useState(originalValue);
+  const [local, setLocal] = useState(() => {
+    if (Array.isArray(originalValue)) return originalValue;
+    if (originalValue && typeof originalValue === "string") return [originalValue];
+    return originalValue;
+  });
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
-    setLocal(originalValue);
-  }, [originalValue]);
+    if (fieldKey === "main_image") {
+      if (Array.isArray(originalValue)) setLocal(originalValue);
+      else if (originalValue && typeof originalValue === "string") setLocal([originalValue]);
+      else setLocal([]);
+    } else {
+      setLocal(originalValue);
+    }
+  }, [originalValue, fieldKey]);
 
   if (!open) return null;
 
@@ -69,9 +79,13 @@ export default function EditFieldModal({ open, onClose, fieldKey, originalValue,
 
           {fieldKey === "main_image" && (
             <ImageUploader
-              images={local && Array.isArray(local) ? local : []}
-              onFileChange={(files) => setLocal((p) => [...(p || []), ...files])}
-              onRemoveImage={(i) => setLocal((p) => p.filter((_, idx) => idx !== i))}
+              images={Array.isArray(local) ? local : []}
+              onFileChange={(e) => {
+                const files = Array.from(e.target?.files || []);
+                if (!files.length) return;
+                setLocal((p) => [...(Array.isArray(p) ? p : []), ...files]);
+              }}
+              onRemoveImage={(i) => setLocal((p) => (Array.isArray(p) ? p.filter((_, idx) => idx !== i) : p))}
             />
           )}
         </div>

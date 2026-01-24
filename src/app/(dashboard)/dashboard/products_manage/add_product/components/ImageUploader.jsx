@@ -24,11 +24,39 @@ const ImageUploader = ({ images, onFileChange, onRemoveImage }) => (
           </span>
 
           <div className="relative max-w-30 aspect-square rounded-lg overflow-hidden bg-gray-100">
-            <img
-              src={URL.createObjectURL(file)}
-              alt={`preview-${i}`}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-            />
+            {
+              (() => {
+                let src = "";
+                let created = false;
+
+                if (typeof file === "string") {
+                  src = file;
+                } else if (file instanceof File || (file && typeof file === "object")) {
+                  try {
+                    src = URL.createObjectURL(file);
+                    created = true;
+                  } catch (e) {
+                    console.warn("createObjectURL failed for image item", e);
+                    src = "";
+                  }
+                }
+
+                return (
+                  <img
+                    src={src}
+                    alt={`preview-${i}`}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    onLoad={() => {
+                      if (created && src) URL.revokeObjectURL(src);
+                    }}
+                    onError={() => {
+                      if (created && src) URL.revokeObjectURL(src);
+                    }}
+                  />
+                );
+              })()
+            }
+
             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <button
                 type="button"
@@ -38,7 +66,7 @@ const ImageUploader = ({ images, onFileChange, onRemoveImage }) => (
                 <X size={18} />
               </button>
             </div>
-          </div>
+          </div> 
         </div>
       ))}
     </div>
