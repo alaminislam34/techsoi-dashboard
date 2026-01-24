@@ -14,9 +14,11 @@ export const ORDER_DETAILS_API = (id) => `/order-details/${id}`; // Put/Delete
 // --- Product Management ---
 export const PRODUCT_API = "/product"; // Get all / Post
 export const PRODUCT_SINGLE_API = (id) => `/product/${id}`; // Get/Put/Delete
+export const PRODUCT_SLUG_API = (slug) => `/product-details/${slug}`; // Get by slug
 export const PRODUCT_SEARCH_API = (query) => `/product-search/${query}`;
 export const PRODUCT_LIMIT_API = (limit) => `/product-limit/${limit}`;
 export const PRODUCT_DETAILS_MANAGE_API = (id) => `/product-details/${id}`;
+export const PRODUCT_DETAILS_API = "/product-details"; // Create
 
 // --- Category Management ---
 export const CATEGORY_API = "/category"; // Get all / Post

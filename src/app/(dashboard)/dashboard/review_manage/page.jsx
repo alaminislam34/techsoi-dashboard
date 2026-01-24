@@ -45,7 +45,9 @@ const ReviewManage = () => {
       header: "Customer",
       key: "customer",
       render: (item) => (
-        <span className="text-sm text-dark italic">{item.customer?.name}</span>
+        <span className="text-sm text-dark italic">
+          {item.customer?.name || item.user?.name || `User #${item.user_id || 'N/A'}`}
+        </span>
       ),
     },
     {

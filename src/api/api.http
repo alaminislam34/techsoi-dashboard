@@ -268,8 +268,8 @@ content-type: application/json
     "short_description": "short-description",
     "emi_status": "1",
     "full_description": "full-description",
-    "specifications": [{"name":"Height","value":"38.6mm",},{"name":"color","value":"red",}],
-    "extra_images": [{ "FORM-URL-1" },{ "FORM-URL-2" },]
+    "specifications": [{"name":"Height","value":"38.6mm"},{"name":"color","value":"red"}],
+    "extra_images": [{"url":"FORM-URL-1"},{"url":"FORM-URL-2"}]
 }
 
 ### update product
@@ -280,7 +280,6 @@ content-type: application/json
 
 {
     "name": "test product update",
-    "sku": "apple-02022025",
     "regular_price": "2000",
     "sale_price": "1500",
     "main_image": "FORM-URL",

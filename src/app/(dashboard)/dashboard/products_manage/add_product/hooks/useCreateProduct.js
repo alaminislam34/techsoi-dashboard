@@ -18,7 +18,7 @@ export default function useCreateProduct() {
         form.append("regular_price", Number(p.fields.regular_price));
         form.append("discount", Number(p.fields.discount || 0));
         form.append("sale_price", Number(p.fields.sale_price));
-        form.append("stock", Number(p.fields.stock || 0));
+        form.append("quantity", Number(p.fields.quantity || 1));
         form.append("category_id", Number(p.fields.category_id));
         form.append("sub_category_id", Number(p.fields.sub_category_id));
         form.append("brand_id", Number(p.fields.brand_id));
@@ -31,10 +31,8 @@ export default function useCreateProduct() {
           form.append("main_image", p.images[0]);
           if (p.images.length > 1) {
             const extraFiles = p.images.slice(1);
-            const dummyExtraJson = extraFiles.map((_, idx) => ({ id: idx }));
-            form.append("extra_images", JSON.stringify(dummyExtraJson));
             extraFiles.forEach((file) => {
-              form.append("extra_images_files[]", file);
+              form.append("extra_images[]", file);
             });
           }
         }

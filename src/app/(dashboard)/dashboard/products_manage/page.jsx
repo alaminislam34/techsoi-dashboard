@@ -34,6 +34,7 @@ const ProductsManageContent = () => {
         return res.data.data.map((product) => ({
           product: {
             id: product.id,
+            slug: product.slug,
             name: product.name,
             image_url: product.main_image,
             category: product.category_id,
@@ -42,6 +43,7 @@ const ProductsManageContent = () => {
           },
           order_info: {
             id: product.id,
+            slug: product.slug,
             discount: "10%",
           },
         }));
@@ -90,9 +92,9 @@ const ProductsManageContent = () => {
       render: (item) => (
         <div
           onClick={() => {
-            const id = item?.product?.id;
-            if (!id) return toast.error("Product id is missing");
-            router.push(`/dashboard/products_manage/${id}`);
+            const slug = item?.product?.slug;
+            if (!slug) return toast.error("Product slug is missing");
+            router.push(`/dashboard/products_manage/${slug}`);
           }}
           className="flex items-center gap-3 cursor-pointer"
         >
@@ -144,7 +146,7 @@ const ProductsManageContent = () => {
       render: (item, index) => (
         <div className="flex items-center gap-3 justify-center">
           <Link
-            href={`/dashboard/products_manage/${item.order_info.id}`}
+            href={`/dashboard/products_manage/${item.order_info.slug}`}
             className="text-slate-500 hover:text-dark transition-colors"
           >
             <Edit3 size={18} />

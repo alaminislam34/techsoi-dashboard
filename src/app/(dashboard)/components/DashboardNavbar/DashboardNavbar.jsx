@@ -154,7 +154,8 @@ const NavbarContent = () => {
                       <div
                         key={s.id}
                         onMouseDown={() => {
-                          router.push(`/dashboard/products_manage/${s.id}`);
+                          const slug = s.slug || s.id;
+                          router.push(`/dashboard/products_manage/${slug}`);
                           setShowSuggestions(false);
                         }}
                         className="p-3 hover:bg-[#f5fbff] cursor-pointer flex items-center gap-3"
