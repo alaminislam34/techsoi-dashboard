@@ -78,7 +78,7 @@ const Sidebar = () => {
       <div>
         <div className="flex items-center justify-center mt-6 mb-12">
           <Link href="/dashboard">
-            {/* <Image
+            <Image
               src="/logos/logo.png"
               height={135}
               width={600}
@@ -86,10 +86,7 @@ const Sidebar = () => {
               loading="eager"
               alt="Website logo"
               className="w-55 h-auto object-cover"
-            />  */}
-            <h1 className="text-xl md:text-2xl font-semibold text-primary">
-              Tech Hat
-            </h1>
+            />
           </Link>
         </div>
 
