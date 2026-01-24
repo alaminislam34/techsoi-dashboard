@@ -2,7 +2,7 @@
 export const ADMIN_LOGIN_API = "/admin/login";
 export const ADMIN_LOGOUT_API = "/admin/logout";
 export const ADMIN_PROFILE_API = "/admin/profile";
-
+export const ADMIN_PASSWORD_RESET_API = "/admin/password-reset";
 // --- User Management ---
 export const GET_ALL_USERS_API = "/users";
 

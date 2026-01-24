@@ -1,207 +1,233 @@
 "use client";
 
 import React, { useState } from "react";
-import { Pencil, Eye, EyeOff, Trash2, Eye as ViewIcon } from "lucide-react";
-import ForgotPasswordFlow from "./components/Modals";
-import SocialLinkModal from "./components/SocialLinkModal";
+import { Eye, EyeOff } from "lucide-react";
+import Swal from "sweetalert2";
+import apiService from "@/api/api";
+import { ADMIN_PASSWORD_RESET_API } from "@/api/apiEndPoint";
 
 const AccountSettings = () => {
-  const [activeTab, setActiveTab] = useState("password");
-  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
-  const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    old_password: "",
+    password: "",
+    confirm_password: "",
+  });
 
   const [showPasswords, setShowPasswords] = useState({
-    current: false,
+    old: false,
     new: false,
     confirm: false,
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const togglePassword = (field) => {
     setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(null); // clear error on input
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic client-side validation
+    if (!formData.old_password) {
+      setError("Please enter your current password");
+      return;
+    }
+    if (!formData.password) {
+      setError("Please enter a new password");
+      return;
+    }
+    if (formData.password.length < 3) {
+      setError("New password must be at least 6 characters");
+      return;
+    }
+    if (formData.password !== formData.confirm_password) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const payload = {
+        old_password: formData.old_password,
+        password: formData.password,
+      };
+
+      const response = await apiService.post(ADMIN_PASSWORD_RESET_API, payload);
+      console.log(response);
+      // Success
+      await Swal.fire({
+        title: "Success!",
+        text: "Your password has been updated successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      // Reset form
+      setFormData({
+        old_password: "",
+        password: "",
+        confirm_password: "",
+      });
+    } catch (err) {
+      console.error("Password reset failed:", err);
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Failed to update password. Please check your current password and try again.";
+
+      setError(errorMessage);
+
+      await Swal.fire({
+        title: "Error",
+        text: errorMessage,
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="w-full space-y-8 p-4">
-      {/* --- Tab Navigation --- */}
-      <div className="flex flex-wrap gap-4">
-        {["password", "social", "contact"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 min-w-37.5 py-4 rounded-xl text-center font-medium transition-all border ${
-              activeTab === tab
-                ? "bg-[#33B1E5] text-white border-[#33B1E5] shadow-md"
-                : "bg-white text-gray-400 border-gray-100 hover:bg-gray-50"
-            }`}
-          >
-            {tab === "password"
-              ? "Change Password"
-              : tab === "social"
-              ? "Social Links"
-              : "Contact Information"}
-          </button>
-        ))}
-      </div>
-
-      {/* --- Password Tab --- */}
-      {activeTab === "password" && (
-        <div className="space-y-10 animate-in fade-in duration-300">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {["Current", "New", "Confirm"].map((label) => (
-              <div key={label} className="space-y-3">
-                <label className="text-sm font-medium text-dark/80">
-                  {label} Password
-                </label>
-                <div className="relative group">
-                  <input
-                    type={
-                      showPasswords[label.toLowerCase()] ? "text" : "password"
-                    }
-                    placeholder="Enter password"
-                    className="w-full px-4 py-3 bg-white border border-[#33B1E5]/30 rounded-lg focus:outline-none focus:border-[#33B1E5] text-dark"
-                  />
-                  <button
-                    onClick={() => togglePassword(label.toLowerCase())}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  >
-                    {showPasswords[label.toLowerCase()] ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
-            <button
-              onClick={() => setIsForgotModalOpen(true)}
-              className="px-10 py-3 rounded-lg border-2 border-red-500 text-red-500 font-medium hover:bg-red-500 hover:text-white transition-all"
-            >
-              Forget Password ?
-            </button>
-            <button className="px-12 py-3.5 bg-[#33B1E5] text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all">
-              Change Password
-            </button>
-          </div>
+    <div className="w-full max-w-3xl mx-auto space-y-8 p-4 md:p-6">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+          <h1 className="text-xl font-semibold text-gray-800">
+            Change Password
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Update your account password for better security.
+          </p>
         </div>
-      )}
 
-      {/* --- Social Links Tab --- */}
-      {activeTab === "social" && (
-        <div className="space-y-8 animate-in fade-in duration-300">
-          <div className="flex justify-end">
-            <button
-              onClick={() => setIsSocialModalOpen(true)}
-              className="px-6 py-2 rounded-xl border border-[#33B1E5] text-[#33B1E5] font-medium hover:bg-[#33B1E5] hover:text-white transition-all"
-            >
-              Add New Social Link
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-6">
-            {[
-              { name: "Facebook", visible: true },
-              { name: "Instagram", visible: true },
-              { name: "Tiktok", visible: false },
-              { name: "Youtube", visible: false },
-            ].map((social, idx) => (
-              <div key={idx} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
-                    {social.name}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button className="text-[#33B1E5]">
-                      {social.visible ? (
-                        <ViewIcon size={16} />
-                      ) : (
-                        <EyeOff size={16} />
-                      )}
-                    </button>
-                    <button className="text-gray-500">
-                      <Pencil size={16} />
-                    </button>
-                    <button className="text-red-500">
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-6">
+            {/* Current Password */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Current Password
+              </label>
+              <div className="relative">
                 <input
-                  type="text"
-                  placeholder="Enter URL"
-                  className="w-full px-4 py-2 border border-[#33B1E5]/30 rounded-lg focus:outline-none focus:border-[#33B1E5]"
+                  type={showPasswords.old ? "text" : "password"}
+                  name="old_password"
+                  value={formData.old_password}
+                  onChange={handleInputChange}
+                  placeholder="Enter current password"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#33B1E5]/30 focus:border-[#33B1E5]"
+                  disabled={isLoading}
                 />
+                <button
+                  type="button"
+                  onClick={() => togglePassword("old")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  disabled={isLoading}
+                >
+                  {showPasswords.old ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
-            ))}
+            </div>
+
+            {/* New Password */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPasswords.new ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Enter new password"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#33B1E5]/30 focus:border-[#33B1E5]"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => togglePassword("new")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  disabled={isLoading}
+                >
+                  {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Confirm New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPasswords.confirm ? "text" : "password"}
+                  name="confirm_password"
+                  value={formData.confirm_password}
+                  onChange={handleInputChange}
+                  placeholder="Confirm new password"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#33B1E5]/30 focus:border-[#33B1E5]"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => togglePassword("confirm")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  disabled={isLoading}
+                >
+                  {showPasswords.confirm ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Submit Button */}
           <div className="flex justify-end pt-4">
-            <button className="px-12 py-3 bg-[#33B1E5] text-white rounded-lg font-medium shadow-md">
-              Save Changes
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`px-10 py-3 rounded-lg font-medium text-white transition-all flex items-center gap-2 ${
+                isLoading
+                  ? "bg-[#33B1E5]/70 cursor-not-allowed"
+                  : "bg-[#33B1E5] hover:opacity-90 shadow-md"
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                  Updating...
+                </>
+              ) : (
+                "Update Password"
+              )}
             </button>
           </div>
-        </div>
-      )}
-
-      {/* --- Contact Information Tab --- */}
-      {activeTab === "contact" && (
-        <div className="space-y-8 animate-in fade-in duration-300">
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-700">
-              Short Brief
-            </label>
-            <input
-              type="text"
-              placeholder="Enter URL"
-              className="w-full px-4 py-3 border border-[#33B1E5]/30 rounded-lg focus:outline-none focus:border-[#33B1E5]"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-700">
-                Whatsapp/Phone Number
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Number"
-                className="w-full px-4 py-3 border border-[#33B1E5]/30 rounded-lg focus:outline-none focus:border-[#33B1E5]"
-              />
-            </div>
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-700">Email</label>
-              <input
-                type="email"
-                placeholder="Enter Email"
-                className="w-full px-4 py-3 border border-[#33B1E5]/30 rounded-lg focus:outline-none focus:border-[#33B1E5]"
-              />
-            </div>
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-700">
-                Shop Location
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Location"
-                className="w-full px-4 py-3 border border-[#33B1E5]/30 rounded-lg focus:outline-none focus:border-[#33B1E5]"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end pt-4">
-            <button className="px-12 py-3 bg-[#33B1E5] text-white rounded-lg font-medium shadow-md">
-              Save Changes
-            </button>
-          </div>
-        </div>
-      )}
-
-      <ForgotPasswordFlow
-        isOpen={isForgotModalOpen}
-        onClose={() => setIsForgotModalOpen(false)}
-      />
-      <SocialLinkModal
-        isOpen={isSocialModalOpen}
-        onClose={() => setIsSocialModalOpen(false)}
-      />
+        </form>
+      </div>
     </div>
   );
 };

@@ -68,7 +68,6 @@ const Sidebar = () => {
     } finally {
       Cookies.remove("admin_token");
       localStorage.removeItem("user");
-      toast.success("Logged out");
       router.push("/login");
     }
   };
