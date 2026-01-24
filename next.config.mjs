@@ -6,10 +6,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "placehold.co",
       },
-      // {
-      //   protocol: "https",
-      //   hostname: "techsoibd.com",
-      // },
+      {
+        protocol: "https",
+        hostname: "api.techsoibd.com",
+      },
     ],
   },
 };

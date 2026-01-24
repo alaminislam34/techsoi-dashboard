@@ -25,6 +25,7 @@ export const useReviews = () => {
       queryKey: ["review", id],
       queryFn: async () => {
         const response = await apiService.get(REVIEW_SINGLE_API(id));
+
         return response.data?.data;
       },
       enabled: !!id,
