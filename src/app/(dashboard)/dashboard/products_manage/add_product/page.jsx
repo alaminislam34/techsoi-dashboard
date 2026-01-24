@@ -55,30 +55,6 @@ const AddProduct = () => {
     },
   });
 
-  // Product creation (POST-only) is handled by `useCreateProduct` hook which performs retries and background retry logic.
-
-  // Helper to extract created id from server error responses (removed in POST-only flow)
-  // const extractCreatedIdFromError = (err) => {
-  //   try {
-  //     const data = err?.response?.data || err?.data || null;
-  //     if (!data) return null;
-  //     return (
-  //       data?.data?.id ||
-  //       data?.data?.product_id ||
-  //       data?.id ||
-  //       data?.product_id ||
-  //       null
-  //     );
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // };
-
-  // pushDetails removed: we now send full product data (including extra images and specifications)
-  // in a single POST request to PRODUCT_API. The server should accept all fields in one request.
-
-  // Full upload retry/fallback logic moved to `useCreateProduct` hook.
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -186,6 +162,7 @@ const AddProduct = () => {
       toast.error(msg);
     }
   };
+  
   return (
     <div className="w-full text-[#475569]">
       <div className="mb-4">

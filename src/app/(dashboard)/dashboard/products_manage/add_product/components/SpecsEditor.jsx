@@ -1,7 +1,7 @@
 import React from "react";
 import { Plus, X } from "lucide-react";
 
-const SpecsEditor = ({ specs, onChangeSpec, onRemoveSpec, onAddSpec }) => (
+const SpecsEditor = ({ specs = [], onChangeSpec, onRemoveSpec, onAddSpec }) => (
   <div className="space-y-4">
     <label className="text-[15px] font-medium text-[#64748b]">
       Specifications
