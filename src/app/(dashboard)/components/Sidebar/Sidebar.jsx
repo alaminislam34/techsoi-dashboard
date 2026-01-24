@@ -78,15 +78,15 @@ const Sidebar = () => {
       <div>
         <div className="flex items-center justify-center mt-6 mb-12">
           <Link href="/dashboard">
-            <Image
+            {/* <Image
               src="/logos/logo.png"
               height={135}
               width={600}
-              unoptimized
               loading="eager"
               alt="Website logo"
               className="w-55 h-auto object-cover"
-            />
+            /> */}
+            <h1>Technology Hub</h1>
           </Link>
         </div>
 
