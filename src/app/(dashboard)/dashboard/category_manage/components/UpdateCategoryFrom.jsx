@@ -13,7 +13,7 @@ const UpdateCategoryForm = () => {
   // --- States for Input Fields (Design Remains Same) ---
   const [categoryName, setCategoryName] = useState("");
   const [categoryFile, setCategoryFile] = useState(null);
-
+  console.log(categoryFile);
   const [selectedParentId, setSelectedParentId] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
   const [subCategoryFile, setSubCategoryFile] = useState(null);
@@ -48,7 +48,8 @@ const UpdateCategoryForm = () => {
         toast.error(res?.data?.message || "Failed to create category");
       }
     },
-    onError: (error) => toast.error(error.message || "Failed to create category"),
+    onError: (error) =>
+      toast.error(error.message || "Failed to create category"),
   });
 
   const subCategoryMutation = useMutation({
@@ -69,7 +70,8 @@ const UpdateCategoryForm = () => {
         toast.error(res?.data?.message || "Failed to create subcategory");
       }
     },
-    onError: (error) => toast.error(error.message || "Failed to create subcategory"),
+    onError: (error) =>
+      toast.error(error.message || "Failed to create subcategory"),
   });
 
   const brandMutation = useMutation({
@@ -103,12 +105,19 @@ const UpdateCategoryForm = () => {
 
     // Prevent duplicate subcategory under same parent (client-side check)
     try {
-      const parent = categories.find((c) => String(c.id) === String(selectedParentId));
+      const parent = categories.find(
+        (c) => String(c.id) === String(selectedParentId),
+      );
       const existing = parent?.subcategory || [];
       const dup = existing.some(
-        (s) => String(s.name).trim().toLowerCase() === subCategoryName.trim().toLowerCase(),
+        (s) =>
+          String(s.name).trim().toLowerCase() ===
+          subCategoryName.trim().toLowerCase(),
       );
-      if (dup) return toast.error("Subcategory with this name already exists for the selected category");
+      if (dup)
+        return toast.error(
+          "Subcategory with this name already exists for the selected category",
+        );
     } catch (e) {
       // ignore - categories may not be loaded
     }
