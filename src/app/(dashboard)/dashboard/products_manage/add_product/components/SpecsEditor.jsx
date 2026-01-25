@@ -6,7 +6,7 @@ const SpecsEditor = ({ specs, onChangeSpec, onRemoveSpec, onAddSpec }) => (
     <label className="text-[15px] font-medium text-[#64748b]">
       Specifications
     </label>
-    {specs.map((spec, idx) => (
+    {specs?.map((spec, idx) => (
       <div key={idx} className="flex flex-col md:flex-row gap-4 items-end">
         <div className="flex-1 w-full">
           <input

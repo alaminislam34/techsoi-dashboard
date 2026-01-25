@@ -3,7 +3,7 @@ import { Upload, X } from "lucide-react";
 
 const ImageUploader = ({ images, onFileChange, onRemoveImage }) => (
   <div className="space-y-4 pt-2">
-    <label className="text-[15px] font-medium text-[#64748b]">
+    <label className="text-[15px] font-medium text-[#64748b] mb-2">
       Product Images (1st is Main, max 5)
     </label>
     <div className="border-[1.5px] border-[#38bdf8]/30 border-dashed rounded-md p-4 flex items-center gap-3 cursor-pointer hover:bg-sky-50 transition-colors relative">
@@ -17,7 +17,7 @@ const ImageUploader = ({ images, onFileChange, onRemoveImage }) => (
       />
     </div>
     <div className="flex flex-wrap items-center gap-4">
-      {images.map((file, i) => (
+      {images?.map((file, i) => (
         <div key={i} className="relative group border rounded-xl p-2 bg-slate-50 shadow-sm max-w-30">
           <span className="text-[10px] absolute -top-2 left-2 bg-sky-500 text-white px-2 py-0.5 rounded-full z-10 font-medium">
             {i === 0 ? "Main Image" : `Extra ${i}`}
