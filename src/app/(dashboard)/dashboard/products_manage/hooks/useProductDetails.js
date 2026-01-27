@@ -18,7 +18,9 @@ async function urlToFile(url, defaultFilename = "image.jpg") {
     }
     const blob = await res.blob();
     const ext = blob.type ? blob.type.split("/")[1] : "jpg";
-    const name = defaultFilename.includes(".") ? defaultFilename : `${defaultFilename}.${ext}`;
+    const name = defaultFilename.includes(".")
+      ? defaultFilename
+      : `${defaultFilename}.${ext}`;
     return new File([blob], name, { type: blob.type || "image/jpeg" });
   } catch (e) {
     console.warn("urlToFile: could not fetch", e);
@@ -39,14 +41,18 @@ export default function useProductDetails(slug) {
       const res = await apiService.get(PRODUCT_SLUG_API(slug));
       const p = res.data?.data || null;
       // Normalize specs and images
-      const specs = (p?.details?.specifications && typeof p.details.specifications === "string")
-        ? JSON.parse(p.details.specifications)
-        : (p?.details?.specifications || []);
+      const specs =
+        p?.details?.specifications &&
+        typeof p.details.specifications === "string"
+          ? JSON.parse(p.details.specifications)
+          : p?.details?.specifications || [];
 
       const images = [];
       if (p?.main_image) images.push(p.main_image);
       const extra = p?.details?.extra_images
-        ? (typeof p.details.extra_images === "string" ? JSON.parse(p.details.extra_images) : p.details.extra_images)
+        ? typeof p.details.extra_images === "string"
+          ? JSON.parse(p.details.extra_images)
+          : p.details.extra_images
         : [];
       images.push(...(extra || []));
 
@@ -64,7 +70,10 @@ export default function useProductDetails(slug) {
         emi_status: p.emi_status ?? "0",
         status: p.status ?? 0,
         full_description: p?.details?.full_description || "",
-        specifications: specs.map((s) => ({ name: s.name ?? s.key ?? "", value: s.value ?? "" })),
+        specifications: specs.map((s) => ({
+          name: s.name ?? s.key ?? "",
+          value: s.value ?? "",
+        })),
         extra_images: extra || [],
         raw: p,
       };
@@ -101,7 +110,10 @@ export default function useProductDetails(slug) {
 
     fd.append("full_description", merged.full_description || "");
 
-    const formattedSpecs = (merged.specifications || []).map((s) => ({ name: s.name || "", value: s.value || "" }));
+    const formattedSpecs = (merged.specifications || []).map((s) => ({
+      name: s.name || "",
+      value: s.value || "",
+    }));
     fd.append("specifications", JSON.stringify(formattedSpecs));
 
     // main_image handling: if File provided in merged.main_image_file use it; if URL exists attach URL->File
@@ -122,12 +134,17 @@ export default function useProductDetails(slug) {
     }
 
     // extra images: send existing URLs as JSON and send new files as extra_images_files[]
-    const existingExtras = merged.extra_images?.filter((x) => typeof x === "string") || [];
-    if (existingExtras.length) fd.append("extra_images", JSON.stringify(existingExtras));
+    const existingExtras =
+      merged.extra_images?.filter((x) => typeof x === "string") || [];
+    if (existingExtras.length)
+      fd.append("extra_images", JSON.stringify(existingExtras));
 
     if (merged.extra_images_files?.length) {
       merged.extra_images_files.forEach((file, idx) => {
-        fd.append("extra_images[]", JSON.stringify({ id: existingExtras.length + idx }));
+        fd.append(
+          "extra_images[]",
+          JSON.stringify({ id: existingExtras.length + idx }),
+        );
         fd.append("extra_images_files[]", file);
       });
     }
@@ -146,7 +163,8 @@ export default function useProductDetails(slug) {
 
       const fd = await buildFormDataForUpdate(merged);
       const res = await apiService.put(`${PRODUCT_API}/${merged.id}`, fd);
-      if (!res?.data?.status) throw new Error(res?.data?.message || "Update failed");
+      if (!res?.data?.status)
+        throw new Error(res?.data?.message || "Update failed");
       // Refresh
       await fetchProduct();
       return res.data;

@@ -91,14 +91,29 @@ content-type: application/json
 Authorization: Bearer {{USERTOKEN}}
 
 {
-    "name": "Akash Frontend",
-    "phone": "01754576435",
-    "email": "akash@techsoibd.com",
-    "address": "Nikunjo",
+    "name": "MD Al Amin Islam",
+    "phone": "01821858917",
+    "email": "mi3548514@gmail.com",
+    "address": "Mirpur",
     "city": "Dhaka",
-    "postcode": "1200",
-    "products": [{"product_id":1,"quantity":3,"amount":5000},{"product_id":3,"quantity":3,"amount":8500},{"product_id":7,"quantity":4,"amount":1400}]
+    "postcode": "1216",
+    "products": [
+        {
+            "product_id": 60,
+            "quantity": 1,
+            "amount": 972
+        }
+    ]
 }
+
+# HTTP/1.1 302 Found
+# Server: nginx/1.24.0 (Ubuntu)
+# Date: Mon, 26 Jan 2026 17:35:22 GMT
+# Content-Type: text/html; charset=UTF-8
+# Transfer-Encoding: chunked
+# Connection: close
+# Location: https://sandbox.sslcommerz.com/EasyCheckOut/testcde6335898191fbc5bc4f0b321a3b674f0c
+
 
 ### user review             ---------------> user review requests
 

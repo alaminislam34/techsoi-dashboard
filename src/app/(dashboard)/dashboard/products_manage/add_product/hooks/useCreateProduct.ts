@@ -12,7 +12,6 @@ type ProductFields = {
   discount?: string | number;
   sale_price: string | number;
   stock?: string | number;
-  quantity?: string | number;
   category_id: string | number | string;
   sub_category_id: string | number | string;
   brand_id: string | number | string;
@@ -46,7 +45,7 @@ export default function useCreateProduct() {
         form.append("regular_price", String(Number(p.fields.regular_price)));
         form.append("discount", String(Number(p.fields.discount || 0)));
         form.append("sale_price", String(Number(p.fields.sale_price)));
-        form.append("quantity", String(Number(p.fields.quantity ?? 1)));
+        form.append("stock", String(Number(p.fields.stock ?? 1)));
         form.append("category_id", String(p.fields.category_id));
         form.append("sub_category_id", String(p.fields.sub_category_id));
         form.append("brand_id", String(p.fields.brand_id));

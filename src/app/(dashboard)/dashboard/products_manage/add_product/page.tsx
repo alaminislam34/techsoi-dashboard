@@ -444,7 +444,7 @@ export default function AddProduct() {
 
         <div>
           <SpecsEditor
-            className="custom-input inline-block"
+            className="w-full inline-block"
             specs={specs}
             onChangeSpec={handleSpecChange}
             onRemoveSpec={(idx) => setSpecs(specs.filter((_, i) => i !== idx))}
