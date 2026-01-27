@@ -105,6 +105,15 @@ Authorization: Bearer {{USERTOKEN}}
         }
     ]
 }
+HTTP/1.1 302 Found
+Server: nginx/1.24.0 (Ubuntu)
+Date: Tue, 27 Jan 2026 09:29:48 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: close
+Location: https://sandbox.sslcommerz.com/EasyCheckOut/testcdef3fc3496b440d3d62523bf7af0c9f736
+
+
 
 # HTTP/1.1 302 Found
 # Server: nginx/1.24.0 (Ubuntu)
@@ -625,3 +634,27 @@ content-type: application/json
 
 DELETE {{URL}}/blog/1
 accept: application/json
+
+
+
+
+
+
+
+
+
+
+{
+    "id": 42,
+    "product_id": 65,
+    "full_description": "Quis natus ratione c",
+    "specifications": "[{\"name\":\"Libero esse molliti\",\"value\":\"Duis sapiente conseq\"}]",
+    "extra_images": [
+        "https://api.techsoibd.com/images/product/65-0-product-ex-image-2026-01-26-06-03-49.png",
+        "https://api.techsoibd.com/images/product/65-1-product-ex-image-2026-01-26-06-03-49.png",
+        "https://api.techsoibd.com/images/product/65-2-product-ex-image-2026-01-26-06-03-49.png",
+        "https://api.techsoibd.com/images/product/65-3-product-ex-image-2026-01-26-06-03-49.png"
+    ],
+    "created_at": "2026-01-26T18:03:49.000000Z",
+    "updated_at": "2026-01-26T18:03:49.000000Z"
+}

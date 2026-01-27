@@ -23,7 +23,7 @@ type FormState = {
   regular_price: string;
   discount: string;
   sale_price: string;
-  stock: string;
+  stock: number;
   category_id: string;
   sub_category_id: string;
   brand_id: string;
@@ -77,7 +77,7 @@ export default function AddProduct() {
       regular_price: "",
       discount: "",
       sale_price: "",
-      stock: "",
+      stock: 1,
       category_id: "",
       sub_category_id: "",
       brand_id: "",
@@ -433,7 +433,7 @@ export default function AddProduct() {
               name="stock"
               value={formData.stock}
               placeholder="0"
-              min={0}
+              min={1}
               step={1}
               onChange={handleChange}
               className="custom-input"

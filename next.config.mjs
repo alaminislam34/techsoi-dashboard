@@ -12,6 +12,16 @@ const nextConfig = {
       },
     ],
   },
+  rewrites: async () => {
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: 'https://api.techsoibd.com/api/:path*',
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;
