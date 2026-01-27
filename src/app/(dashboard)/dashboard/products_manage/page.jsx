@@ -122,7 +122,7 @@ const ProductsManageContent = () => {
       header: "Stock",
       render: (item) => (
         <span className="text-gray-600">
-          {item.product.quantity.toString().padStart(2, "0")}
+          {item.product.stock?.toString().padStart(2, "0")}
         </span>
       ),
     },

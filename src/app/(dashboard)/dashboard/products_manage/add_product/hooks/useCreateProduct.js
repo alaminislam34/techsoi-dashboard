@@ -9,6 +9,12 @@ export default function useCreateProduct() {
   const [isPending, setIsPending] = useState(false);
   const fallbackRunningRef = useRef(false);
 
+  const isPng = (file) =>
+    file && typeof file.name === "string" && file.name.toLowerCase().endsWith(".png");
+
+  const getInvalidFiles = (files) =>
+    (files || []).filter((file) => file instanceof File && !isPng(file));
+
   const attemptPrimaryWithRetries = async (p, retries = 6, delayMs = 1500) => {
     let lastErr = null;
     for (let i = 0; i < retries; i++) {
@@ -18,7 +24,7 @@ export default function useCreateProduct() {
         form.append("regular_price", Number(p.fields.regular_price));
         form.append("discount", Number(p.fields.discount || 0));
         form.append("sale_price", Number(p.fields.sale_price));
-        form.append("quantity", Number(p.fields.quantity || 1));
+        form.append("stock", Number(p.fields.stock || 1));
         form.append("category_id", Number(p.fields.category_id));
         form.append("sub_category_id", Number(p.fields.sub_category_id));
         form.append("brand_id", Number(p.fields.brand_id));
@@ -28,14 +34,30 @@ export default function useCreateProduct() {
         form.append("specifications", JSON.stringify(p.specs || []));
 
         if (p.images && p.images.length) {
-          form.append("main_image", p.images[0]);
-          if (p.images.length > 1) {
-            const extraFiles = p.images.slice(1);
-            extraFiles.forEach((file) => {
+          console.log("Frontend images:", p.images);
+
+          const uniqueImages = Array.from(
+            new Map(
+              p.images.map((file) => [`${file.name}-${file.size}`, file]),
+            ).values(),
+          );
+
+          // Validate PNG only with clear message
+          const invalidFiles = getInvalidFiles(uniqueImages);
+          if (invalidFiles.length) {
+            const badList = invalidFiles.map((f) => f.name).join(", ");
+            toast.error(`Only .png images are allowed. Invalid: ${badList}`);
+            throw new Error("Non-PNG image detected");
+          }
+
+          if (uniqueImages.length) {
+            form.append("main_image", uniqueImages[0]);
+            uniqueImages.slice(1).forEach((file) => {
               form.append("extra_images[]", file);
             });
           }
         }
+        console.log(form.getAll("extra_images[]"));
 
         const res = await apiService.post(PRODUCT_API, form);
         return res;
@@ -43,7 +65,10 @@ export default function useCreateProduct() {
         // Detailed logging for debugging failures (includes non-enumerable props)
         try {
           console.error("attemptPrimaryWithRetries error:", e);
-          console.error("attemptPrimaryWithRetries error (serialized):", JSON.stringify(e, Object.getOwnPropertyNames(e)));
+          console.error(
+            "attemptPrimaryWithRetries error (serialized):",
+            JSON.stringify(e, Object.getOwnPropertyNames(e)),
+          );
         } catch (logErr) {
           console.error("Failed to serialize error", logErr);
         }
@@ -79,7 +104,9 @@ export default function useCreateProduct() {
         console.warn("Primary retries failed", primErr);
       }
 
-      const bgToastId = toast.loading("Upload issue — retrying in background...");
+      const bgToastId = toast.loading(
+        "Upload issue — retrying in background...",
+      );
       (async () => {
         try {
           await attemptPrimaryWithRetries(payload, 8, 3000);

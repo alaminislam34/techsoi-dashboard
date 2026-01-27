@@ -6,11 +6,21 @@ const nextConfig = {
         protocol: "https",
         hostname: "placehold.co",
       },
-      // {
-      //   protocol: "https",
-      //   hostname: "techsoibd.com",
-      // },
+      {
+        protocol: "https",
+        hostname: "api.techsoibd.com",
+      },
     ],
+  },
+  rewrites: async () => {
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: 'https://api.techsoibd.com/api/:path*',
+        },
+      ],
+    };
   },
 };
 

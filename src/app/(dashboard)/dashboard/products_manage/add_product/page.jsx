@@ -85,7 +85,7 @@ const AddProduct = () => {
       regular_price: "",
       discount: "",
       sale_price: "",
-      stock: "",
+      stock: 1,
       category_id: "",
       sub_category_id: "",
       brand_id: "",
@@ -130,20 +130,6 @@ const AddProduct = () => {
     if (!validSpecs.length) {
       return toast.error("At least one specification required");
     }
-
-    const data = new FormData();
-
-    data.append("name", formData.name);
-    data.append("regular_price", Number(formData.regular_price));
-    data.append("discount", Number(formData.discount || 0));
-    data.append("sale_price", Number(formData.sale_price));
-    data.append("stock", Number(formData.stock));
-    data.append("category_id", Number(formData.category_id));
-    data.append("sub_category_id", Number(formData.sub_category_id));
-    data.append("brand_id", Number(formData.brand_id));
-    data.append("short_description", formData.short_description || "");
-    data.append("full_description", formData.full_description || "");
-    data.append("emi_status", formData.emi_status === "1" ? 1 : 0);
 
     // Validate stock: required and must be a non-negative integer
     const stockValue = Number(formData.stock);
@@ -365,7 +351,7 @@ const AddProduct = () => {
               name="stock"
               value={formData.stock}
               placeholder="0"
-              min={0}
+              min={1}
               step={1}
               onChange={handleChange}
               className="custom-input"

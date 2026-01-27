@@ -13,7 +13,8 @@ import {
   PRODUCT_DETAILS_MANAGE_API,
 } from "@/api/apiEndPoint";
 import InputWrapper from "../add_product/components/InputWrapper";
-import SpecsEditor from "../add_product/components/SpecsEditor";
+import SpecsEditorManage from "./components/SpecsEditorManage";
+import { useUpdateProduct } from "./hooks/useUpdateProduct";
 
 export default function ManageProduct() {
   const params = useParams();
@@ -55,64 +56,74 @@ export default function ManageProduct() {
       console.log("=== FETCHING PRODUCT BY SLUG ===");
       console.log("Slug:", productSlug);
       console.log("Endpoint:", PRODUCT_SLUG_API(productSlug));
-      
+
       const productRes = await apiService.get(PRODUCT_SLUG_API(productSlug));
       console.log("Raw product response:", productRes.data);
-      
+
       const p = productRes.data.data;
       const d = p.details || {};
-      
+
       console.log("Product ID:", p.id);
       console.log("Product Details:", d);
       console.log("Details ID:", d.id);
-      
+
       // Store IDs separately
       setProductId(p.id);
       setDetailsId(d.id || null);
-      
+
       // Parse specifications
       let parsedSpecs = [];
       if (d.specifications) {
         try {
-          const specs = typeof d.specifications === 'string' 
-            ? JSON.parse(d.specifications) 
-            : d.specifications;
-          
+          const specs =
+            typeof d.specifications === "string"
+              ? JSON.parse(d.specifications)
+              : d.specifications;
+
           if (Array.isArray(specs)) {
-            parsedSpecs = specs;
-          } else if (typeof specs === 'object') {
+            parsedSpecs = specs.map((spec) => ({
+              key: spec.key || spec.name || "",
+              value: spec.value || "",
+            }));
+          } else if (typeof specs === "object") {
             parsedSpecs = Object.entries(specs).map(([key, value]) => ({
               key,
-              value: typeof value === 'object' ? JSON.stringify(value) : String(value)
+              value:
+                typeof value === "object"
+                  ? JSON.stringify(value)
+                  : String(value),
             }));
           }
         } catch (err) {
           console.error("Failed to parse specifications:", err);
         }
       }
-      
+
       setSpecifications(parsedSpecs);
-      
+
       // Parse extra images
       let parsedImages = [];
       if (d.extra_images) {
         try {
-          const imgs = typeof d.extra_images === 'string' 
-            ? JSON.parse(d.extra_images) 
-            : d.extra_images;
-          
+          const imgs =
+            typeof d.extra_images === "string"
+              ? JSON.parse(d.extra_images)
+              : d.extra_images;
+
           if (Array.isArray(imgs)) {
-            parsedImages = imgs.map(img => 
-              typeof img === 'string' ? img : img.url || img.image_url || ''
-            ).filter(Boolean);
+            parsedImages = imgs
+              .map((img) =>
+                typeof img === "string" ? img : img.url || img.image_url || "",
+              )
+              .filter(Boolean);
           }
         } catch (err) {
           console.error("Failed to parse extra images:", err);
         }
       }
-      
+
       setExistingImages(parsedImages);
-      
+
       // Set form data
       setFormData({
         name: p.name || "",
@@ -127,17 +138,17 @@ export default function ManageProduct() {
         stock: p.stock || "",
         emi_status: p.emi_status || "0",
       });
-      
+
       // Set main image
       if (p.main_image) {
         setImages([p.main_image]);
       }
-      
+
       console.log("=== PRODUCT DATA LOADED ===");
       console.log("Form data populated");
       console.log("Specifications count:", parsedSpecs.length);
       console.log("Extra images count:", parsedImages.length);
-      
+
       return p;
     },
     enabled: !!productSlug,
@@ -180,94 +191,23 @@ export default function ManageProduct() {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateMutation = useMutation({
-    mutationFn: async (data) => {
-      console.log("=== STARTING UPDATE PROCESS ===");
-      console.log("Product ID:", productId);
-      console.log("Details ID:", detailsId);
-      console.log("Form data:", data);
-      
-      // Prepare product data (base fields)
-      const dataProduct = new FormData();
-      dataProduct.append("_method", "PUT");
-      dataProduct.append("name", data.name);
-      dataProduct.append("regular_price", data.regular_price);
-      dataProduct.append("discount", data.discount);
-      dataProduct.append("sale_price", data.sale_price);
-      dataProduct.append("category_id", data.category_id);
-      dataProduct.append("sub_category_id", data.sub_category_id || "");
-      dataProduct.append("brand_id", data.brand_id || "");
-      dataProduct.append("short_description", data.short_description);
-      dataProduct.append("stock", data.stock);
-      dataProduct.append("emi_status", data.emi_status);
-
-      // Add main image if new
-      if (images.length > 0 && images[0] instanceof File) {
-        console.log("Adding new main image");
-        dataProduct.append("main_image", images[0]);
-      }
-
-      console.log("=== UPDATING PRODUCT BASE FIELDS ===");
-      console.log("Endpoint:", `${PRODUCT_API}/${productId}`);
-      const productUpdateRes = await apiService.post(`${PRODUCT_API}/${productId}`, dataProduct);
-      console.log("Product update response:", productUpdateRes.data);
-
-      // Prepare product details data
-      const dataDetails = new FormData();
-      dataDetails.append("full_description", data.full_description);
-      
-      const formattedSpecs = specifications.map((spec) => ({
-        key: spec.key,
-        value: spec.value,
-      }));
-      dataDetails.append("specifications", JSON.stringify(formattedSpecs));
-      if (images.length > 1) {
-        images.slice(1).forEach((img) => {
-          dataDetails.append("extra_images[]", img);
-        });
-      }
-      
-      console.log("Formatted specs:", formattedSpecs);
-      console.log("Extra images count:", images.length > 1 ? images.length - 1 : 0);
-      
-      if (detailsId) {
-        // Update existing details using detailsId
-        console.log("=== UPDATING PRODUCT DETAILS ===");
-        console.log("Details ID:", detailsId);
-        console.log("Endpoint:", PRODUCT_DETAILS_MANAGE_API(detailsId));
-        dataDetails.append("_method", "PUT");
-        const detailsUpdateRes = await apiService.post(PRODUCT_DETAILS_MANAGE_API(detailsId), dataDetails);
-        console.log("Details update response:", detailsUpdateRes.data);
-      } else {
-        console.log("No detailsId found - skipping details update");
-        console.log("Details will need to be added through product creation or backend");
-      }
-
-      console.log("=== UPDATE COMPLETED SUCCESSFULLY ===");
-      toast.success("Product Updated Successfully!");
-      setImages([]);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["product", productSlug]);
-      queryClient.invalidateQueries(["products"]);
-    },
-    onError: (error) => {
-      console.error("=== UPDATE FAILED ===");
-      console.error("Error:", error);
-      console.error("Error response:", error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to update product");
-    },
-  });
+  const updateMutation = useUpdateProduct();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!productId) {
       toast.error("Product ID not found");
       return;
     }
-    
-    updateMutation.mutate(formData);
+
+    updateMutation.mutate({
+      productId,
+      formData,
+      specifications,
+      images,
+      existingImages,
+    });
   };
 
   if (isProductLoading) {
@@ -294,20 +234,20 @@ export default function ManageProduct() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
+    <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Edit Product</h1>
         <button
           onClick={() => router.push("/dashboard/products_manage")}
           className="text-gray-600 hover:text-gray-800"
         >
           ← Back to Products
         </button>
+        <h1 className="text-2xl font-bold text-gray-600">Update Product</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+        <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Basic Information
           </h2>
@@ -415,7 +355,7 @@ export default function ManageProduct() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Specifications
           </h2>
-          <SpecsEditor
+          <SpecsEditorManage
             specifications={specifications}
             setSpecifications={setSpecifications}
           />
@@ -479,9 +419,7 @@ export default function ManageProduct() {
                 {images.map((img, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={
-                        img instanceof File ? URL.createObjectURL(img) : img
-                      }
+                      src={img instanceof File ? URL.createObjectURL(img) : img}
                       alt={`New ${index}`}
                       className="w-full h-32 object-cover rounded-lg"
                     />
