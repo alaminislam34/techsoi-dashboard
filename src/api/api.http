@@ -236,7 +236,9 @@ content-type: application/json
     "phone": "01754545454",
     "address": "Chapai",
     "facebook_link": "#",
-    "instagram_link": "#"
+    "instagram_link": "#",
+    "tiktok_link": "#",
+    "whatsapp_link": "#"
 }
 
 ### get all products       ---------------> product requests

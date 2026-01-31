@@ -1,13 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Loader2, Trash2, ArrowLeft } from "lucide-react";
+import {
+  Loader2,
+  Trash2,
+  ArrowLeft,
+  ChevronDown,
+  Pencil,
+  Save,
+} from "lucide-react";
 import apiService from "@/api/api";
-import { PRODUCT_API, PRODUCT_SLUG_API } from "@/api/apiEndPoint";
+import Swal from "sweetalert2";
+import {
+  PRODUCT_API,
+  PRODUCT_SLUG_API,
+  CATEGORY_API,
+  SUB_CATEGORY_API,
+  BRAND_API,
+} from "@/api/apiEndPoint";
 import InputWrapper from "../add_product/components/InputWrapper";
+import SpecsEditor from "../add_product/components/SpecsEditor";
+import ImageUploader from "../add_product/components/ImageUploader";
+import useUpdateProduct from "./hooks/useUpdateProduct";
 
 export default function ManageProduct() {
   const params = useParams();
@@ -16,8 +33,42 @@ export default function ManageProduct() {
   const productSlug = params?.slug;
 
   const [productId, setProductId] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    regular_price: "",
+    discount: "",
+    sale_price: "",
+    stock: 1,
+    category_id: "",
+    sub_category_id: "",
+    brand_id: "",
+    short_description: "",
+    emi_status: "1",
+    full_description: "",
+  });
+  const [specs, setSpecs] = useState([{ name: "", value: "" }]);
+  const [images, setImages] = useState([]);
+  const { submitUpdate, isPending: isUpdating } = useUpdateProduct();
 
-  // 1. Fetch Product Data
+  // Fetch Dropdowns
+  const {
+    data: dropdowns = { categories: [], subCategories: [], brands: [] },
+  } = useQuery({
+    queryKey: ["product-form-data"],
+    queryFn: async () => {
+      const [cat, sub, br] = await Promise.all([
+        apiService.get(CATEGORY_API),
+        apiService.get(SUB_CATEGORY_API),
+        apiService.get(BRAND_API),
+      ]);
+      return {
+        categories: cat.data?.data || [],
+        subCategories: sub.data?.data || [],
+        brands: br.data?.data || [],
+      };
+    },
+  });
+
   const {
     data: product,
     isLoading: isProductLoading,
@@ -33,13 +84,8 @@ export default function ManageProduct() {
     enabled: !!productSlug,
   });
 
-  // 2. Delete Mutation
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      if (!confirm("Are you sure you want to permanently delete this product?"))
-        return;
-      return await apiService.delete(`${PRODUCT_API}/${productId}`);
-    },
+    mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
     onSuccess: () => {
       toast.success("Product deleted successfully");
       queryClient.invalidateQueries(["products"]);
@@ -49,6 +95,225 @@ export default function ManageProduct() {
       toast.error(error.response?.data?.message || "Failed to delete product");
     },
   });
+
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Yes, Delete!",
+      cancelButtonText: "No, cancel",
+      background: "#ffffff",
+      customClass: {
+        title: "text-xl font-semibold text-dark",
+        confirmButton: "px-4 py-2 rounded-md text-sm font-medium",
+        cancelButton: "px-4 py-2 rounded-md text-sm font-medium",
+      },
+    });
+
+    if (result.isConfirmed) {
+      deleteMutation.mutate(productId);
+    }
+  };
+
+  const safeParse = (data) => {
+    if (!data) return [];
+    if (typeof data !== "string") return data;
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      return typeof data === "string" && data.startsWith("http") ? [data] : [];
+    }
+  };
+
+  useEffect(() => {
+    if (product) {
+      const p = product;
+      const d = p.details || {};
+
+      setFormData({
+        name: p.name || "",
+        regular_price: p.regular_price || "",
+        discount: p.discount || "",
+        sale_price: p.sale_price || "",
+        stock: p.stock || 1,
+        category_id: p.category_id || "",
+        sub_category_id: p.sub_category_id || "",
+        brand_id: p.brand_id || "",
+        short_description: p.short_description || "",
+        emi_status: p.emi_status ? String(p.emi_status) : "1",
+        full_description: d.full_description || "",
+      });
+
+      const parsedSpecs = safeParse(d.specifications);
+      if (Array.isArray(parsedSpecs) && parsedSpecs.length > 0) {
+        setSpecs(
+          parsedSpecs.map((spec) => ({
+            name: spec.name || spec.key || "",
+            value: spec.value || "",
+          })),
+        );
+      }
+
+      // Parse images
+      const imagesList = [];
+      if (p.main_image) {
+        imagesList.push(p.main_image);
+      }
+      const extraImgs = safeParse(d.extra_images);
+      if (Array.isArray(extraImgs)) {
+        extraImgs.forEach((img) => {
+          const url = typeof img === "string" ? img : img.url;
+          if (url) imagesList.push(url);
+        });
+      }
+      setImages(imagesList);
+    }
+  }, [product]);
+
+  // Form handlers
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSpecChange = (index, field, value) => {
+    const updated = [...specs];
+    updated[index][field] = value;
+    setSpecs(updated);
+  };
+
+  // Image validation helper
+  async function fileLooksLikeImage(file) {
+    if (file.type && String(file.type).startsWith("image/")) return true;
+    try {
+      const buf = await file.arrayBuffer();
+      const arr = new Uint8Array(buf);
+      if (arr.length >= 4) {
+        if (arr[0] === 0xff && arr[1] === 0xd8 && arr[2] === 0xff) return true;
+        if (
+          arr[0] === 0x89 &&
+          arr[1] === 0x50 &&
+          arr[2] === 0x4e &&
+          arr[3] === 0x47
+        )
+          return true;
+        if (
+          arr[0] === 0x47 &&
+          arr[1] === 0x49 &&
+          arr[2] === 0x46 &&
+          arr[3] === 0x38
+        )
+          return true;
+        if (
+          arr[0] === 0x52 &&
+          arr[1] === 0x49 &&
+          arr[2] === 0x46 &&
+          arr[3] === 0x46 &&
+          arr[8] === 0x57 &&
+          arr[9] === 0x45 &&
+          arr[10] === 0x42 &&
+          arr[11] === 0x50
+        )
+          return true;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
+  }
+
+  const handleFile = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const validated = [];
+    const invalidByMagic = [];
+
+    for (const f of files) {
+      if (!(f instanceof File)) continue;
+      const ok = await fileLooksLikeImage(f);
+      if (ok) validated.push(f);
+      else invalidByMagic.push(f);
+    }
+
+    if (invalidByMagic.length) {
+      toast.error(
+        `${invalidByMagic.length} file(s) ignored: not valid image files.`,
+      );
+    }
+
+    if (!validated.length) return;
+
+    const existingKeys = new Set(
+      images.map((it) =>
+        it instanceof File ? `${it.name}:${it.size}` : it?.toString(),
+      ),
+    );
+
+    const uniqueNew = [];
+    for (const f of validated) {
+      const key = `${f.name}:${f.size}`;
+      if (!existingKeys.has(key)) {
+        existingKeys.add(key);
+        uniqueNew.push(f);
+      }
+    }
+
+    if (!uniqueNew.length) {
+      toast.error("No new image files to add (duplicates ignored)");
+      return;
+    }
+
+    const allowed = Math.max(0, 5 - images.length);
+    if (allowed <= 0) {
+      return toast.error("Max 5 images allowed");
+    }
+
+    let toAdd = uniqueNew.slice(0, allowed);
+    const dropped = uniqueNew.length - toAdd.length;
+    if (dropped > 0) {
+      toast.error(
+        `Only ${allowed} images allowed. ${dropped} file(s) were ignored.`,
+      );
+    }
+
+    setImages([...images, ...toAdd]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!images.length) {
+      return toast.error("Main image is required");
+    }
+
+    const validSpecs = specs.filter((s) => s.name.trim() && s.value.trim());
+
+    if (!validSpecs.length) {
+      return toast.error("At least one specification required");
+    }
+
+    const payload = {
+      productId: productId,
+      fields: { ...formData, quantity: formData.stock },
+      specs: JSON.parse(JSON.stringify(validSpecs)),
+      images: [...images],
+    };
+
+    try {
+      await submitUpdate(payload);
+      // toast.success("Product updated successfully!");
+      queryClient.invalidateQueries(["product", productSlug]);
+    } catch (err) {
+      console.error("submitUpdate failed:", err);
+      const msg =
+        err?.message || err?.data?.message || "Failed to update product";
+      toast.error(msg);
+    }
+  };
 
   if (isProductLoading) {
     return (
@@ -73,28 +338,11 @@ export default function ManageProduct() {
     );
   }
 
-  const p = product || {};
-  const d = p.details || {};
-
-  // Helper to safely parse JSON or return the object/array as is
-  const safeParse = (data) => {
-    if (!data) return [];
-    if (typeof data !== "string") return data;
-    try {
-      return JSON.parse(data);
-    } catch (e) {
-      // If it fails to parse, it might be a single URL or malformed string
-      return typeof data === "string" && data.startsWith("http") ? [data] : [];
-    }
-  };
-
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      {/* Header Section */}
+    <div className="text-[#475569]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">View Product</h1>
-          <p className="text-sm text-gray-500">ID: {productId}</p>
+          <h1 className="text-2xl font-bold text-gray-800">Update Product</h1>
         </div>
         <div className="flex gap-3">
           <button
@@ -105,7 +353,7 @@ export default function ManageProduct() {
           </button>
 
           <button
-            onClick={() => deleteMutation.mutate()}
+            onClick={handleDelete}
             disabled={deleteMutation.isPending}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
           >
@@ -119,156 +367,253 @@ export default function ManageProduct() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Basic Information */}
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
-            Basic Information
-          </h2>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputWrapper label="Select Main Category">
+            <select
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              className="custom-select"
+              required
+            >
+              <option value="">Select Main Category</option>
+              {dropdowns.categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="absolute right-4 top-3.5 text-slate-400 pointer-events-none"
+              size={20}
+            />
+          </InputWrapper>
 
-          <InputWrapper label="Product Name">
+          <InputWrapper label="Select Sub Category">
+            <select
+              name="sub_category_id"
+              value={formData.sub_category_id}
+              onChange={handleChange}
+              className="custom-select"
+              required
+            >
+              <option value="">Select Sub Category</option>
+              {dropdowns.subCategories
+                .filter(
+                  (s) => String(s.category_id) === String(formData.category_id),
+                )
+                .map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+            </select>
+            <ChevronDown
+              className="absolute right-4 top-3.5 text-slate-400 pointer-events-none"
+              size={20}
+            />
+          </InputWrapper>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputWrapper label="Select Brands">
+            <select
+              name="brand_id"
+              value={formData.brand_id}
+              onChange={handleChange}
+              className="custom-select"
+              required
+            >
+              <option value="">Select brands</option>
+              {dropdowns.brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="absolute right-4 top-3.5 text-slate-400 pointer-events-none"
+              size={20}
+            />
+          </InputWrapper>
+          <InputWrapper label="EMI Status">
+            <select
+              name="emi_status"
+              value={formData.emi_status}
+              onChange={handleChange}
+              className="custom-select"
+            >
+              <option value="1">Available</option>
+              <option value="0">Not Available</option>
+            </select>
+            <ChevronDown
+              className="absolute right-4 top-3.5 text-slate-400 pointer-events-none"
+              size={20}
+            />
+          </InputWrapper>
+        </div>
+
+        <InputWrapper label="Products Name">
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            placeholder="Type product name"
+            onChange={handleChange}
+            className="custom-input pr-12"
+            required
+          />
+          <Pencil
+            className="absolute right-4 top-3.5 text-slate-300"
+            size={18}
+          />
+        </InputWrapper>
+
+        <InputWrapper label="Short Details">
+          <input
+            type="text"
+            name="short_description"
+            value={formData.short_description}
+            placeholder="Type short description"
+            onChange={handleChange}
+            className="custom-input pr-12"
+          />
+          <Pencil
+            className="absolute right-4 top-3.5 text-slate-300"
+            size={18}
+          />
+        </InputWrapper>
+
+        <InputWrapper label="Full Description">
+          <textarea
+            name="full_description"
+            value={formData.full_description}
+            placeholder="Type full description"
+            rows={4}
+            onChange={handleChange}
+            className="custom-input h-auto! py-3 pr-12 resize-none"
+          />
+          <Pencil className="absolute right-4 top-4 text-slate-300" size={18} />
+        </InputWrapper>
+
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <InputWrapper label="Regular Price">
             <input
-              type="text"
-              value={p.name || ""}
-              readOnly
-              className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg outline-none cursor-default"
+              type="number"
+              name="regular_price"
+              value={formData.regular_price}
+              placeholder="0.00"
+              onChange={handleChange}
+              className="custom-input"
+              required
             />
           </InputWrapper>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputWrapper label="Regular Price">
-              <input
-                type="text"
-                value={p.regular_price || "0"}
-                readOnly
-                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg outline-none cursor-default"
-              />
-            </InputWrapper>
-            <InputWrapper label="Discount (%)">
-              <input
-                type="text"
-                value={p.discount || "0"}
-                readOnly
-                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg outline-none cursor-default"
-              />
-            </InputWrapper>
-            <InputWrapper label="Sale Price">
-              <input
-                type="text"
-                value={p.sale_price || "0"}
-                readOnly
-                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg outline-none cursor-default"
-              />
-            </InputWrapper>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputWrapper label="Category">
-              <input
-                type="text"
-                value={p.category?.name || "N/A"}
-                readOnly
-                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg outline-none cursor-default"
-              />
-            </InputWrapper>
-            <InputWrapper label="Stock Status">
-              <input
-                type="text"
-                value={p.stock || "0"}
-                readOnly
-                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg outline-none cursor-default"
-              />
-            </InputWrapper>
-          </div>
-
-          <InputWrapper label="Short Description">
-            <textarea
-              value={p.short_description || ""}
-              readOnly
-              rows={2}
-              className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg outline-none cursor-default"
+          <InputWrapper label="Discount Amount">
+            <input
+              type="number"
+              name="discount"
+              value={formData.discount}
+              placeholder="0.00"
+              onChange={handleChange}
+              className="custom-input"
             />
           </InputWrapper>
-
-          <InputWrapper label="Full Description">
-            <div className="w-full px-4 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-700 min-h-25">
-              {d.full_description || "No description provided."}
-            </div>
+          <InputWrapper label="Sale Price">
+            <input
+              type="number"
+              name="sale_price"
+              value={formData.sale_price}
+              placeholder="0.00"
+              onChange={handleChange}
+              className="custom-input"
+              required
+            />
+          </InputWrapper>
+          <InputWrapper label="Stock">
+            <input
+              type="number"
+              name="stock"
+              value={formData.stock}
+              placeholder="0"
+              min={1}
+              step={1}
+              onChange={handleChange}
+              className="custom-input"
+              required
+            />
           </InputWrapper>
         </div>
 
-        {/* Specifications Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
-            Specifications
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-            {(() => {
-              const specs = safeParse(d.specifications);
-              return Array.isArray(specs) && specs.length > 0 ? (
-                specs.map((spec, i) => (
-                  <div
-                    key={i}
-                    className="py-2 flex justify-between border-b border-gray-50"
-                  >
-                    <span className="font-medium text-gray-500">
-                      {spec.name || spec.key}:
-                    </span>
-                    <span className="text-gray-900">{spec.value}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-400 italic">No specifications found.</p>
-              );
-            })()}
-          </div>
+        <div>
+          <SpecsEditor
+            className="w-full inline-block"
+            specs={specs}
+            onChangeSpec={handleSpecChange}
+            onRemoveSpec={(idx) => setSpecs(specs.filter((_, i) => i !== idx))}
+            onAddSpec={() => setSpecs([...specs, { name: "", value: "" }])}
+          />
         </div>
 
-        {/* Images Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
-            Product Images
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Main Image */}
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-[#32afe2] uppercase tracking-wider">
-                Main Image
-              </p>
-              <div className="border rounded-lg overflow-hidden bg-gray-50 aspect-square">
-                <img
-                  src={
-                    p.main_image || "https://placehold.co/400x400?text=No+Image"
-                  }
-                  alt="Main"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-
-            {/* Extra Images */}
-            {(() => {
-              const extraImgs = safeParse(d.extra_images);
-              return Array.isArray(extraImgs)
-                ? extraImgs.map((img, index) => (
-                    <div key={index} className="space-y-2">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        Extra {index + 1}
-                      </p>
-                      <div className="border rounded-lg overflow-hidden bg-gray-50 aspect-square">
-                        <img
-                          src={typeof img === "string" ? img : img.url}
-                          alt={`Extra ${index}`}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </div>
-                  ))
-                : null;
-            })()}
-          </div>
+        <div>
+          <ImageUploader
+            images={images}
+            onFileChange={handleFile}
+            onRemoveImage={(i) =>
+              setImages(images.filter((_, idx) => idx !== i))
+            }
+          />
         </div>
-      </div>
+
+        <div className="pt-4 flex gap-3">
+          <button
+            type="submit"
+            disabled={isUpdating}
+            className="w-full md:w-auto px-10 py-4 bg-[#38bdf8] text-white rounded-xl font-semibold shadow-lg hover:bg-sky-500 transition-all flex items-center justify-center gap-3 disabled:opacity-70"
+          >
+            {isUpdating ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <Save size={20} />
+                Update Product
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+
+      <style jsx>{`
+        .custom-input,
+        .custom-select {
+          width: 100%;
+          height: 52px;
+          padding: 0 1rem;
+          background: #fff;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 15px;
+          color: #1e293b;
+          outline: none;
+        }
+        .custom-input:focus,
+        .custom-select:focus {
+          border-color: #38bdf8;
+        }
+        .custom-select {
+          appearance: none;
+          cursor: pointer;
+        }
+        .h-13 {
+          height: 52px;
+        }
+        .w-13 {
+          width: 52px;
+        }
+      `}</style>
     </div>
   );
 }

@@ -38,7 +38,7 @@ export default function AddProduct() {
     regular_price: "",
     discount: "",
     sale_price: "",
-    stock: "",
+    stock: 1,
     category_id: "",
     sub_category_id: "",
     brand_id: "",
@@ -255,10 +255,10 @@ export default function AddProduct() {
 
   return (
     <div className="w-full text-[#475569]">
-      <div className="mb-4">
+      <div className="mb-4 flex justify-start">
         <Link
           href={"/dashboard/products_manage"}
-          className="flex flex-row items-center gap-2 text-gray-400"
+          className="flex flex-row items-center p-2 gap-2 text-gray-400"
         >
           <ArrowLeft /> Back
         </Link>

@@ -128,7 +128,7 @@ export default function useCreateProduct() {
     setIsPending(true);
     try {
       const res = await attemptPrimaryWithRetries(payload, 3, 1200);
-      toast.success("Product Created Successfully!");
+      // toast.success("Product Created Successfully!");
       queryClient.invalidateQueries(["products"]);
       return res;
     } catch (err) {

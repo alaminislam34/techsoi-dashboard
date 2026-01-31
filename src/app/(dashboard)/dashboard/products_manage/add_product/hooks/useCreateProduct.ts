@@ -64,7 +64,6 @@ export default function useCreateProduct() {
           }
         }
 
-        // Log attempt + main image summary for debugging intermittent failures
         try {
           console.log(`CreateProduct attempt ${attemptNumber}:`, {
             name: p.fields.name,
@@ -191,7 +190,7 @@ export default function useCreateProduct() {
     setIsPending(true);
     try {
       const res = await attemptPrimaryWithRetries(payload, 3, 1200);
-      toast.success("Product Created Successfully!");
+      // toast.success("Product Created Successfully!");
       queryClient.invalidateQueries({ queryKey: ["products"] });
       return res;
     } catch (err) {
