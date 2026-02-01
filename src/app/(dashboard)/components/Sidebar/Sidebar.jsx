@@ -68,7 +68,6 @@ const Sidebar = () => {
     } finally {
       Cookies.remove("admin_token");
       localStorage.removeItem("user");
-      toast.success("Logged out");
       router.push("/login");
     }
   };
@@ -82,7 +81,6 @@ const Sidebar = () => {
               src="/logos/logo.png"
               height={135}
               width={600}
-              unoptimized
               loading="eager"
               alt="Website logo"
               className="w-55 h-auto object-cover"

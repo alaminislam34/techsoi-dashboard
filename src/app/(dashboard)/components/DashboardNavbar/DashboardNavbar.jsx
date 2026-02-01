@@ -215,13 +215,6 @@ const NavbarContent = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 xl:gap-4 shrink-0">
-        <button className="p-2 hover:bg-primary hover:text-white duration-300 rounded-xl text-primary bg-white cursor-pointer border border-primary/80 relative transition-all">
-          <Bell size={20} />
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary_red rounded-full border border-white"></span>
-        </button>
-      </div>
-
       {/* ---------- MOBILE SIDEBAR ---------- */}
       <div
         className={`fixed inset-0 z-100 transition-all duration-300 ${

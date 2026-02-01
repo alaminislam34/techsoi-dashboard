@@ -18,13 +18,27 @@ import useCreateProduct from "./hooks/useCreateProduct";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-const AddProduct = () => {
-  const [formData, setFormData] = useState({
+type FormState = {
+  name: string;
+  regular_price: string;
+  discount: string;
+  sale_price: string;
+  stock: number;
+  category_id: string;
+  sub_category_id: string;
+  brand_id: string;
+  short_description: string;
+  emi_status: string;
+  full_description: string;
+};
+
+export default function AddProduct() {
+  const [formData, setFormData] = useState<FormState>({
     name: "",
     regular_price: "",
     discount: "",
     sale_price: "",
-    stock: "",
+    stock: 1,
     category_id: "",
     sub_category_id: "",
     brand_id: "",
@@ -33,8 +47,10 @@ const AddProduct = () => {
     full_description: "",
   });
 
-  const [specs, setSpecs] = useState([{ name: "", value: "" }]);
-  const [images, setImages] = useState([]);
+  const [specs, setSpecs] = useState<{ name: string; value: string }[]>([
+    { name: "", value: "" },
+  ]);
+  const [images, setImages] = useState<Array<File | string>>([]);
   const { submitProduct, isPending: submitting } = useCreateProduct();
 
   const {
@@ -55,30 +71,6 @@ const AddProduct = () => {
     },
   });
 
-  // Product creation (POST-only) is handled by `useCreateProduct` hook which performs retries and background retry logic.
-
-  // Helper to extract created id from server error responses (removed in POST-only flow)
-  // const extractCreatedIdFromError = (err) => {
-  //   try {
-  //     const data = err?.response?.data || err?.data || null;
-  //     if (!data) return null;
-  //     return (
-  //       data?.data?.id ||
-  //       data?.data?.product_id ||
-  //       data?.id ||
-  //       data?.product_id ||
-  //       null
-  //     );
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // };
-
-  // pushDetails removed: we now send full product data (including extra images and specifications)
-  // in a single POST request to PRODUCT_API. The server should accept all fields in one request.
-
-  // Full upload retry/fallback logic moved to `useCreateProduct` hook.
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -97,32 +89,143 @@ const AddProduct = () => {
     setImages([]);
   };
 
-  // twoStepCreate removed: we rely on a single POST that contains all fields and files
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
+    const { name, value } = e.target as HTMLInputElement;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSpecChange = (index, field, value) => {
+  const handleSpecChange = (
+    index: number,
+    field: "name" | "value",
+    value: string,
+  ) => {
     const updated = [...specs];
     updated[index][field] = value;
     setSpecs(updated);
   };
 
-  const handleFile = (e) => {
-    const files = Array.from(e.target.files);
-    if (images.length + files.length > 5) {
+  // Helper that inspects file.type and file signature bytes to confirm it's an image
+  async function fileLooksLikeImage(file: File) {
+    if (file.type && String(file.type).startsWith("image/")) return true;
+    try {
+      const buf = await file.arrayBuffer();
+      const arr = new Uint8Array(buf);
+      if (arr.length >= 4) {
+        // JPEG
+        if (arr[0] === 0xff && arr[1] === 0xd8 && arr[2] === 0xff) return true;
+        // PNG
+        if (
+          arr[0] === 0x89 &&
+          arr[1] === 0x50 &&
+          arr[2] === 0x4e &&
+          arr[3] === 0x47
+        )
+          return true;
+        // GIF
+        if (
+          arr[0] === 0x47 &&
+          arr[1] === 0x49 &&
+          arr[2] === 0x46 &&
+          arr[3] === 0x38
+        )
+          return true;
+        // WEBP (RIFF....WEBP)
+        if (
+          arr[0] === 0x52 &&
+          arr[1] === 0x49 &&
+          arr[2] === 0x46 &&
+          arr[3] === 0x46 &&
+          arr[8] === 0x57 &&
+          arr[9] === 0x45 &&
+          arr[10] === 0x42 &&
+          arr[11] === 0x50
+        )
+          return true;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
+  }
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    // Validate each file by signature and type
+    const validated: File[] = [];
+    const invalidByMagic: File[] = [];
+
+    for (const f of files) {
+      if (!(f instanceof File)) continue;
+      const ok = await fileLooksLikeImage(f);
+      if (ok) validated.push(f);
+      else invalidByMagic.push(f);
+    }
+
+    if (invalidByMagic.length) {
+      toast.error(
+        `${invalidByMagic.length} file(s) ignored: not valid image files.`,
+      );
+    }
+
+    if (!validated.length) return;
+
+    // Build existing keys to detect duplicates (name:size)
+    const existingKeys = new Set(
+      images.map((it) =>
+        it instanceof File ? `${it.name}:${(it as File).size}` : it?.toString(),
+      ),
+    );
+
+    const uniqueNew: File[] = [];
+    for (const f of validated) {
+      const key = `${f.name}:${f.size}`;
+      if (!existingKeys.has(key)) {
+        existingKeys.add(key);
+        uniqueNew.push(f);
+      }
+    }
+
+    if (!uniqueNew.length) {
+      toast.error("No new image files to add (duplicates ignored)");
+      return;
+    }
+
+    // Enforce max 5 images
+    const allowed = Math.max(0, 5 - images.length);
+    if (allowed <= 0) {
       return toast.error("Max 5 images allowed");
     }
-    setImages([...images, ...files]);
+
+    let toAdd = uniqueNew.slice(0, allowed);
+    const dropped = uniqueNew.length - toAdd.length;
+    if (dropped > 0) {
+      toast.error(
+        `Only ${allowed} images allowed. ${dropped} file(s) were ignored.`,
+      );
+    }
+
+    setImages([...images, ...toAdd]);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!images.length) {
       return toast.error("Main image is required");
+    }
+
+    // Ensure main image is a File and actually looks like an image (type or signature)
+    const main = images[0];
+    if (!(main instanceof File) || !(await fileLooksLikeImage(main as File))) {
+      return toast.error(
+        "The main image must be an image file. Please re-upload a valid image.",
+      );
     }
 
     const validSpecs = specs.filter((s) => s.name.trim() && s.value.trim());
@@ -131,40 +234,17 @@ const AddProduct = () => {
       return toast.error("At least one specification required");
     }
 
-    // Validate stock: required and must be a non-negative integer
-    const stockValue = Number(formData.stock);
-    if (
-      formData.stock === "" ||
-      Number.isNaN(stockValue) ||
-      stockValue < 0 ||
-      !Number.isInteger(stockValue)
-    ) {
-      return toast.error(
-        "Stock is required and must be a non-negative integer",
-      );
-    }
-
     const payload = {
-      fields: { ...formData },
+      fields: { ...formData, quantity: formData.stock },
       specs: JSON.parse(JSON.stringify(validSpecs)),
       images: [...images],
     };
 
     try {
-      await submitProduct(payload);
+      await submitProduct(payload as any);
       resetForm();
-    } catch (err) {
-      // Log detailed error information to help debugging
-      try {
-        console.error("submitProduct failed (raw):", err);
-        console.error(
-          "submitProduct failed (serialized):",
-          JSON.stringify(err, Object.getOwnPropertyNames(err)),
-        );
-      } catch (logErr) {
-        console.error("Failed to serialize submit error", logErr);
-      }
-
+    } catch (err: any) {
+      console.error("submitProduct failed (raw):", err);
       const msg =
         err?.message ||
         (err?.data && err.data.message) ||
@@ -172,12 +252,13 @@ const AddProduct = () => {
       toast.error(msg);
     }
   };
+
   return (
     <div className="w-full text-[#475569]">
-      <div className="mb-4">
+      <div className="mb-4 flex justify-start">
         <Link
           href={"/dashboard/products_manage"}
-          className="flex flex-row items-center gap-2 text-gray-400"
+          className="flex flex-row items-center p-2 gap-2 text-gray-400"
         >
           <ArrowLeft /> Back
         </Link>
@@ -193,7 +274,7 @@ const AddProduct = () => {
               required
             >
               <option value="">Select Main Category</option>
-              {dropdowns.categories.map((c) => (
+              {dropdowns.categories.map((c: any) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
@@ -216,9 +297,10 @@ const AddProduct = () => {
               <option value="">Select Sub Category</option>
               {dropdowns.subCategories
                 .filter(
-                  (s) => String(s.category_id) === String(formData.category_id),
+                  (s: any) =>
+                    String(s.category_id) === String(formData.category_id),
                 )
-                .map((s) => (
+                .map((s: any) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>
@@ -241,7 +323,7 @@ const AddProduct = () => {
               required
             >
               <option value="">Select brands</option>
-              {dropdowns.brands.map((b) => (
+              {dropdowns.brands.map((b: any) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
                 </option>
@@ -360,19 +442,25 @@ const AddProduct = () => {
           </InputWrapper>
         </div>
 
-        <SpecsEditor
-          className="custom-input"
-          specs={specs}
-          onChangeSpec={handleSpecChange}
-          onRemoveSpec={(idx) => setSpecs(specs.filter((_, i) => i !== idx))}
-          onAddSpec={() => setSpecs([...specs, { name: "", value: "" }])}
-        />
+        <div>
+          <SpecsEditor
+            className="w-full inline-block"
+            specs={specs}
+            onChangeSpec={handleSpecChange}
+            onRemoveSpec={(idx) => setSpecs(specs.filter((_, i) => i !== idx))}
+            onAddSpec={() => setSpecs([...specs, { name: "", value: "" }])}
+          />
+        </div>
 
-        <ImageUploader
-          images={images}
-          onFileChange={handleFile}
-          onRemoveImage={(i) => setImages(images.filter((_, idx) => idx !== i))}
-        />
+        <div>
+          <ImageUploader
+            images={images}
+            onFileChange={handleFile}
+            onRemoveImage={(i) =>
+              setImages(images.filter((_, idx) => idx !== i))
+            }
+          />
+        </div>
 
         <div className="pt-4">
           <button
@@ -419,6 +507,4 @@ const AddProduct = () => {
       `}</style>
     </div>
   );
-};
-
-export default AddProduct;
+}

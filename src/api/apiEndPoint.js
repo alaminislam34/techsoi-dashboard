@@ -52,3 +52,6 @@ export const BLOG_LIMIT_API = (limit) => `/blog-limit/${limit}`;
 // --- Review Management ---
 export const REVIEW_API = "/review-product"; // Get all
 export const REVIEW_SINGLE_API = (id) => `/review-product/${id}`; // Get/Put/Delete
+
+// --- Website / Settings ---
+export const WEBSITE_INFO_API = "/website-info"; // Get / Put
