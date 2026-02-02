@@ -16,8 +16,8 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
-          source: '/api/:path*',
-          destination: 'https://api.techsoibd.com/api/:path*',
+          source: "/api/:path*",
+          destination: "https://api.techsoibd.com/api/:path*",
         },
       ],
     };
