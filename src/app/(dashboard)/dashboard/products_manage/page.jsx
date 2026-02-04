@@ -43,18 +43,32 @@ const ProductsManageContent = () => {
         // Server-side sorting would be ideal, but if the API ignores the sort param
         // we apply client-side sorting as a fallback so the UI responds immediately.
         let items = res.data.data;
-
+        console.log(items);
         if (sort) {
           if (sort === "newest") {
             items = items.slice().sort((a, b) => {
-              const ta = new Date(a.created_at || a.createdAt || 0).getTime() || a.id || 0;
-              const tb = new Date(b.created_at || b.createdAt || 0).getTime() || b.id || 0;
+              const ta =
+                new Date(a.created_at || a.createdAt || 0).getTime() ||
+                a.id ||
+                0;
+              const tb =
+                new Date(b.created_at || b.createdAt || 0).getTime() ||
+                b.id ||
+                0;
               return tb - ta;
             });
           } else if (sort === "price_asc") {
-            items = items.slice().sort((a, b) => Number(a.sale_price || 0) - Number(b.sale_price || 0));
+            items = items
+              .slice()
+              .sort(
+                (a, b) => Number(a.sale_price || 0) - Number(b.sale_price || 0),
+              );
           } else if (sort === "price_desc") {
-            items = items.slice().sort((a, b) => Number(b.sale_price || 0) - Number(a.sale_price || 0));
+            items = items
+              .slice()
+              .sort(
+                (a, b) => Number(b.sale_price || 0) - Number(a.sale_price || 0),
+              );
           }
         }
 
@@ -64,7 +78,7 @@ const ProductsManageContent = () => {
             slug: product.slug,
             name: product.name,
             image_url: product.main_image,
-            category: product.category_id,
+            category: product?.category?.name,
             quantity: product.stock,
             net_price: product.sale_price,
           },
@@ -88,9 +102,15 @@ const ProductsManageContent = () => {
     },
     onError: (error) => {
       // Detect foreign key / integrity constraint errors and show user-friendly message
-      const serverMsg = error?.response?.data?.message || error?.message || "Failed to delete product";
-      const fkRegex = /foreign key|constraint|SQLSTATE\[23000\]|1451|product_details_product_id_foreign/i;
-      const isForeignKeyErr = fkRegex.test(String(serverMsg)) || fkRegex.test(String(error?.message || ""));
+      const serverMsg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to delete product";
+      const fkRegex =
+        /foreign key|constraint|SQLSTATE\[23000\]|1451|product_details_product_id_foreign/i;
+      const isForeignKeyErr =
+        fkRegex.test(String(serverMsg)) ||
+        fkRegex.test(String(error?.message || ""));
 
       if (isForeignKeyErr) {
         // Non-technical message for admins
@@ -157,9 +177,7 @@ const ProductsManageContent = () => {
     },
     {
       header: "Category",
-      render: (item) => (
-        <span className="text-gray-600">{item.product.category}</span>
-      ),
+      render: (item) => <span className="text-gray-600">{item.product.category}</span>,
     },
     {
       header: "Stock",

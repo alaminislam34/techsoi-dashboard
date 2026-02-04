@@ -49,6 +49,7 @@ const BlogDetails = () => {
 
   const [editState, setEditState] = useState({
     title: "",
+    title_bn: "",
     short_description: "",
     full_description: "",
     status: 1,
@@ -64,6 +65,7 @@ const BlogDetails = () => {
       setEditState((s) => ({
         ...s,
         title: blog.title || "",
+        title_bn: blog.title_bn || "",
         short_description: blog.short_description || "",
         full_description: blog.full_description || "",
         status: blog.status ?? 1,
@@ -111,6 +113,7 @@ const BlogDetails = () => {
 
         form.append("_method", "PUT");
         form.append("title", editState.title);
+        form.append("title_bn", editState.title_bn);
         form.append("short_description", editState.short_description);
         form.append("full_description", editState.full_description || "");
         form.append("status", String(editState.status));
@@ -120,6 +123,7 @@ const BlogDetails = () => {
       } else {
         const payload = {
           title: editState.title,
+          title_bn: editState.title_bn,
           short_description: editState.short_description,
           full_description: editState.full_description || "",
           status: editState.status,
@@ -216,7 +220,7 @@ const BlogDetails = () => {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-semibold text-[#0f172a]">
-                    {blog.title}
+                    {blog.title_bn}
                   </h3>
                   <p className="text-sm text-[#64748b] mt-2">
                     {blog.short_description}
@@ -283,6 +287,22 @@ const BlogDetails = () => {
 
                       <div>
                         <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
+                          Title (Bengali)
+                        </label>
+                        <input
+                          value={editState.title_bn}
+                          onChange={(e) =>
+                            setEditState({
+                              ...editState,
+                              title_bn: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] text-gray-600 focus:outline-primary rounded-xl"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
                           Short Description
                         </label>
                         <input
@@ -318,109 +338,109 @@ const BlogDetails = () => {
                         <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
                           Image
                         </label>
-                        <div className="flex items-center gap-3 mt-2">
-                          <div className="w-28 h-28 rounded overflow-hidden bg-gray-100">
+                        <div className="flex items-start justify-between gap-3 mt-2">
+                          <div className="overflow-hidden space-y-2">
                             <img
                               src={
                                 editState.imagePreview ||
                                 "https://placehold.co/200x200?text=No+Image"
                               }
                               alt="preview"
-                              className="w-full h-full object-cover"
-                            />
+                              className="w-full h-full max-w-30 aspect-4/3 object-cover"
+                            />{" "}
+                            <div>
+                              <input
+                                ref={editFileRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (!f) return;
+
+                                  // Client-side validation: MIME, extension, size (max 5MB)
+                                  const allowedMimes = [
+                                    "image/jpeg",
+                                    "image/png",
+                                    "image/jpg",
+                                    "image/gif",
+                                    "image/svg+xml",
+                                  ];
+
+                                  const maxSize = 5 * 1024 * 1024; // 5MB
+
+                                  const fileExt = (f.name || "")
+                                    .split(".")
+                                    .pop()
+                                    ?.toLowerCase();
+                                  const allowedExts = [
+                                    "jpeg",
+                                    "png",
+                                    "jpg",
+                                    "gif",
+                                    "svg",
+                                  ];
+
+                                  if (
+                                    !(
+                                      allowedMimes.includes(f.type) ||
+                                      allowedExts.includes(fileExt)
+                                    )
+                                  ) {
+                                    toast.error(
+                                      "Only JPEG, PNG, JPG, GIF or SVG images are allowed.",
+                                    );
+                                    return;
+                                  }
+
+                                  if (f.size > maxSize) {
+                                    toast.error(
+                                      "Image is too large. Max size is 5MB.",
+                                    );
+                                    return;
+                                  }
+
+                                  // Helpful debug log for server-side validation issues
+                                  console.debug("Uploading image:", {
+                                    name: f.name,
+                                    type: f.type,
+                                    size: f.size,
+                                  });
+
+                                  setEditState({
+                                    ...editState,
+                                    imageFile: f,
+                                    imagePreview: URL.createObjectURL(f),
+                                  });
+                                }}
+                              />
+                              <button
+                                onClick={() => editFileRef.current?.click()}
+                                className="px-4 py-2 bg-[#38bdf8] text-white rounded-lg"
+                              >
+                                Change
+                              </button>
+                            </div>
                           </div>
-                          <div>
-                            <input
-                              ref={editFileRef}
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (!f) return;
 
-                                // Client-side validation: MIME, extension, size (max 5MB)
-                                const allowedMimes = [
-                                  "image/jpeg",
-                                  "image/png",
-                                  "image/jpg",
-                                  "image/gif",
-                                  "image/svg+xml",
-                                ];
-
-                                const maxSize = 5 * 1024 * 1024; // 5MB
-
-                                const fileExt = (f.name || "")
-                                  .split(".")
-                                  .pop()
-                                  ?.toLowerCase();
-                                const allowedExts = [
-                                  "jpeg",
-                                  "png",
-                                  "jpg",
-                                  "gif",
-                                  "svg",
-                                ];
-
-                                if (
-                                  !(
-                                    allowedMimes.includes(f.type) ||
-                                    allowedExts.includes(fileExt)
-                                  )
-                                ) {
-                                  toast.error(
-                                    "Only JPEG, PNG, JPG, GIF or SVG images are allowed.",
-                                  );
-                                  return;
+                          <div className="flex items-center gap-3">
+                            <label className="text-sm">Status:</label>
+                            <div className="border border-primary px-4 py-2 rounded">
+                              <select
+                                className="px-2 text-primary outline-none"
+                                value={editState.status}
+                                onChange={(e) =>
+                                  setEditState({
+                                    ...editState,
+                                    status: Number(e.target.value),
+                                  })
                                 }
-
-                                if (f.size > maxSize) {
-                                  toast.error(
-                                    "Image is too large. Max size is 5MB.",
-                                  );
-                                  return;
-                                }
-
-                                // Helpful debug log for server-side validation issues
-                                console.debug("Uploading image:", {
-                                  name: f.name,
-                                  type: f.type,
-                                  size: f.size,
-                                });
-
-                                setEditState({
-                                  ...editState,
-                                  imageFile: f,
-                                  imagePreview: URL.createObjectURL(f),
-                                });
-                              }}
-                            />
-                            <button
-                              onClick={() => editFileRef.current?.click()}
-                              className="px-4 py-2 bg-[#38bdf8] text-white rounded-lg"
-                            >
-                              Change
-                            </button>
+                              >
+                                <option value={1}>Published</option>
+                                <option value={0}>Draft</option>
+                              </select>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <label className="text-sm">Status:</label>
-                        <div className="border border-primary px-4 py-2 rounded">
-                          <select
-                            className="px-2 text-primary outline-none"
-                            value={editState.status}
-                            onChange={(e) =>
-                              setEditState({
-                                ...editState,
-                                status: Number(e.target.value),
-                              })
-                            }
-                          >
-                            <option value={1}>Published</option>
-                            <option value={0}>Draft</option>
-                          </select>
                         </div>
                       </div>
 
