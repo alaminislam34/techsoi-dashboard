@@ -38,7 +38,7 @@ export default function AddProduct() {
     regular_price: "",
     discount: "",
     sale_price: "",
-    stock: 1,
+    stock: 0,
     category_id: "",
     sub_category_id: "",
     brand_id: "",
@@ -77,7 +77,7 @@ export default function AddProduct() {
       regular_price: "",
       discount: "",
       sale_price: "",
-      stock: 1,
+      stock: 0,
       category_id: "",
       sub_category_id: "",
       brand_id: "",
@@ -253,6 +253,12 @@ export default function AddProduct() {
     }
   };
 
+  if (formData.regular_price && formData.discount) {
+    formData.sale_price = String(
+      Number(formData.regular_price) * (1 - Number(formData.discount) / 100),
+    );
+  }
+
   return (
     <div className="w-full text-[#475569]">
       <div className="mb-4 flex justify-start">
@@ -412,6 +418,8 @@ export default function AddProduct() {
               name="discount"
               value={formData.discount}
               placeholder="0.00"
+              min={0}
+              max={100}
               onChange={handleChange}
               className="custom-input"
             />
@@ -433,7 +441,7 @@ export default function AddProduct() {
               name="stock"
               value={formData.stock}
               placeholder="0"
-              min={1}
+              min={0}
               step={1}
               onChange={handleChange}
               className="custom-input"
