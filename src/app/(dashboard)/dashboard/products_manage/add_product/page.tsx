@@ -1,44 +1,44 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Pencil, Upload, ChevronDown, X, Loader2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import {
-  Loader2,
-  Trash2,
-  ArrowLeft,
-  ChevronDown,
-  Pencil,
-  Save,
-} from "lucide-react";
-import apiService from "@/api/api";
-import Swal from "sweetalert2";
-import {
-  PRODUCT_API,
-  PRODUCT_SLUG_API,
   CATEGORY_API,
   SUB_CATEGORY_API,
   BRAND_API,
+  PRODUCT_API,
 } from "@/api/apiEndPoint";
-import InputWrapper from "../add_product/components/InputWrapper";
-import SpecsEditor from "../add_product/components/SpecsEditor";
-import ImageUploader from "../add_product/components/ImageUploader";
-import useUpdateProduct from "./hooks/useUpdateProduct";
+import apiService from "@/api/api";
+import InputWrapper from "./components/InputWrapper";
+import SpecsEditor from "./components/SpecsEditor";
+import ImageUploader from "./components/ImageUploader";
+import useCreateProduct from "./hooks/useCreateProduct";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
-export default function ManageProduct() {
-  const params = useParams();
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const productSlug = params?.slug;
+type FormState = {
+  name: string;
+  regular_price: string;
+  discount: string;
+  sale_price: string;
+  stock: number;
+  category_id: string;
+  sub_category_id: string;
+  brand_id: string;
+  short_description: string;
+  emi_status: string;
+  full_description: string;
+};
 
-  const [productId, setProductId] = useState(null);
-  const [formData, setFormData] = useState({
+export default function AddProduct() {
+  const [formData, setFormData] = useState<FormState>({
     name: "",
     regular_price: "",
     discount: "",
     sale_price: "",
-    stock: 1,
+    stock: 0,
     category_id: "",
     sub_category_id: "",
     brand_id: "",
@@ -46,11 +46,13 @@ export default function ManageProduct() {
     emi_status: "1",
     full_description: "",
   });
-  const [specs, setSpecs] = useState([{ name: "", value: "" }]);
-  const [images, setImages] = useState([]);
-  const { submitUpdate, isPending: isUpdating } = useUpdateProduct();
 
-  // Fetch Dropdowns
+  const [specs, setSpecs] = useState<{ name: string; value: string }[]>([
+    { name: "", value: "" },
+  ]);
+  const [images, setImages] = useState<Array<File | string>>([]);
+  const { submitProduct, isPending: submitting } = useCreateProduct();
+
   const {
     data: dropdowns = { categories: [], subCategories: [], brands: [] },
   } = useQuery({
@@ -69,130 +71,53 @@ export default function ManageProduct() {
     },
   });
 
-  const {
-    data: product,
-    isLoading: isProductLoading,
-    isError: isProductError,
-  } = useQuery({
-    queryKey: ["product", productSlug],
-    queryFn: async () => {
-      const productRes = await apiService.get(PRODUCT_SLUG_API(productSlug));
-      const p = productRes.data.data;
-      setProductId(p.id);
-      return p;
-    },
-    enabled: !!productSlug,
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => apiService.delete(`${PRODUCT_API}/${id}`),
-    onSuccess: () => {
-      toast.success("Product deleted successfully");
-      queryClient.invalidateQueries(["products"]);
-      router.push("/dashboard/products_manage");
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to delete product");
-    },
-  });
-
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#64748b",
-      confirmButtonText: "Yes, Delete!",
-      cancelButtonText: "No, cancel",
-      background: "#ffffff",
-      customClass: {
-        title: "text-xl font-semibold text-dark",
-        confirmButton: "px-4 py-2 rounded-md text-sm font-medium",
-        cancelButton: "px-4 py-2 rounded-md text-sm font-medium",
-      },
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      regular_price: "",
+      discount: "",
+      sale_price: "",
+      stock: 0,
+      category_id: "",
+      sub_category_id: "",
+      brand_id: "",
+      short_description: "",
+      emi_status: "1",
+      full_description: "",
     });
-
-    if (result.isConfirmed) {
-      deleteMutation.mutate(productId);
-    }
+    setSpecs([{ name: "", value: "" }]);
+    setImages([]);
   };
 
-  const safeParse = (data) => {
-    if (!data) return [];
-    if (typeof data !== "string") return data;
-    try {
-      return JSON.parse(data);
-    } catch (e) {
-      return typeof data === "string" && data.startsWith("http") ? [data] : [];
-    }
-  };
-
-  useEffect(() => {
-    if (product) {
-      const p = product;
-      const d = p.details || {};
-
-      setFormData({
-        name: p.name || "",
-        regular_price: p.regular_price || "",
-        discount: p.discount || "",
-        sale_price: p.sale_price || "",
-        stock: p.stock || 1,
-        category_id: p.category_id || "",
-        sub_category_id: p.sub_category_id || "",
-        brand_id: p.brand_id || "",
-        short_description: p.short_description || "",
-        emi_status: p.emi_status ? String(p.emi_status) : "1",
-        full_description: d.full_description || "",
-      });
-
-      const parsedSpecs = safeParse(d.specifications);
-      if (Array.isArray(parsedSpecs) && parsedSpecs.length > 0) {
-        setSpecs(
-          parsedSpecs.map((spec) => ({
-            name: spec.name || spec.key || "",
-            value: spec.value || "",
-          })),
-        );
-      }
-
-      // Parse images
-      const imagesList = [];
-      if (p.main_image) {
-        imagesList.push(p.main_image);
-      }
-      const extraImgs = safeParse(d.extra_images);
-      if (Array.isArray(extraImgs)) {
-        extraImgs.forEach((img) => {
-          const url = typeof img === "string" ? img : img.url;
-          if (url) imagesList.push(url);
-        });
-      }
-      setImages(imagesList);
-    }
-  }, [product]);
-
-  // Form handlers
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
+    const { name, value } = e.target as HTMLInputElement;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSpecChange = (index, field, value) => {
+  const handleSpecChange = (
+    index: number,
+    field: "name" | "value",
+    value: string,
+  ) => {
     const updated = [...specs];
     updated[index][field] = value;
     setSpecs(updated);
   };
 
-  // Image validation helper
-  async function fileLooksLikeImage(file) {
+  // Helper that inspects file.type and file signature bytes to confirm it's an image
+  async function fileLooksLikeImage(file: File) {
     if (file.type && String(file.type).startsWith("image/")) return true;
     try {
       const buf = await file.arrayBuffer();
       const arr = new Uint8Array(buf);
       if (arr.length >= 4) {
+        // JPEG
         if (arr[0] === 0xff && arr[1] === 0xd8 && arr[2] === 0xff) return true;
+        // PNG
         if (
           arr[0] === 0x89 &&
           arr[1] === 0x50 &&
@@ -200,6 +125,7 @@ export default function ManageProduct() {
           arr[3] === 0x47
         )
           return true;
+        // GIF
         if (
           arr[0] === 0x47 &&
           arr[1] === 0x49 &&
@@ -207,6 +133,7 @@ export default function ManageProduct() {
           arr[3] === 0x38
         )
           return true;
+        // WEBP (RIFF....WEBP)
         if (
           arr[0] === 0x52 &&
           arr[1] === 0x49 &&
@@ -225,12 +152,13 @@ export default function ManageProduct() {
     return false;
   }
 
-  const handleFile = async (e) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    const validated = [];
-    const invalidByMagic = [];
+    // Validate each file by signature and type
+    const validated: File[] = [];
+    const invalidByMagic: File[] = [];
 
     for (const f of files) {
       if (!(f instanceof File)) continue;
@@ -247,13 +175,14 @@ export default function ManageProduct() {
 
     if (!validated.length) return;
 
+    // Build existing keys to detect duplicates (name:size)
     const existingKeys = new Set(
       images.map((it) =>
-        it instanceof File ? `${it.name}:${it.size}` : it?.toString(),
+        it instanceof File ? `${it.name}:${(it as File).size}` : it?.toString(),
       ),
     );
 
-    const uniqueNew = [];
+    const uniqueNew: File[] = [];
     for (const f of validated) {
       const key = `${f.name}:${f.size}`;
       if (!existingKeys.has(key)) {
@@ -267,6 +196,7 @@ export default function ManageProduct() {
       return;
     }
 
+    // Enforce max 5 images
     const allowed = Math.max(0, 5 - images.length);
     if (allowed <= 0) {
       return toast.error("Max 5 images allowed");
@@ -283,11 +213,19 @@ export default function ManageProduct() {
     setImages([...images, ...toAdd]);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!images.length) {
       return toast.error("Main image is required");
+    }
+
+    // Ensure main image is a File and actually looks like an image (type or signature)
+    const main = images[0];
+    if (!(main instanceof File) || !(await fileLooksLikeImage(main as File))) {
+      return toast.error(
+        "The main image must be an image file. Please re-upload a valid image.",
+      );
     }
 
     const validSpecs = specs.filter((s) => s.name.trim() && s.value.trim());
@@ -297,76 +235,40 @@ export default function ManageProduct() {
     }
 
     const payload = {
-      productId: productId,
       fields: { ...formData, quantity: formData.stock },
       specs: JSON.parse(JSON.stringify(validSpecs)),
       images: [...images],
     };
 
     try {
-      await submitUpdate(payload);
-      // toast.success("Product updated successfully!");
-      queryClient.invalidateQueries(["product", productSlug]);
-    } catch (err) {
-      console.error("submitUpdate failed:", err);
+      await submitProduct(payload as any);
+      resetForm();
+    } catch (err: any) {
+      console.error("submitProduct failed (raw):", err);
       const msg =
-        err?.message || err?.data?.message || "Failed to update product";
+        err?.message ||
+        (err?.data && err.data.message) ||
+        "Failed to publish product";
       toast.error(msg);
     }
   };
 
-  if (isProductLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#32afe2] mb-2" size={40} />
-        <p className="text-gray-500">Loading product information...</p>
-      </div>
-    );
-  }
-
-  if (isProductError) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-red-500 font-medium mb-4">Error loading product.</p>
-        <button
-          onClick={() => router.push("/dashboard/products_manage")}
-          className="bg-[#32afe2] text-white px-6 py-2 rounded-lg"
-        >
-          Back to List
-        </button>
-      </div>
+  if (formData.regular_price && formData.discount) {
+    formData.sale_price = String(
+      Number(formData.regular_price) * (1 - Number(formData.discount) / 100),
     );
   }
 
   return (
-    <div className="text-[#475569]">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Update Product</h1>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => router.push("/dashboard/products_manage")}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 border border-gray-300 rounded-lg transition-all"
-          >
-            <ArrowLeft size={18} /> Back
-          </button>
-
-          <button
-            onClick={handleDelete}
-            disabled={deleteMutation.isPending}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
-          >
-            {deleteMutation.isPending ? (
-              <Loader2 className="animate-spin" size={18} />
-            ) : (
-              <Trash2 size={18} />
-            )}
-            Delete
-          </button>
-        </div>
+    <div className="w-full text-[#475569]">
+      <div className="mb-4 flex justify-start">
+        <Link
+          href={"/dashboard/products_manage"}
+          className="flex flex-row items-center p-2 gap-2 text-gray-400"
+        >
+          <ArrowLeft /> Back
+        </Link>
       </div>
-
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputWrapper label="Select Main Category">
@@ -378,7 +280,7 @@ export default function ManageProduct() {
               required
             >
               <option value="">Select Main Category</option>
-              {dropdowns.categories.map((c) => (
+              {dropdowns.categories.map((c: any) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
@@ -401,9 +303,10 @@ export default function ManageProduct() {
               <option value="">Select Sub Category</option>
               {dropdowns.subCategories
                 .filter(
-                  (s) => String(s.category_id) === String(formData.category_id),
+                  (s: any) =>
+                    String(s.category_id) === String(formData.category_id),
                 )
-                .map((s) => (
+                .map((s: any) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>
@@ -426,7 +329,7 @@ export default function ManageProduct() {
               required
             >
               <option value="">Select brands</option>
-              {dropdowns.brands.map((b) => (
+              {dropdowns.brands.map((b: any) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
                 </option>
@@ -515,6 +418,8 @@ export default function ManageProduct() {
               name="discount"
               value={formData.discount}
               placeholder="0.00"
+              min={0}
+              max={100}
               onChange={handleChange}
               className="custom-input"
             />
@@ -536,7 +441,7 @@ export default function ManageProduct() {
               name="stock"
               value={formData.stock}
               placeholder="0"
-              min={1}
+              min={0}
               step={1}
               onChange={handleChange}
               className="custom-input"
@@ -565,22 +470,16 @@ export default function ManageProduct() {
           />
         </div>
 
-        <div className="pt-4 flex gap-3">
+        <div className="pt-4">
           <button
             type="submit"
-            disabled={isUpdating}
+            disabled={submitting}
             className="w-full md:w-auto px-10 py-4 bg-[#38bdf8] text-white rounded-xl font-semibold shadow-lg hover:bg-sky-500 transition-all flex items-center justify-center gap-3 disabled:opacity-70"
           >
-            {isUpdating ? (
-              <>
-                <Loader2 className="animate-spin" />
-                Updating...
-              </>
+            {submitting ? (
+              <Loader2 className="animate-spin" />
             ) : (
-              <>
-                <Save size={20} />
-                Update Product
-              </>
+              "Publish Product"
             )}
           </button>
         </div>

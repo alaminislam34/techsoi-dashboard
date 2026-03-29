@@ -151,17 +151,6 @@ const DashboardPage = () => {
                       {opt.label}
                     </button>
                   ))}
-                  <div className="border-t mt-1">
-                    <button
-                      onClick={() => {
-                        deleteOrder(item.id, "Out of Stock");
-                        setOpenDropdownId(null);
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
-                    >
-                      <Trash2 size={12} /> Delete Order
-                    </button>
-                  </div>
                 </div>
               </>
             )}

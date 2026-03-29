@@ -9,6 +9,7 @@ import Link from "next/link";
 
 const PublishNewBlog = () => {
   const [title, setTitle] = useState("");
+  const [titleBn, setTitleBn] = useState("");
   const [shortDetails, setShortDetails] = useState("");
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]);
@@ -68,13 +69,14 @@ const PublishNewBlog = () => {
   }, []);
 
   const handlePublish = async () => {
-    if (!title || !shortDetails || !description) {
+    if (!title || !titleBn || !shortDetails || !description) {
       return toast.error("Please fill all fields");
     }
 
     setLoading(true);
     const formData = new FormData();
     formData.append("title", title);
+    formData.append("title_bn", titleBn);
     formData.append("short_description", shortDetails);
     formData.append("full_description", description);
 
@@ -100,6 +102,7 @@ const PublishNewBlog = () => {
       if (res.data.status) {
         toast.success("Blog published successfully!");
         setTitle("");
+        setTitleBn("");
         setShortDetails("");
         setDescription("");
         // cleanup object URLs
@@ -153,6 +156,18 @@ const PublishNewBlog = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Type here"
+            className="w-full px-4 py-3 bg-secondary/20 border border-gray-200 rounded-lg focus:outline-none focus:border-primary text-dark"
+          />
+        </div>
+        <div className="md:col-span-2 flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-600">
+            Blog Title (Bengali)
+          </label>
+          <input
+            type="text"
+            value={titleBn}
+            onChange={(e) => setTitleBn(e.target.value)}
             placeholder="Type here"
             className="w-full px-4 py-3 bg-secondary/20 border border-gray-200 rounded-lg focus:outline-none focus:border-primary text-dark"
           />

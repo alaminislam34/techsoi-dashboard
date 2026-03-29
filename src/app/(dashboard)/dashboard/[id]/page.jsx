@@ -179,20 +179,6 @@ const ProductsDetails = () => {
                           {opt.label}
                         </button>
                       ))}
-                      <div className="bg-red-50 mt-1 border-t">
-                        <button
-                          onClick={() => {
-                            deleteOrder(
-                              order.id,
-                              "Admin Cancelled from details",
-                            );
-                            setIsOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-100 flex items-center gap-2 transition-colors"
-                        >
-                          <Trash2 size={14} /> Delete Order
-                        </button>
-                      </div>
                     </div>
                   </>
                 )}

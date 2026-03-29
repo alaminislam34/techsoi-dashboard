@@ -44,12 +44,12 @@ const BlogDetails = () => {
     }
   };
 
-  // Edit modal state
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const [editState, setEditState] = useState({
     title: "",
+    title_bn: "",
     short_description: "",
     full_description: "",
     status: 1,
@@ -65,6 +65,7 @@ const BlogDetails = () => {
       setEditState((s) => ({
         ...s,
         title: blog.title || "",
+        title_bn: blog.title_bn || "",
         short_description: blog.short_description || "",
         full_description: blog.full_description || "",
         status: blog.status ?? 1,
@@ -73,6 +74,116 @@ const BlogDetails = () => {
       }));
     }
   }, [blog]);
+
+  const handleUpdateBlog = async () => {
+    setEditLoading(true);
+
+    if (!editState.title || !String(editState.title).trim()) {
+      toast.error("Title is required");
+      return setEditLoading(false);
+    }
+
+    try {
+      let res;
+
+      if (editState.imageFile) {
+        const f = editState.imageFile;
+        const allowedMimes = [
+          "image/jpeg",
+          "image/png",
+          "image/jpg",
+          "image/gif",
+          "image/svg+xml",
+        ];
+        const allowedExts = ["jpeg", "png", "jpg", "gif", "svg"];
+        const fileExt = (f.name || "").split(".").pop()?.toLowerCase();
+        if (!(allowedMimes.includes(f.type) || allowedExts.includes(fileExt))) {
+          toast.error("Invalid image type. Allowed: jpeg, png, jpg, gif, svg.");
+          setEditLoading(false);
+          return;
+        }
+        if (f.size > 5 * 1024 * 1024) {
+          toast.error("Image is too large. Max allowed size is 5MB.");
+          setEditLoading(false);
+          return;
+        }
+      }
+      if (editState.imageFile instanceof File) {
+        const form = new FormData();
+
+        form.append("_method", "PUT");
+        form.append("title", editState.title);
+        form.append("title_bn", editState.title_bn);
+        form.append("short_description", editState.short_description);
+        form.append("full_description", editState.full_description || "");
+        form.append("status", String(editState.status));
+        form.append("image", editState.imageFile, editState.imageFile.name);
+
+        res = await apiService.post(BLOG_SINGLE_API(id), form);
+      } else {
+        const payload = {
+          title: editState.title,
+          title_bn: editState.title_bn,
+          short_description: editState.short_description,
+          full_description: editState.full_description || "",
+          status: editState.status,
+        };
+
+        if (
+          typeof editState.imagePreview === "string" &&
+          editState.imagePreview
+        ) {
+          payload.image = editState.imagePreview;
+        }
+
+        res = await apiService.put(BLOG_SINGLE_API(id), payload, {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (res?.data?.status) {
+        toast.success("Blog updated");
+        setBlog(res.data.data);
+        setIsEditOpen(false);
+
+        if (
+          editState.imageFile &&
+          editState.imagePreview &&
+          editState.imagePreview.startsWith("blob:")
+        ) {
+          try {
+            URL.revokeObjectURL(editState.imagePreview);
+          } catch (e) {}
+        }
+      } else {
+        toast.error(res?.data?.message || "Update failed");
+      }
+    } catch (e) {
+      console.error("Update blog error", e);
+
+      const errMsg =
+        e?.data?.message ||
+        e?.message ||
+        e?.response?.data?.message ||
+        e?.response?.data?.errors?.image?.[0] ||
+        "Update failed";
+
+      if (e?.data?.errors) {
+        const firstKey = Object.keys(e.data.errors)[0];
+        const firstMsg = e.data.errors[firstKey] && e.data.errors[firstKey][0];
+        if (firstMsg) toast.error(firstMsg);
+        else toast.error(errMsg);
+      } else {
+        toast.error(errMsg);
+      }
+
+      if (e?.status && e.status >= 500) {
+        console.error("Server error details:", e);
+      }
+    } finally {
+      setEditLoading(false);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -109,7 +220,7 @@ const BlogDetails = () => {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-semibold text-[#0f172a]">
-                    {blog.title}
+                    {blog.title_bn}
                   </h3>
                   <p className="text-sm text-[#64748b] mt-2">
                     {blog.short_description}
@@ -159,7 +270,7 @@ const BlogDetails = () => {
 
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-[#0f172a]">
+                        <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
                           Title
                         </label>
                         <input
@@ -170,12 +281,28 @@ const BlogDetails = () => {
                               title: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl"
+                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] text-gray-600 focus:outline-primary rounded-xl"
                         />
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium text-[#0f172a]">
+                        <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
+                          Title (Bengali)
+                        </label>
+                        <input
+                          value={editState.title_bn}
+                          onChange={(e) =>
+                            setEditState({
+                              ...editState,
+                              title_bn: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] text-gray-600 focus:outline-primary rounded-xl"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
                           Short Description
                         </label>
                         <input
@@ -186,12 +313,12 @@ const BlogDetails = () => {
                               short_description: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl"
+                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] text-gray-600 focus:outline-primary rounded-xl"
                         />
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium text-[#0f172a]">
+                        <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
                           Full Description (HTML)
                         </label>
                         <textarea
@@ -203,122 +330,131 @@ const BlogDetails = () => {
                               full_description: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl resize-none"
+                          className="w-full px-4 py-3 bg-white border border-[#e2e8f0] text-gray-600 focus:outline-primary rounded-xl resize-none"
                         />
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium text-[#0f172a]">
+                        <label className="text-sm font-medium text-gray-500 mb-2 inline-block">
                           Image
                         </label>
-                        <div className="flex items-center gap-3 mt-2">
-                          <div className="w-28 h-28 rounded overflow-hidden bg-gray-100">
+                        <div className="flex items-start justify-between gap-3 mt-2">
+                          <div className="overflow-hidden space-y-2">
                             <img
                               src={
                                 editState.imagePreview ||
                                 "https://placehold.co/200x200?text=No+Image"
                               }
                               alt="preview"
-                              className="w-full h-full object-cover"
-                            />
+                              className="w-full h-full max-w-30 aspect-4/3 object-cover"
+                            />{" "}
+                            <div>
+                              <input
+                                ref={editFileRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (!f) return;
+
+                                  // Client-side validation: MIME, extension, size (max 5MB)
+                                  const allowedMimes = [
+                                    "image/jpeg",
+                                    "image/png",
+                                    "image/jpg",
+                                    "image/gif",
+                                    "image/svg+xml",
+                                  ];
+
+                                  const maxSize = 5 * 1024 * 1024; // 5MB
+
+                                  const fileExt = (f.name || "")
+                                    .split(".")
+                                    .pop()
+                                    ?.toLowerCase();
+                                  const allowedExts = [
+                                    "jpeg",
+                                    "png",
+                                    "jpg",
+                                    "gif",
+                                    "svg",
+                                  ];
+
+                                  if (
+                                    !(
+                                      allowedMimes.includes(f.type) ||
+                                      allowedExts.includes(fileExt)
+                                    )
+                                  ) {
+                                    toast.error(
+                                      "Only JPEG, PNG, JPG, GIF or SVG images are allowed.",
+                                    );
+                                    return;
+                                  }
+
+                                  if (f.size > maxSize) {
+                                    toast.error(
+                                      "Image is too large. Max size is 5MB.",
+                                    );
+                                    return;
+                                  }
+
+                                  // Helpful debug log for server-side validation issues
+                                  console.debug("Uploading image:", {
+                                    name: f.name,
+                                    type: f.type,
+                                    size: f.size,
+                                  });
+
+                                  setEditState({
+                                    ...editState,
+                                    imageFile: f,
+                                    imagePreview: URL.createObjectURL(f),
+                                  });
+                                }}
+                              />
+                              <button
+                                onClick={() => editFileRef.current?.click()}
+                                className="px-4 py-2 bg-[#38bdf8] text-white rounded-lg"
+                              >
+                                Change
+                              </button>
+                            </div>
                           </div>
-                          <div>
-                            <input
-                              ref={editFileRef}
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (!f) return;
-                                if (!f.type.startsWith("image/"))
-                                  return alert("Only images allowed");
-                                setEditState({
-                                  ...editState,
-                                  imageFile: f,
-                                  imagePreview: URL.createObjectURL(f),
-                                });
-                              }}
-                            />
-                            <button
-                              onClick={() => editFileRef.current?.click()}
-                              className="px-4 py-2 bg-[#38bdf8] text-white rounded-lg"
-                            >
-                              Change
-                            </button>
+
+                          <div className="flex items-center gap-3">
+                            <label className="text-sm">Status:</label>
+                            <div className="border border-primary px-4 py-2 rounded">
+                              <select
+                                className="px-2 text-primary outline-none"
+                                value={editState.status}
+                                onChange={(e) =>
+                                  setEditState({
+                                    ...editState,
+                                    status: Number(e.target.value),
+                                  })
+                                }
+                              >
+                                <option value={1}>Published</option>
+                                <option value={0}>Draft</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <label className="text-sm">Status:</label>
-                        <select
-                          className="px-3 py-2 border rounded"
-                          value={editState.status}
-                          onChange={(e) =>
-                            setEditState({
-                              ...editState,
-                              status: Number(e.target.value),
-                            })
-                          }
-                        >
-                          <option value={1}>Published</option>
-                          <option value={0}>Draft</option>
-                        </select>
                       </div>
 
                       <div className="flex justify-end gap-3 mt-4">
                         <button
                           onClick={() => setIsEditOpen(false)}
-                          className="px-4 py-2 bg-white border rounded"
+                          className="px-4 py-2 bg-white border border-primary text-primary rounded"
                         >
                           Cancel
                         </button>
                         <button
                           disabled={editLoading}
-                          onClick={async () => {
-                            setEditLoading(true);
-                            try {
-                              const form = new FormData();
-                              form.append("title", editState.title);
-                              form.append(
-                                "short_description",
-                                editState.short_description,
-                              );
-                              form.append(
-                                "full_description",
-                                editState.full_description || "",
-                              );
-                              form.append("status", editState.status);
-                              if (editState.imageFile)
-                                form.append("image", editState.imageFile);
-
-                              const res = await apiService.put(
-                                BLOG_SINGLE_API(id),
-                                form,
-                                {
-                                  headers: {
-                                    "Content-Type": "multipart/form-data",
-                                  },
-                                },
-                              );
-                              if (res?.data?.status) {
-                                toast.success("Blog updated");
-                                setBlog(res.data.data);
-                                setIsEditOpen(false);
-                              } else {
-                                toast.error("Update failed");
-                              }
-                            } catch (e) {
-                              console.error("Update blog error", e);
-                              toast.error(
-                                e?.response?.data?.message || "Update failed",
-                              );
-                            } finally {
-                              setEditLoading(false);
-                            }
-                          }}
-                          className="px-4 py-2 bg-[#0f172a] text-white rounded flex items-center gap-2"
+                          onClick={handleUpdateBlog}
+                          className="px-4 py-2 bg-primary text-white rounded flex items-center gap-2"
                         >
                           {editLoading ? (
                             <Loader2 className="animate-spin" size={16} />
