@@ -15,7 +15,7 @@ jobs:
 
       - name: Set image name
         id: vars
-        run: echo "image=docker.io/${{ secrets.DOCKER_USERNAME }}/techsoi-bd" >> "$GITHUB_OUTPUT"
+        run: echo "image=docker.io/${{ secrets.DOCKER_USERNAME }}/techsoi-dashboard" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
