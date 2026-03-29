@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       {
@@ -16,8 +17,8 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
-          source: '/api/:path*',
-          destination: 'https://api.techsoibd.com/api/:path*',
+          source: "/api/:path*",
+          destination: "https://api.techsoibd.com/api/:path*",
         },
       ],
     };
