@@ -4,6 +4,7 @@
 FROM node:20-alpine AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 # -----------------------
 # Dependencies
@@ -11,10 +12,32 @@ ENV NEXT_TELEMETRY_DISABLED=1
 FROM base AS deps
 WORKDIR /app
 
+# Required for some native modules
 RUN apk add --no-cache libc6-compat
 
+# Enable pnpm
+RUN corepack enable
+
 COPY package.json pnpm-lock.yaml ./
-RUN corepack enable && pnpm install --frozen-lockfile --prod
+
+# Install only production dependencies
+RUN pnpm install --frozen-lockfile --prod
+
+# -----------------------
+# Development
+# -----------------------
+FROM base AS dev
+WORKDIR /app
+
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml ./
+
+# Install all dependencies for development
+RUN pnpm install --frozen-lockfile
+
+# Default command for dev stage when used directly
+CMD ["corepack", "pnpm", "dev", "--hostname", "0.0.0.0"]
 
 # -----------------------
 # Builder
@@ -22,12 +45,14 @@ RUN corepack enable && pnpm install --frozen-lockfile --prod
 FROM base AS builder
 WORKDIR /app
 
+RUN corepack enable
+
 COPY . .
 
-# Reinstall full deps for build
-RUN corepack enable && pnpm install --frozen-lockfile
+# Install all dependencies (including dev)
+RUN pnpm install --frozen-lockfile
 
-# Build app
+# Build Next.js app
 RUN pnpm exec next build
 
 # -----------------------
@@ -38,24 +63,30 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOST=0.0.0.0
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Non-root user (SECURITY)
 RUN addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001
 
-# Copy only required files
+# Install curl for healthcheck
+RUN apk add --no-cache curl libc6-compat
+
+# Copy standalone output
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Ownership fix
+# Fix permissions
 RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
 EXPOSE 3000
 
-# Health check (PRO LEVEL)
+# Healthcheck (PROPER)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
-  CMD wget -qO- http://localhost:3001 || exit 1
+  CMD curl -f http://localhost:3000 || exit 1
 
+# Start app
 CMD ["node", "server.js"]
