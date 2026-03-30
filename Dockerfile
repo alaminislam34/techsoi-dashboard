@@ -4,7 +4,6 @@
 FROM node:20-alpine AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
 
 # -----------------------
 # Dependencies
@@ -37,7 +36,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Default command for dev stage when used directly
-CMD ["corepack", "pnpm", "dev", "--hostname", "0.0.0.0"]
+CMD ["corepack", "pnpm", "exec", "next", "dev", "--hostname", "0.0.0.0"]
 
 # -----------------------
 # Builder
@@ -46,6 +45,10 @@ FROM base AS builder
 WORKDIR /app
 
 RUN corepack enable
+
+ARG NEXT_PUBLIC_BASE_URL
+
+ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
 COPY . .
 
@@ -62,7 +65,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3001
 ENV HOST=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -82,11 +85,11 @@ RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3001
 
 # Healthcheck (PROPER)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
-  CMD curl -f http://localhost:3000 || exit 1
+  CMD curl -f http://localhost:3001 || exit 1
 
 # Start app
 CMD ["node", "server.js"]

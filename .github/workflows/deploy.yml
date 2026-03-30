@@ -33,5 +33,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ steps.vars.outputs.image }}:latest
+          build-args: |
+            NEXT_PUBLIC_BASE_URL=https://api.techsoibd.com/api
           cache-from: type=gha
           cache-to: type=gha,mode=max
