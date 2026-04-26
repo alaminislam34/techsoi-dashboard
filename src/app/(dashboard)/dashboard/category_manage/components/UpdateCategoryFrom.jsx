@@ -13,7 +13,7 @@ const UpdateCategoryForm = () => {
   // --- States for Input Fields (Design Remains Same) ---
   const [categoryName, setCategoryName] = useState("");
   const [categoryFile, setCategoryFile] = useState(null);
-  console.log(categoryFile);
+  const [categoryBannerFile, setCategoryBannerFile] = useState(null);
   const [selectedParentId, setSelectedParentId] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
   const [subCategoryFile, setSubCategoryFile] = useState(null);
@@ -96,6 +96,7 @@ const UpdateCategoryForm = () => {
     const formData = new FormData();
     formData.append("name", categoryName);
     formData.append("image", categoryFile);
+    formData.append("banner", categoryBannerFile);
     categoryMutation.mutate(formData);
   };
 
@@ -153,8 +154,10 @@ const UpdateCategoryForm = () => {
     <div className="bg-white space-y-6 p-2 md:p-4">
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Main Category</h2>
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="md:col-span-6">
+          {/* Category Name */}
+          <div className="md:col-span-4">
             <label className="block text-sm md:text-base text-dark mb-2">
               Category Name
             </label>
@@ -166,7 +169,9 @@ const UpdateCategoryForm = () => {
               className="w-full px-4 py-3 rounded-xl border border-primary focus:outline-none placeholder-gray-400 text-gray-600"
             />
           </div>
-          <div className="md:col-span-4">
+
+          {/* Icon Upload */}
+          <div className="md:col-span-3">
             <label className="block text-sm md:text-base text-dark mb-2">
               Upload Icon
             </label>
@@ -191,6 +196,38 @@ const UpdateCategoryForm = () => {
               </label>
             </div>
           </div>
+
+          {/* Banner Upload (NEW) */}
+          <div className="md:col-span-3">
+            <label className="block text-sm md:text-base text-dark mb-2">
+              Upload Banner
+            </label>
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="category-banner-upload"
+                onChange={(e) =>
+                  e.target.files.length &&
+                  setCategoryBannerFile(e.target.files[0])
+                }
+              />
+              <label
+                htmlFor="category-banner-upload"
+                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-primary cursor-pointer text-gray-400 bg-white"
+              >
+                <Upload size={18} className="text-primary shrink-0" />
+                <span className="truncate text-sm">
+                  {categoryBannerFile
+                    ? categoryBannerFile.name
+                    : "Choose banner"}
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {/* Create Button */}
           <div className="md:col-span-2">
             <button
               type="button"
@@ -207,7 +244,6 @@ const UpdateCategoryForm = () => {
           </div>
         </div>
       </section>
-
       {/* --- Sub Category Section --- */}
       <section>
         <h2 className="text-lg font-semibold text-dark mb-4">Sub Category</h2>

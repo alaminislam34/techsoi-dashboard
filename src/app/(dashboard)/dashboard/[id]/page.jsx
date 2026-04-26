@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronDown, ArrowLeft, Package, Trash2 } from "lucide-react";
+import { ChevronDown, ArrowLeft, Package } from "lucide-react";
 import {
   SINGLE_ORDER_API,
   CATEGORY_API,
   SUB_CATEGORY_API,
   BRAND_API,
+  PAYMENT_STATUS_UPDATE_API,
 } from "@/api/apiEndPoint";
 import apiService from "@/api/api";
 import { useOrderActions } from "@/api/hooks/useOrderActions";
@@ -22,7 +23,9 @@ const ProductsDetails = () => {
   const params = useParams();
   const router = useRouter();
   const orderId = params.id;
+
   const [isOpen, setIsOpen] = useState(false);
+  const [isPayOpen, setIsPayOpen] = useState(false); // 🔥 NEW
 
   const fetchAllData = async () => {
     try {
@@ -51,8 +54,19 @@ const ProductsDetails = () => {
     fetchAllData();
   }, [orderId]);
 
-  const { updateStatus, deleteOrder, isUpdating } =
-    useOrderActions(fetchAllData);
+  const { updateStatus, isUpdating } = useOrderActions(fetchAllData);
+
+  const updatePaymentStatus = async (status) => {
+    try {
+      await apiService.put(PAYMENT_STATUS_UPDATE_API(orderId), {
+        pay_status: status,
+        status: order.status,
+      });
+      fetchAllData();
+    } catch (err) {
+      console.error("Payment status update failed:", err);
+    }
+  };
 
   const getCategoryName = (id) =>
     categories.find((c) => c.id === id)?.name || "N/A";
@@ -99,10 +113,12 @@ const ProductsDetails = () => {
       </button>
 
       <div className="space-y-6">
+        {/* ORDER SUMMARY */}
         <section>
           <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
             Order Summary
           </div>
+
           <div className="bg-white p-6 md:p-8 rounded-b-xl flex flex-col md:flex-row gap-6 md:gap-8 relative shadow-sm border border-gray-100">
             <div className="w-full md:w-48 h-32 md:h-48 bg-gray-100 rounded-2xl shrink-0 flex flex-col items-center justify-center border border-dashed border-gray-300">
               <Package size={32} className="text-gray-300 mb-1" />
@@ -121,25 +137,63 @@ const ProductsDetails = () => {
                 </span>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                  <span className="text-gray-500 w-24">Payment:</span>
-                  <span
-                    className={`font-medium ${order.pay_status === 1 ? "text-green-600" : "text-red-500"}`}
+              {/* PAYMENT STATUS BUTTON ADDED */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <span className="text-gray-500 w-24">Payment:</span>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setIsPayOpen(!isPayOpen)}
+                    className={`px-4 py-2 rounded-lg text-sm border font-medium ${
+                      order.pay_status === 1
+                        ? "text-green-600 border-green-500 bg-green-50"
+                        : "text-red-500 border-red-500 bg-red-50"
+                    }`}
                   >
-                    {order.pay_status === 1 ? "Paid" : "Unpaid"} (
-                    {order.pay_method})
-                  </span>
+                    {order.pay_status === 1 ? "Paid" : "Unpaid"} ▾
+                  </button>
+
+                  {isPayOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0"
+                        onClick={() => setIsPayOpen(false)}
+                      />
+
+                      <div className="absolute mt-2 bg-white border rounded-lg shadow-md w-32 z-20">
+                        <button
+                          onClick={() => {
+                            updatePaymentStatus(1);
+                            setIsPayOpen(false);
+                          }}
+                          className="w-full px-3 py-2 text-left hover:bg-green-50"
+                        >
+                          Paid
+                        </button>
+                        <button
+                          onClick={() => {
+                            updatePaymentStatus(0);
+                            setIsPayOpen(false);
+                          }}
+                          className="w-full px-3 py-2 text-left hover:bg-red-50"
+                        >
+                          Unpaid
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 pt-2 border-t border-gray-50 sm:border-none">
-                  <span className="text-gray-500 w-24 text-lg">Total:</span>
-                  <span className="font-bold text-xl text-primary">
-                    ৳ {Number(order.total_amount).toLocaleString()}
-                  </span>
-                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 pt-2 border-t border-gray-50 sm:border-none">
+                <span className="text-gray-500 w-24 text-lg">Total:</span>
+                <span className="font-bold text-xl text-primary">
+                  ৳ {Number(order.total_amount).toLocaleString()}
+                </span>
               </div>
             </div>
 
+            {/* STATUS CHANGE (UNCHANGED) */}
             <div className="md:absolute top-4 right-4 md:top-8 md:right-8">
               <div className="relative">
                 <button
@@ -150,14 +204,7 @@ const ProductsDetails = () => {
                   {statusOptions.find(
                     (opt) => opt.value === Number(order.status),
                   )?.label || "Select Status"}
-                  <ChevronDown
-                    size={16}
-                    className={
-                      isOpen
-                        ? "rotate-180 transition-transform"
-                        : "transition-transform"
-                    }
-                  />
+                  <ChevronDown size={16} />
                 </button>
 
                 {isOpen && (
@@ -166,7 +213,7 @@ const ProductsDetails = () => {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-full md:w-44 bg-white border border-gray-100 rounded-lg shadow-xl z-20 py-1 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-full md:w-44 bg-white border rounded-lg shadow-xl z-20 py-1">
                       {statusOptions.map((opt) => (
                         <button
                           key={opt.value}
@@ -174,7 +221,7 @@ const ProductsDetails = () => {
                             updateStatus(order.id, order.pay_status, opt.value);
                             setIsOpen(false);
                           }}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-secondary hover:text-primary transition-colors border-b border-gray-50 last:border-0"
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-secondary hover:text-primary"
                         >
                           {opt.label}
                         </button>

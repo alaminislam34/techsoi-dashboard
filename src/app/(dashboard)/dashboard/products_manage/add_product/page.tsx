@@ -373,21 +373,29 @@ export default function AddProduct() {
           />
         </InputWrapper>
 
-        <InputWrapper label="Short Details">
-          <input
-            type="text"
+        <InputWrapper label="Short Details (Key Points)">
+          <textarea
             name="short_description"
             value={formData.short_description}
-            placeholder="Type short description"
             onChange={handleChange}
-            className="custom-input pr-12"
+            onPaste={(e) => {
+              const paste = e.clipboardData.getData("text");
+
+              setFormData((prev) => ({
+                ...prev,
+                short_description: prev.short_description + paste,
+              }));
+
+              e.preventDefault(); // default paste বন্ধ
+            }}
+            className="custom-input min-h-30 pr-12 resize-none whitespace-pre-wrap"
           />
+
           <Pencil
             className="absolute right-4 top-3.5 text-slate-300"
             size={18}
           />
         </InputWrapper>
-
         <InputWrapper label="Full Description">
           <textarea
             name="full_description"

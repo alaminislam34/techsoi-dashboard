@@ -55,3 +55,5 @@ export const REVIEW_SINGLE_API = (id) => `/review-product/${id}`; // Get/Put/Del
 
 // --- Website / Settings ---
 export const WEBSITE_INFO_API = "/website-info"; // Get / Put
+
+export const PAYMENT_STATUS_UPDATE_API = (orderId) => `/order/${orderId}`; // Put
