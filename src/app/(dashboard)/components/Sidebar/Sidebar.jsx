@@ -75,7 +75,7 @@ const Sidebar = () => {
   return (
     <div className="lg:w-65 xl:w-72 border-r border-gray-300 h-screen bg-secondary flex justify-between flex-col fixed left-0 top-0 p-6">
       <div>
-        <div className="flex items-center justify-center mt-6 mb-12">
+        <div className="flex items-center justify-center mt-6 mb-12 ">
           <Link href="/dashboard">
             <Image
               src={"/logos/logo.png"}

@@ -189,47 +189,43 @@ const AccountSettings = () => {
 
   return (
     <div>
-      {/* Tabs */}
-      <div className="flex items-center gap-4 py-4">
-        <button
-          type="button"
-          onClick={() => setActiveTab("password")}
-          aria-pressed={activeTab === "password"}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            activeTab === "password"
-              ? "bg-[#38bdf8] text-white"
-              : "text-gray-600 hover:bg-gray-50"
-          }`}
-        >
-          Change Password
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("website")}
-          aria-pressed={activeTab === "website"}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            activeTab === "website"
-              ? "bg-[#38bdf8] text-white"
-              : "text-gray-600 hover:bg-gray-50"
-          }`}
-        >
-          Website Settings
-        </button>
+      {/* Tabs Container */}
+      <div className="flex items-center gap-8 border-b border-gray-100 mb-8 overflow-x-auto scrollbar-hide">
+        {[
+          { id: "password", label: "Change Password" },
+          { id: "website", label: "Website Settings" },
+          { id: "faq", label: "FAQs" },
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className="relative py-4 group"
+            >
+              {/* Label */}
+              <span
+                className={`font-semibold transition-all duration-200 ${
+                  isActive
+                    ? "text-[#38bdf8]"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                {tab.label}
+              </span>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("faq")}
-          aria-pressed={activeTab === "faq"}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            activeTab === "faq"
-              ? "bg-[#38bdf8] text-white"
-              : "text-gray-600 hover:bg-gray-50"
-          }`}
-        >
-          FAQs
-        </button>
+              {/* Active Underline Indicator */}
+              {isActive ? (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#38bdf8] rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300" />
+              ) : (
+                /* Hover Indicator */
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-200 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
+              )}
+            </button>
+          );
+        })}
       </div>
-
       {/* Panels */}
       {activeTab === "password" && (
         <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">

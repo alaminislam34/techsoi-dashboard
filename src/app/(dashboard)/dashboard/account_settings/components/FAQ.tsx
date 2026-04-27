@@ -174,7 +174,7 @@ export default function FaqPage() {
                       />
                     ) : (
                       <span
-                        className={`font-semibold text-lg transition-colors ${isActive ? "text-sky-500" : "text-gray-800"}`}
+                        className={`font-semibold transition-colors ${isActive ? "text-sky-500" : "text-gray-800"}`}
                       >
                         {faq.question}
                       </span>
@@ -230,7 +230,7 @@ export default function FaqPage() {
                 </div>
 
                 <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${isActive || isEditing ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+                  className={`overflow-hidden duration-300 ${isActive || isEditing ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
                 >
                   <div className="px-6 pb-6 text-gray-600 border-t border-gray-50 pt-4">
                     {isEditing ? (
@@ -242,7 +242,7 @@ export default function FaqPage() {
                         }
                       />
                     ) : (
-                      <p className="leading-relaxed">{faq.answer}</p>
+                      <p className="leading-relaxed text-sm">{faq.answer}</p>
                     )}
                   </div>
                 </div>
@@ -251,7 +251,6 @@ export default function FaqPage() {
           })}
       </div>
 
-      {/* Delete Confirmation Modal */}
       {isDeleting !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">

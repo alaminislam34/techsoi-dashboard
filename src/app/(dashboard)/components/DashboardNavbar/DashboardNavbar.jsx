@@ -240,11 +240,12 @@ const NavbarContent = () => {
             <div className="flex items-center justify-center mt-6 mb-12">
               <Link href="/dashboard" onClick={() => setIsSidebarOpen(false)}>
                 <Image
-                  src="/logos/logo.png"
-                  height={100}
-                  width={200}
+                  src={"/logos/logo.png"}
+                  height={135}
+                  width={600}
+                  unoptimized
                   alt="Website logo"
-                  className="w-48 h-auto object-contain"
+                  className="w-55 h-auto object-cover"
                 />
               </Link>
             </div>
