@@ -91,8 +91,7 @@ const UpdateCategoryForm = () => {
   });
 
   const handleCreateCategory = () => {
-    if (!categoryName.trim() || !categoryFile)
-      return toast.error("Missing fields for Category");
+    if (!categoryName.trim()) return toast.error("Missing fields for Category");
     const formData = new FormData();
     formData.append("name", categoryName);
     formData.append("image", categoryFile);

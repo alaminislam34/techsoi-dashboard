@@ -367,7 +367,7 @@ const Category = () => {
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-2">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center mb-4">
             <Layers size={18} className="text-slate-400" />
             <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
               Categories
@@ -406,10 +406,10 @@ const Category = () => {
                       return (
                         <tr
                           key={category.id}
-                          className="hover:bg-slate-50/30 transition-colors"
+                          className="hover:bg-slate-50/30 transition-colors "
                         >
-                          <td className="px-6 py-4">
-                            <div className="flex items-center justify-between gap-4">
+                          <td className="px-4 md:px-6 py-4 flex items-start">
+                            <div className="flex items-start md:items-center flex-col md:flex-row gap-2 md:gap-4">
                               <div className="flex items-center gap-4">
                                 <div className="h-10 w-10 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 relative shrink-0">
                                   <Image
@@ -459,7 +459,7 @@ const Category = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 md:px-6 py-4">
                             <div className="flex flex-wrap gap-2">
                               {filteredSubs.length > 0 ? (
                                 filteredSubs.map((sub) => (

@@ -7,6 +7,7 @@ import apiService from "@/api/api";
 import { ADMIN_PASSWORD_RESET_API, WEBSITE_INFO_API } from "@/api/apiEndPoint";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import FaqPage from "./components/FAQ";
 
 const AccountSettings = () => {
   const [formData, setFormData] = useState({
@@ -213,6 +214,19 @@ const AccountSettings = () => {
           }`}
         >
           Website Settings
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("faq")}
+          aria-pressed={activeTab === "faq"}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            activeTab === "faq"
+              ? "bg-[#38bdf8] text-white"
+              : "text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          FAQs
         </button>
       </div>
 
@@ -509,6 +523,8 @@ const AccountSettings = () => {
           </form>
         </div>
       )}
+
+      {activeTab === "faq" && <FaqPage />}
     </div>
   );
 };

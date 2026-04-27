@@ -57,3 +57,8 @@ export const REVIEW_SINGLE_API = (id) => `/review-product/${id}`; // Get/Put/Del
 export const WEBSITE_INFO_API = "/website-info"; // Get / Put
 
 export const PAYMENT_STATUS_UPDATE_API = (orderId) => `/order/${orderId}`; // Put
+export const FAQ_GET_API = "/faq"; // Get all
+export const FAQ_SINGLE_API = (id) => `/faq/${id}`;
+export const FAQ_CREATE_API = "/faq"; // Post
+export const FAQ_UPDATE_API = (id) => `/faq/${id}`;
+export const FAQ_DELETE_API = (id) => `/faq/${id}`; // Delete

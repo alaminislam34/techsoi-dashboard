@@ -279,13 +279,6 @@ const ReviewDetails = () => {
         {/* Actions */}
         <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3">
           <button
-            onClick={() => router.push(`/reviews/${review.id}/edit`)}
-            className="px-5 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition"
-          >
-            Edit
-          </button>
-
-          <button
             onClick={handleDelete}
             disabled={isDeleting}
             className={`px-5 py-2 rounded font-medium min-w-27.5 flex items-center justify-center gap-2 ${
