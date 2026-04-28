@@ -26,16 +26,7 @@ const sidelinks = [
     href: "/dashboard/products_manage",
     match: (pathname) => pathname.startsWith("/dashboard/products_manage"),
   },
-  {
-    name: "Poster Banner",
-    href: "/dashboard/banner_manage",
-    match: (pathname) => pathname.startsWith("/dashboard/banner_manage"),
-  },
-  {
-    name: "Add brands",
-    href: "/dashboard/add_brands",
-    match: (pathname) => pathname.startsWith("/dashboard/add_brands"),
-  },
+
   {
     name: "Review Management",
     href: "/dashboard/review_manage",

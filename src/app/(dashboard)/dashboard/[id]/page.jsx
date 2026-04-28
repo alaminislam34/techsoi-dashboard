@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronDown, ArrowLeft, Package } from "lucide-react";
+import { ChevronDown, ArrowLeft, Package, Check } from "lucide-react";
 import {
   SINGLE_ORDER_API,
   CATEGORY_API,
@@ -25,7 +25,7 @@ const ProductsDetails = () => {
   const orderId = params.id;
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isPayOpen, setIsPayOpen] = useState(false); // 🔥 NEW
+  const [isPayOpen, setIsPayOpen] = useState(false);
 
   const fetchAllData = async () => {
     try {
@@ -76,12 +76,19 @@ const ProductsDetails = () => {
 
   const statusOptions = [
     { label: "New Order", value: 1 },
-    { label: "Pending", value: 2 },
-    { label: "Processing", value: 3 },
-    { label: "In Delivery", value: 4 },
-    { label: "Complete", value: 5 },
+    { label: "Accepted", value: 2 },
+    { label: "In Delivery", value: 3 },
+    { label: "Completed", value: 4 },
     { label: "Cancelled", value: 0 },
   ];
+
+  const statusStyles = {
+    1: "bg-blue-50 text-blue-700 hover:bg-blue-100",
+    2: "bg-purple-50 text-purple-700 hover:bg-purple-100",
+    3: "bg-amber-50 text-amber-700 hover:bg-amber-100",
+    4: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+    0: "bg-rose-50 text-rose-700 hover:bg-rose-100",
+  };
 
   const getStatusStyles = (id) => {
     switch (Number(id)) {
@@ -93,7 +100,7 @@ const ProductsDetails = () => {
         return "text-orange-500 border-orange-500 bg-orange-50";
       case 3:
         return "text-purple-600 border-purple-500 bg-purple-50";
-      case 5:
+      case 4:
         return "text-green-600 border-green-600 bg-green-50";
       default:
         return "text-primary border-primary bg-secondary/50";
@@ -113,7 +120,6 @@ const ProductsDetails = () => {
       </button>
 
       <div className="space-y-6">
-        {/* ORDER SUMMARY */}
         <section>
           <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
             Order Summary
@@ -137,36 +143,44 @@ const ProductsDetails = () => {
                 </span>
               </div>
 
-              {/* PAYMENT STATUS BUTTON ADDED */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <span className="text-gray-500 w-24">Payment:</span>
-
+              {/* PAYMENT STATUS */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-2">
+                <span className="text-gray-500 text-sm font-medium w-24">
+                  Payment:
+                </span>
                 <div className="relative">
                   <button
                     onClick={() => setIsPayOpen(!isPayOpen)}
-                    className={`px-4 py-2 rounded-lg text-sm border font-medium ${
+                    className={`group flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-300 shadow-sm
+                    ${
                       order.pay_status === 1
-                        ? "text-green-600 border-green-500 bg-green-50"
-                        : "text-red-500 border-red-500 bg-red-50"
+                        ? "text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100"
+                        : "text-rose-600 border-rose-200 bg-rose-50 hover:bg-rose-100"
                     }`}
                   >
-                    {order.pay_status === 1 ? "Paid" : "Unpaid"} ▾
+                    <span
+                      className={`w-2 h-2 rounded-full ${order.pay_status === 1 ? "bg-emerald-500" : "bg-rose-500"}`}
+                    ></span>
+                    {order.pay_status === 1 ? "Paid" : "Unpaid"}
+                    <ChevronDown
+                      size={14}
+                      className={isPayOpen ? "rotate-180" : ""}
+                    />
                   </button>
 
                   {isPayOpen && (
                     <>
                       <div
-                        className="fixed inset-0"
+                        className="fixed inset-0 z-10"
                         onClick={() => setIsPayOpen(false)}
                       />
-
-                      <div className="absolute mt-2 bg-white border rounded-lg shadow-md w-32 z-20">
+                      <div className="absolute left-0 mt-2 bg-white border border-gray-100 rounded-lg shadow-md w-32 z-20">
                         <button
                           onClick={() => {
                             updatePaymentStatus(1);
                             setIsPayOpen(false);
                           }}
-                          className="w-full px-3 py-2 text-left hover:bg-green-50"
+                          className="w-full px-3 py-2 text-left hover:bg-green-50 text-sm"
                         >
                           Paid
                         </button>
@@ -175,7 +189,7 @@ const ProductsDetails = () => {
                             updatePaymentStatus(0);
                             setIsPayOpen(false);
                           }}
-                          className="w-full px-3 py-2 text-left hover:bg-red-50"
+                          className="w-full px-3 py-2 text-left hover:bg-red-50 text-sm"
                         >
                           Unpaid
                         </button>
@@ -193,18 +207,21 @@ const ProductsDetails = () => {
               </div>
             </div>
 
-            {/* STATUS CHANGE (UNCHANGED) */}
+            {/* ORDER STATUS DROPDOWN */}
             <div className="md:absolute top-4 right-4 md:top-8 md:right-8">
               <div className="relative">
                 <button
                   disabled={isUpdating}
                   onClick={() => setIsOpen(!isOpen)}
-                  className={`flex items-center justify-between w-full md:w-44 gap-2 border px-4 py-2 rounded-lg text-sm font-medium transition-all ${getStatusStyles(order.status)} ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`flex items-center justify-between w-full md:w-44 gap-2  px-4 py-2 rounded-lg text-sm font-medium transition-all ${getStatusStyles(order.status)} ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {statusOptions.find(
                     (opt) => opt.value === Number(order.status),
                   )?.label || "Select Status"}
-                  <ChevronDown size={16} />
+                  <ChevronDown
+                    size={16}
+                    className={isOpen ? "rotate-180" : ""}
+                  />
                 </button>
 
                 {isOpen && (
@@ -213,19 +230,33 @@ const ProductsDetails = () => {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-full md:w-44 bg-white border rounded-lg shadow-xl z-20 py-1">
-                      {statusOptions.map((opt) => (
-                        <button
-                          key={opt.value}
-                          onClick={() => {
-                            updateStatus(order.id, order.pay_status, opt.value);
-                            setIsOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-secondary hover:text-primary"
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
+                    <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-1.5 animate-in fade-in zoom-in duration-200">
+                      {statusOptions.map((opt) => {
+                        const isActive = opt.value === Number(order.status);
+                        return (
+                          <button
+                            key={opt.value}
+                            disabled={isUpdating || isActive}
+                            onClick={() => {
+                              updateStatus(
+                                order.id,
+                                order.pay_status,
+                                opt.value,
+                              );
+                              setIsOpen(false);
+                            }}
+                            className={`group w-full flex items-center justify-between px-3 py-2 text-sm font-medium mb-1 rounded-lg transition-all
+                            ${
+                              isActive
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                : `${statusStyles[opt.value]} hover:brightness-95 cursor-pointer`
+                            }`}
+                          >
+                            <span>{opt.label}</span>
+                            {isActive && <Check size={14} />}
+                          </button>
+                        );
+                      })}
                     </div>
                   </>
                 )}
@@ -234,6 +265,7 @@ const ProductsDetails = () => {
           </div>
         </section>
 
+        {/* ITEMS TABLE */}
         <section>
           <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
             Items in this Order
@@ -257,10 +289,8 @@ const ProductsDetails = () => {
                       key={item.id}
                       className="hover:bg-gray-50/50 transition-colors"
                     >
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-gray-800">
-                          Product #{item.product_id}
-                        </div>
+                      <td className="px-6 py-4 font-semibold text-gray-800">
+                        Product #{item.product_id}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {getCategoryName(item.category_id)}
@@ -274,7 +304,7 @@ const ProductsDetails = () => {
                       <td className="px-6 py-4 text-center font-medium">
                         {item.product_qty}
                       </td>
-                      <td className="px-6 py-4 text-right font-bold text-primary whitespace-nowrap">
+                      <td className="px-6 py-4 text-right font-bold text-primary">
                         ৳ {Number(item.total_amount).toLocaleString()}
                       </td>
                     </tr>
@@ -285,6 +315,7 @@ const ProductsDetails = () => {
           </div>
         </section>
 
+        {/* CUSTOMER DETAILS */}
         <section>
           <div className="bg-secondary text-primary font-semibold py-3 px-6 rounded-t-xl border-b border-white">
             Customer Details
