@@ -34,6 +34,8 @@ const AccountSettings = () => {
     instagram_link: "",
     tiktok_link: "",
     whatsapp_link: "",
+    hero_text: "",
+    youtube_link: "",
   });
   const [isUpdatingWebsite, setIsUpdatingWebsite] = useState(false);
 
@@ -489,6 +491,18 @@ const AccountSettings = () => {
                     type="url"
                     name="youtube_link"
                     value={website.youtube_link}
+                    onChange={handleWebsiteChange}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38bdf8]/30 focus:border-[#38bdf8]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 pb-2">
+                    Hero Text
+                  </label>
+                  <input
+                    type="text"
+                    name="hero_text"
+                    value={website.hero_text}
                     onChange={handleWebsiteChange}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38bdf8]/30 focus:border-[#38bdf8]"
                   />
