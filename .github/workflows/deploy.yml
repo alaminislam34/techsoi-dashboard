@@ -48,14 +48,22 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASS }}
           script: |
+            set -e
             cd ~/techsoi-dashboard
 
-            echo "🚀 Deployment started for techsoi-dashboard..."
+            echo "Starting deployment process..."
 
+            echo "Pulling latest image from Docker Hub..."
             docker-compose -f docker-compose.prod.yml pull
 
-            docker-compose -f docker-compose.prod.yml up -d --remove-orphans
 
+            echo "Stopping old containers..."
+            docker-compose -f docker-compose.prod.yml down || true
+
+
+            echo "Starting new containers..."
+            docker-compose -f docker-compose.prod.yml up -d
+
+
+            echo "Pruning unused images..."
             docker image prune -f
-
-            echo "✅ Deployment successful and clean-up done!"
