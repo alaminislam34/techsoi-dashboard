@@ -91,4 +91,4 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
   CMD curl -f http://localhost:3001 || exit 1
 
-CMD ["node", ".next/standalone/server.js"]
+CMD ["node", "server.js"]
