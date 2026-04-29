@@ -11,13 +11,18 @@ const apiService = axios.create({
 apiService.interceptors.request.use(
   (config) => {
     // If sending FormData, let the browser/axios set the Content-Type
-    if (config.data && typeof FormData !== 'undefined' && config.data instanceof FormData) {
-      if (config.headers && config.headers['Content-Type']) {
-        delete config.headers['Content-Type'];
+    if (
+      config.data &&
+      typeof FormData !== "undefined" &&
+      config.data instanceof FormData
+    ) {
+      if (config.headers && config.headers["Content-Type"]) {
+        delete config.headers["Content-Type"];
       }
     } else {
       // default to JSON for non-FormData requests
-      config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json';
+      config.headers["Content-Type"] =
+        config.headers["Content-Type"] || "application/json";
     }
     if (!config.url.includes("/admin/login")) {
       const token = Cookies.get("admin_token");

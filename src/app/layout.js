@@ -3,14 +3,15 @@ import { StateProvider } from "./providers/StateProvider";
 import TanstackqueryProvider from "./providers/TanstackqueryProvider";
 
 export const metadata = {
-  title: "Techsoi BD",
-  description: "Techsoi BD",
+  title: "Admin Dashboard | Techsoi BD",
+  description:
+    "Admin dashboard for managing orders, products, and customers of Techsoi BD.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <TanstackqueryProvider>
           <StateProvider>{children}</StateProvider>
         </TanstackqueryProvider>

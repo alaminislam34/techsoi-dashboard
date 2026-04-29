@@ -26,16 +26,7 @@ const sidelinks = [
     href: "/dashboard/products_manage",
     match: (pathname) => pathname.startsWith("/dashboard/products_manage"),
   },
-  {
-    name: "Poster Banner",
-    href: "/dashboard/banner_manage",
-    match: (pathname) => pathname.startsWith("/dashboard/banner_manage"),
-  },
-  {
-    name: "Add brands",
-    href: "/dashboard/add_brands",
-    match: (pathname) => pathname.startsWith("/dashboard/add_brands"),
-  },
+
   {
     name: "Review Management",
     href: "/dashboard/review_manage",
@@ -68,7 +59,6 @@ const Sidebar = () => {
     } finally {
       Cookies.remove("admin_token");
       localStorage.removeItem("user");
-      toast.success("Logged out");
       router.push("/login");
     }
   };
@@ -76,20 +66,16 @@ const Sidebar = () => {
   return (
     <div className="lg:w-65 xl:w-72 border-r border-gray-300 h-screen bg-secondary flex justify-between flex-col fixed left-0 top-0 p-6">
       <div>
-        <div className="flex items-center justify-center mt-6 mb-12">
+        <div className="flex items-center justify-center mt-6 mb-12 ">
           <Link href="/dashboard">
-            {/* <Image
-              src="/logos/logo.png"
+            <Image
+              src={"/logos/logo.png"}
               height={135}
               width={600}
               unoptimized
-              loading="eager"
               alt="Website logo"
               className="w-55 h-auto object-cover"
-            />  */}
-            <h1 className="text-xl md:text-2xl font-semibold text-primary">
-              Tech Hat
-            </h1>
+            />
           </Link>
         </div>
 

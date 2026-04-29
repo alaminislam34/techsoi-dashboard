@@ -1,0 +1,25 @@
+services:
+  app:
+    image: alaminislam34/techsoi-dashboard:latest
+    build:
+      context: .
+      target: dev
+    container_name: techsoi-dashboard
+    restart: unless-stopped
+    command: sh -c "corepack pnpm install && corepack pnpm dev --hostname 0.0.0.0"
+    ports:
+      - "${APP_PORT:-3001}:3001"
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      HOST: 0.0.0.0
+      BASE_URL: ${BASE_URL:-https://api.techsoibd.com/api}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-https://api.techsoibd.com/api}
+      CI: "true"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next

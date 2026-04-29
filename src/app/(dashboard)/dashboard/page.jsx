@@ -11,9 +11,18 @@ import apiService from "@/api/api";
 import { ORDER_API } from "@/api/apiEndPoint";
 import { useOrderActions } from "@/api/hooks/useOrderActions";
 import { useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 
+const statusStyles = {
+  1: "bg-blue-50 text-blue-700 hover:bg-blue-100", // New Order
+  2: "bg-purple-50 text-purple-700 hover:bg-purple-100", // Accepted
+  3: "bg-amber-50 text-amber-700 hover:bg-amber-100", // In Delivery
+  4: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100", // Completed
+  0: "bg-rose-50 text-rose-700 hover:bg-rose-100", // Cancelled
+};
 const DashboardPage = () => {
   const router = useRouter();
+
   const {
     data: orders = [],
     isLoading,
@@ -32,27 +41,26 @@ const DashboardPage = () => {
   const statusConfig = {
     1: { label: "New Order", style: "text-primary border-primary bg-blue-50" },
     2: {
-      label: "Pending",
+      label: "Accepted",
       style: "text-orange-500 border-orange-500/40 bg-orange-50",
     },
+
     3: {
-      label: "Processing",
-      style: "text-purple-500 border-purple-500/40 bg-purple-50",
-    },
-    4: {
       label: "In Delivery",
       style: "text-green-600 border-green-600 bg-green-50",
     },
-    5: { label: "Complete", style: "text-white border-green-700 bg-green-600" },
+    4: {
+      label: "Completed",
+      style: "text-white border-green-700 bg-green-600",
+    },
     0: { label: "Cancelled", style: "text-red-600 border-red-600 bg-red-50" },
   };
 
   const statusOptions = [
     { label: "New Order", value: 1 },
-    { label: "Pending", value: 2 },
-    { label: "Processing", value: 3 },
-    { label: "In Delivery", value: 4 },
-    { label: "Complete", value: 5 },
+    { label: "Accepted", value: 2 },
+    { label: "In Delivery", value: 3 },
+    { label: "Completed", value: 4 },
     { label: "Cancelled", value: 0 },
   ];
 
@@ -119,49 +127,56 @@ const DashboardPage = () => {
               onClick={() =>
                 setOpenDropdownId(openDropdownId === index ? null : index)
               }
-              className={`flex items-center justify-between w-28 px-2 py-1.5 border rounded-md text-sm transition-all ${config.style} ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`flex items-center justify-between w-32 px-3 py-2 border rounded-lg text-xs font-semibold tracking-wide uppercase transition-all duration-200 
+          ${config.style} 
+          ${isUpdating ? "opacity-50 cursor-not-allowed" : "hover:shadow-md active:scale-95"}`}
             >
               {config.label}
               <ChevronDown
-                size={12}
-                className={openDropdownId === index ? "rotate-180" : ""}
+                size={14}
+                className={`transition-transform duration-300 ${openDropdownId === index ? "rotate-180" : ""}`}
               />
             </button>
 
             {openDropdownId === index && (
               <>
                 <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setOpenDropdownId(null)}
-                />
-                <div
-                  className={`absolute left-0 w-32 bg-white border border-gray-200 rounded-md shadow-xl z-50 py-1 
-                ${isLastItems ? "bottom-full mb-1" : "top-full mt-1"}
-              `}
+                  className={`absolute left-0 w-40 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-1.5
+              animate-in fade-in zoom-in duration-200
+              ${isLastItems ? "bottom-full mb-2 origin-bottom" : "top-full mt-2 origin-top"}
+            `}
+                  style={{ pointerEvents: "auto" }} // নিশ্চিত করা যে ড্রপডাউনে ক্লিক কাজ করবে
                 >
-                  {statusOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => {
-                        updateStatus(item.id, item.pay_status, opt.value);
-                        setOpenDropdownId(null);
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors"
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                  <div className="border-t mt-1">
-                    <button
-                      onClick={() => {
-                        deleteOrder(item.id, "Out of Stock");
-                        setOpenDropdownId(null);
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
-                    >
-                      <Trash2 size={12} /> Delete Order
-                    </button>
-                  </div>
+                  {statusOptions.map((opt) => {
+                    const isActive = opt.value === item.status;
+                    return (
+                      <button
+                        key={opt.value}
+                        disabled={isUpdating || isActive}
+                        onClick={(e) => {
+                          e.stopPropagation(); // টেবিলের ক্লিক ইভেন্ট আটকাবে
+                          updateStatus(item.id, item.pay_status, opt.value);
+                          setOpenDropdownId(null);
+                        }}
+                        className={`group w-full flex items-center justify-between px-3 py-2 text-sm font-medium mb-1 rounded-lg transition-all duration-150
+                    ${
+                      isActive
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : `${statusStyles[opt.value]} hover:brightness-95 hover:pl-4 cursor-pointer`
+                    }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isActive && (
+                          <Check size={14} className="text-gray-400" />
+                        )}
+                        {!isActive && !isUpdating && (
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            →
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </>
             )}

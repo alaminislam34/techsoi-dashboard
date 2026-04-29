@@ -2,7 +2,7 @@
 export const ADMIN_LOGIN_API = "/admin/login";
 export const ADMIN_LOGOUT_API = "/admin/logout";
 export const ADMIN_PROFILE_API = "/admin/profile";
-
+export const ADMIN_PASSWORD_RESET_API = "/admin/password-reset";
 // --- User Management ---
 export const GET_ALL_USERS_API = "/users";
 
@@ -14,8 +14,11 @@ export const ORDER_DETAILS_API = (id) => `/order-details/${id}`; // Put/Delete
 // --- Product Management ---
 export const PRODUCT_API = "/product"; // Get all / Post
 export const PRODUCT_SINGLE_API = (id) => `/product/${id}`; // Get/Put/Delete
+export const PRODUCT_SLUG_API = (slug) => `/product-details/${slug}`; // Get by slug
+export const PRODUCT_SEARCH_API = (query) => `/product-search/${query}`;
 export const PRODUCT_LIMIT_API = (limit) => `/product-limit/${limit}`;
 export const PRODUCT_DETAILS_MANAGE_API = (id) => `/product-details/${id}`;
+export const PRODUCT_DETAILS_API = "/product-details"; // Create
 
 // --- Category Management ---
 export const CATEGORY_API = "/category"; // Get all / Post
@@ -33,7 +36,8 @@ export const BRAND_LIMIT_API = (limit) => `/brand-limit/${limit}`;
 
 export const SPECIAL_BRAND_API = "/special-brand"; // Get all / Post
 export const SPECIAL_BRAND_SINGLE_API = (id) => `/special-brand/${id}`; // Get/Put/Delete
-export const SPECIAL_BRAND_LIMIT_API = (limit) => `/special-brand-limit/${limit}`;
+export const SPECIAL_BRAND_LIMIT_API = (limit) =>
+  `/special-brand-limit/${limit}`;
 
 // --- Banner / Hero Image Management ---
 export const BANNER_API = "/hero-image"; // Get all / Post
@@ -48,3 +52,13 @@ export const BLOG_LIMIT_API = (limit) => `/blog-limit/${limit}`;
 // --- Review Management ---
 export const REVIEW_API = "/review-product"; // Get all
 export const REVIEW_SINGLE_API = (id) => `/review-product/${id}`; // Get/Put/Delete
+
+// --- Website / Settings ---
+export const WEBSITE_INFO_API = "/website-info"; // Get / Put
+
+export const PAYMENT_STATUS_UPDATE_API = (orderId) => `/order/${orderId}`; // Put
+export const FAQ_GET_API = "/faq"; // Get all
+export const FAQ_SINGLE_API = (id) => `/faq/${id}`;
+export const FAQ_CREATE_API = "/faq"; // Post
+export const FAQ_UPDATE_API = (id) => `/faq/${id}`;
+export const FAQ_DELETE_API = (id) => `/faq/${id}`; // Delete
