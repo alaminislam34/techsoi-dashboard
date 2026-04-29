@@ -16,7 +16,7 @@
 # next.js
 /.next/
 /out/
-
+/src/api/hooks/api.http
 # production
 /build
 
