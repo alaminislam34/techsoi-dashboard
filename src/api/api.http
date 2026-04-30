@@ -1,5 +1,5 @@
-@URL = https://api.techsoibd.com/api
-@USERTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50ZWNoc29pYmQuY29tL2FwaS9sb2dpbiIsImlhdCI6MTc2OTUyMDQyOSwiZXhwIjoxNzY5NTI0MDI5LCJuYmYiOjE3Njk1MjA0MjksImp0aSI6InJCWnBTWklRb3BHQ2E0RmQiLCJzdWIiOiIzIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.5hpUCmnc8maESxjEtvmzH85_UnujqKS4RCCwDt_dhL4
+@URL = http://localhost:8000/api
+@USERTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzY1NjQ3OTIyLCJleHAiOjE3NjU2NTE1MjIsIm5iZiI6MTc2NTY0NzkyMiwianRpIjoienV3R241aFg0MUdvMGRzdSIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.TkfDY0DiA05EU8596akX8v8a4S5r-h_6SR9E-RnW2J4
 @ADMINTOKEN = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzY4NTU3MjIzLCJleHAiOjE3Njg1NjA4MjMsIm5iZiI6MTc2ODU1NzIyMywianRpIjoiNUVRTXJzelR0RGtJZ1lDSiIsInN1YiI6IjEiLCJwcnYiOiJkZjg4M2RiOTdiZDA1ZWY4ZmY4NTA4MmQ2ODZjNDVlODMyZTU5M2E5In0.yDVwvCC4NeYubZa5hOB42G9Qs6_pLkxtiKf5sg_pboA
 
 ### user login           ---------------> user requests
@@ -85,44 +85,54 @@ Authorization: Bearer {{USERTOKEN}}
 
 ### pay and order             ---------------> pay and order requests
 
+POST {{URL}}/order
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
+
+{
+    "name": "Akash Frontend",
+    "phone": "01754576435",
+    "email": "akash@techsoibd.com",
+    "address": "Nikunjo",
+    "city": "Dhaka",
+    "postcode": "1200",
+    "products": [{"product_id":1,"quantity":3,"amount":5000},{"product_id":3,"quantity":3,"amount":8500},{"product_id":7,"quantity":4,"amount":1400}]
+}
+
+### after payment success full
+
+POST {{URL}}/order-success
+accept: application/json
+content-type: application/json
+
+{
+    "transaction_id": "TRANSACTION ID OF ORDER SUCCESSFULL RESPONSE"
+}
+
+### pay with sslcommerz backend
+
 POST {{URL}}/pay/sslcommerz
 accept: application/json
 content-type: application/json
 Authorization: Bearer {{USERTOKEN}}
 
 {
-    "name": "MD Al Amin Islam",
-    "phone": "01821858917",
-    "email": "mi3548514@gmail.com",
-    "address": "Mirpur",
+    "name": "Akash Frontend",
+    "phone": "01754576435",
+    "email": "akash@techsoibd.com",
+    "address": "Nikunjo",
     "city": "Dhaka",
-    "postcode": "1216",
-    "products": [
-        {
-            "product_id": 60,
-            "quantity": 1,
-            "amount": 972
-        }
-    ]
+    "postcode": "1200",
+    "products": [{"product_id":1,"quantity":3,"amount":5000},{"product_id":3,"quantity":3,"amount":8500},{"product_id":7,"quantity":4,"amount":1400}]
 }
-# HTTP/1.1 302 Found
-# Server: nginx/1.24.0 (Ubuntu)
-# Date: Tue, 27 Jan 2026 09:29:48 GMT
-# Content-Type: text/html; charset=UTF-8
-# Transfer-Encoding: chunked
-# Connection: close
-# Location: https://sandbox.sslcommerz.com/EasyCheckOut/testcdef3fc3496b440d3d62523bf7af0c9f736
 
+### user order             ---------------> user order requests
 
-
-# HTTP/1.1 302 Found
-# Server: nginx/1.24.0 (Ubuntu)
-# Date: Mon, 26 Jan 2026 17:35:22 GMT
-# Content-Type: text/html; charset=UTF-8
-# Transfer-Encoding: chunked
-# Connection: close
-# Location: https://sandbox.sslcommerz.com/EasyCheckOut/testcde6335898191fbc5bc4f0b321a3b674f0c
-
+GET {{URL}}/user-order
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{USERTOKEN}}
 
 ### user review             ---------------> user review requests
 
@@ -148,6 +158,18 @@ GET {{URL}}/admin/profile
 accept: application/json
 content-type: application/json
 Authorization: Bearer {{ADMINTOKEN}}
+
+### admin password reset
+
+POST {{URL}}/admin/password-reset
+accept: application/json
+content-type: application/json
+Authorization: Bearer {{ADMINTOKEN}}
+
+{
+    "old_password": "123",
+    "password": "1234"
+}
 
 ### admin logout
 
@@ -238,7 +260,9 @@ content-type: application/json
     "facebook_link": "#",
     "instagram_link": "#",
     "tiktok_link": "#",
-    "whatsapp_link": "#"
+    "whatsapp_link": "#",
+    "youtube_link": "#",
+    "hero_text": "Hero Text Here",
 }
 
 ### get all products       ---------------> product requests
@@ -263,7 +287,7 @@ accept: application/json
 
 ### get filtered product
 
-GET {{URL}}/product-filter?filter[name]=Gaming Mouse&filter[category_id]=1&sort=-id
+GET {{URL}}/product-filter?filter[name]=Gaming Mouse&filter[category_id]=1&filter[sub_category_id]=1&filter[brand_id]=1&sort=-id
 accept: application/json
 
 ### get details of product
@@ -292,10 +316,12 @@ content-type: application/json
     "sub_category_id": "1",
     "brand_id": "1",
     "short_description": "short-description",
+    "stock": "50",
     "emi_status": "1",
     "full_description": "full-description",
-    "specifications": [{"name":"Height","value":"38.6mm"},{"name":"color","value":"red"}],
-    "extra_images": [{"url":"FORM-URL-1"},{"url":"FORM-URL-2"}]
+    "specifications": [{"name":"Height","value":"38.6mm",},{"name":"color","value":"red",}],
+    "extra_images": [{ "FORM-URL-1" },{ "FORM-URL-2" },],
+    "key_features": ["1 Year Warranty","Battery: 5200mAh","RAM - 8GB","Storage - 256GB"]
 }
 
 ### update product
@@ -307,12 +333,20 @@ content-type: application/json
 {
     "name": "test product update",
     "regular_price": "2000",
+    "discount": "500",
     "sale_price": "1500",
     "main_image": "FORM-URL",
     "category_id": "1",
     "sub_category_id": "1",
     "brand_id": "1",
     "short_description": "short-description",
+    "stock": "50",
+    "emi_status": "1",
+    "status": "0",
+    "full_description": "full-description",
+    "specifications": [{"name":"Height","value":"38.6mm",},{"name":"color","value":"red",}],
+    "extra_images": [{ "FORM-URL-1" },{ "FORM-URL-2" },],
+    "key_features": ["1 Year Warranty","Battery: 5200mAh","RAM - 4GB","Storage - 120GB","Camera - 8MP"]
 }
 
 ### delete a product
@@ -335,8 +369,14 @@ content-type: application/json
     "product_id": "1",
     "full_description": "full-description",
     "specifications": [{"name":"Height","value":"38.6mm",},{"name":"color","value":"red",}],
-    "extra_images": [{ "FORM-URL-1" },{ "FORM-URL-2" },]
+    "extra_images": [{ "FORM-URL-1" },{ "FORM-URL-2" },],
+    "key_features": ["1 Year Warranty","Battery: 5200mAh","RAM - 4GB","Storage - 120GB","Camera - 8MP"]
 }
+
+### get all review for website
+
+GET {{URL}}/reviews
+accept: application/json
 
 ### get all products review       ---------------> product review requests
 
@@ -368,6 +408,11 @@ Authorization: Bearer {{USERTOKEN}}
 DELETE {{URL}}/review-product/1
 accept: application/json
 Authorization: Bearer {{ADMINTOKEN}}
+
+### get review of product
+
+GET {{URL}}/product-review/monarch-city-ranger-x7-argb-mid-tower-atx-desktop-case
+accept: application/json
 
 ### get all faq             ---------------> faq requests
 
@@ -434,7 +479,8 @@ content-type: application/json
 
 {
     "name": "test-category-1",
-    "image": "FORM-URL"
+    "image": "FORM-URL",
+    "banner": "FORM-URL",
 }
 
 ### update a category
@@ -445,7 +491,8 @@ content-type: application/json
 
 {
     "name": "test-category-1",
-    "image": "FORM-URL"
+    "image": "FORM-URL",
+    "banner": "FORM-URL",
 }
 
 ### delete a category
@@ -606,6 +653,11 @@ accept: application/json
 GET {{URL}}/blog/1
 accept: application/json
 
+### get single blog with slug
+
+GET {{URL}}/blog-details/title-test-blog
+accept: application/json
+
 ### store new blog
 
 POST {{URL}}/blog
@@ -614,6 +666,7 @@ content-type: application/json
 
 {
     "title": "test-blog-1",
+    "title_bn": "title in bangla",
     "image": "FORM-URL",
     "short_description": "test-short-description",
     "full_description": "test-full-description",
@@ -627,6 +680,7 @@ content-type: application/json
 
 {
     "title": "test-blog-update",
+    "title_bn": "title in bangla",
     "image": "FORM-URL",
     "short_description": "test-short-description",
     "full_description": "test-full-description",
@@ -636,27 +690,3 @@ content-type: application/json
 
 DELETE {{URL}}/blog/1
 accept: application/json
-
-
-
-
-
-
-
-
-
-
-{
-    "id": 42,
-    "product_id": 65,
-    "full_description": "Quis natus ratione c",
-    "specifications": "[{\"name\":\"Libero esse molliti\",\"value\":\"Duis sapiente conseq\"}]",
-    "extra_images": [
-        "https://api.techsoibd.com/images/product/65-0-product-ex-image-2026-01-26-06-03-49.png",
-        "https://api.techsoibd.com/images/product/65-1-product-ex-image-2026-01-26-06-03-49.png",
-        "https://api.techsoibd.com/images/product/65-2-product-ex-image-2026-01-26-06-03-49.png",
-        "https://api.techsoibd.com/images/product/65-3-product-ex-image-2026-01-26-06-03-49.png"
-    ],
-    "created_at": "2026-01-26T18:03:49.000000Z",
-    "updated_at": "2026-01-26T18:03:49.000000Z"
-}

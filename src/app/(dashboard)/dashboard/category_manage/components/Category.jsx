@@ -121,24 +121,39 @@ const Category = () => {
     e.preventDefault();
     setIsUpdating(true);
 
-    const { id, name, image, banner } = editModal.data;
+    const { id, name, image, banner, category_id } = editModal.data;
 
     try {
-      const formData = new FormData();
-      formData.append("name", name);
-      if (image instanceof File) formData.append("image", image);
-      if (banner instanceof File) formData.append("banner", banner);
-
       if (editModal.type === "category") {
+        const formData = new FormData();
+        formData.append("name", name);
+
+        if (image instanceof File) {
+          formData.append("image", image);
+        }
+
+        if (banner instanceof File) {
+          formData.append("banner", banner);
+        }
+
         await updateCategory(id, formData);
-      } else if (editModal.type === "sub") {
-        await updateSubCategory(id, formData);
       } else if (editModal.type === "brand") {
-        await updateBrand(id, formData);
+        await updateBrand(id, {
+          name,
+          image: typeof image === "string" ? image : undefined,
+          special: 0, // 👈 default দিলে safe
+        });
+      } else if (editModal.type === "sub") {
+        await updateSubCategory(id, {
+          name,
+          category_id: Number(category_id),
+        });
       }
 
       toast.success("Updated successfully");
       refreshInventory();
+
+      // 👉 reset state
       setEditModal({
         open: false,
         type: null,
@@ -146,7 +161,10 @@ const Category = () => {
         previews: { image: "", banner: "" },
       });
     } catch (err) {
-      toast.error(err.message || "Update failed");
+      console.error(err);
+      toast.error(
+        err?.response?.data?.message || err.message || "Update failed",
+      );
     } finally {
       setIsUpdating(false);
     }
@@ -486,7 +504,6 @@ const Category = () => {
                                     </span>
                                     <div className="flex items-center border-l border-slate-100 ml-1 pl-1">
                                       <button
-                                        disabled
                                         onClick={() =>
                                           setEditModal({
                                             open: true,
@@ -494,6 +511,8 @@ const Category = () => {
                                             data: {
                                               id: sub.id,
                                               name: sub.name,
+                                              category_id: sub.category_id,
+                                              image: sub.image,
                                             },
                                             previews: { image: "", banner: "" },
                                           })
@@ -577,7 +596,6 @@ const Category = () => {
                       </span>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
-                          disabled
                           onClick={() =>
                             setEditModal({
                               open: true,
@@ -598,9 +616,9 @@ const Category = () => {
                           onClick={() =>
                             setConfirm({
                               open: true,
-                              id: brand.id,
+                              id: brand?.id,
                               type: "brand",
-                              name: brand.name,
+                              name: brand?.name,
                             })
                           }
                           className="p-1.5 text-red-500 hover:text-red-600 bg-white shadow-sm border border-slate-100 rounded-md transition-all"
