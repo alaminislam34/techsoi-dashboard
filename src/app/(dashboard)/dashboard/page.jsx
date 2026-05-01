@@ -198,6 +198,10 @@ const DashboardPage = () => {
     },
   ];
 
+  const OrderSort = orders.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  );
+
   return (
     <div className="w-full">
       <div className="flex flex-col gap-6">
@@ -220,7 +224,7 @@ const DashboardPage = () => {
             </div>
           ) : (
             <Table
-              data={orders}
+              data={OrderSort}
               columns={orderColumns}
               itemsPerPage={10}
               redirectPath={`/dashboard`}

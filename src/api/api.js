@@ -10,7 +10,6 @@ const apiService = axios.create({
 
 apiService.interceptors.request.use(
   (config) => {
-    // If sending FormData, let the browser/axios set the Content-Type
     if (
       config.data &&
       typeof FormData !== "undefined" &&
