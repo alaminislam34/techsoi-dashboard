@@ -8,6 +8,7 @@ import { ADMIN_PASSWORD_RESET_API, WEBSITE_INFO_API } from "@/api/apiEndPoint";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import FaqPage from "./components/FAQ";
+import AboutSettingsPage from "./components/AboutSettingsPage";
 
 const AccountSettings = () => {
   const [formData, setFormData] = useState({
@@ -197,6 +198,7 @@ const AccountSettings = () => {
           { id: "password", label: "Change Password" },
           { id: "website", label: "Website Settings" },
           { id: "faq", label: "FAQs" },
+          { id: "about", label: "About Page" },
         ].map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -535,6 +537,8 @@ const AccountSettings = () => {
       )}
 
       {activeTab === "faq" && <FaqPage />}
+
+      {activeTab === "about" && <AboutSettingsPage />}
     </div>
   );
 };

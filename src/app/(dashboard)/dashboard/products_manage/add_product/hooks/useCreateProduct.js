@@ -10,7 +10,9 @@ export default function useCreateProduct() {
   const fallbackRunningRef = useRef(false);
 
   const isPng = (file) =>
-    file && typeof file.name === "string" && file.name.toLowerCase().endsWith(".png");
+    file &&
+    typeof file.name === "string" &&
+    file.name.toLowerCase().endsWith(".png");
 
   const getInvalidFiles = (files) =>
     (files || []).filter((file) => file instanceof File && !isPng(file));
