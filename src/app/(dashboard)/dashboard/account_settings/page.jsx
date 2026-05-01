@@ -198,7 +198,7 @@ const AccountSettings = () => {
           { id: "password", label: "Change Password" },
           { id: "website", label: "Website Settings" },
           { id: "faq", label: "FAQs" },
-          { id: "about", label: "About Page" },
+          // { id: "about", label: "About Page" },
         ].map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -538,7 +538,7 @@ const AccountSettings = () => {
 
       {activeTab === "faq" && <FaqPage />}
 
-      {activeTab === "about" && <AboutSettingsPage />}
+      {/* {activeTab === "about" && <AboutSettingsPage />} */}
     </div>
   );
 };
